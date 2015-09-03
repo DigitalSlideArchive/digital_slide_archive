@@ -6,7 +6,7 @@ import requests
 import stampfile
 
 # Root path for scraping SVS files
-URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/bcr/nationwidechildrens.org/tissue_images/slide_images/nationwidechildrens.org_LGG.tissue_images.Level_1.112.3.0/'
+URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/bcr/nationwidechildrens.org/tissue_images/'
 
 
 def findSvsFiles(url):
@@ -47,7 +47,7 @@ def extractMetadataFromUrl(url):
 
 
 def ingest(clientArgs, importUrl, parentType, parentId, login=None,
-           password=None):
+           password=None, verbose=False):
     stamps = stampfile.readStamps()
     client = girder_client.GirderClient(**clientArgs)
     #client.authenticate(login, password, interactive=(password is None))
@@ -64,14 +64,14 @@ def ingest(clientArgs, importUrl, parentType, parentId, login=None,
         maxDate = max(maxDate, date)
 
         if dateThreshold and date < dateThreshold:
-            print('--- Skipping %s due to mtime.' % url)
+            if verbose:
+                print('--- Skipping %s due to mtime.' % url)
             continue
 
         metadata = extractMetadataFromUrl(url)
+        print metadata
 
-    if maxDate:
-        stamps[importUrl] = maxDate
-
+    stamps[importUrl] = maxDate
     stampfile.writeStamps(stamps)
 
 if __name__ == '__main__':
@@ -88,6 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('--parent-type', default='collection',
                         help='(default: collection)')
     parser.add_argument('--parent-id', required=True)
+    parser.add_argument('-v', '--verbose', action='store_true')
 
     args = parser.parse_args()
 
@@ -99,4 +100,4 @@ if __name__ == '__main__':
     }
 
     ingest(clientArgs, URLBASE, args.parent_type, args.parent_id,
-           login=args.username, password=args.password)
+           login=args.username, password=args.password, verbose=args.verbose)
