@@ -3,29 +3,36 @@ import dateutil.parser
 import girder_client
 import lxml.html
 import requests
+import stampfile
 
 # Root path for scraping SVS files
-URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/'
-# Dummy date threshold for testing
-THRESHOLD = datetime.datetime.utcnow().replace(tzinfo=dateutil.tz.tzutc())
+URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/bcr/nationwidechildrens.org/tissue_images/slide_images/nationwidechildrens.org_LGG.tissue_images.Level_1.112.3.0/'
 
 
 def findSvsFiles(url):
     """
     Given a URL to an apache mod_autoindex directory listing, recursively
     scrapes the listing for .svs files. This is a generator that yields each
-    such file found in the listing.
+    such file found in the listing as a tuple whose first element is the URL
+    and whose second element is its modified time as reported by the server.
     """
-    doc = lxml.html.fromstring(requests.get(url + '?F=0').text)
-    children = doc.xpath('.//li/a/text()')
+    doc = lxml.html.fromstring(requests.get(url + '?F=2').text)
+    rows = doc.xpath('.//table//tr')
 
-    for child in children:
-        child = child.strip()
-        if child.endswith('/'):  # subdirectory
-            for svs in findSvsFiles(url + child):
+    for row in rows:
+        name = row.xpath('.//td[2]/a/text()')
+
+        if not name:  # F=2 gives us some header rows that only contain <th>
+            continue
+
+        name = name[0].strip()
+
+        if name.endswith('/'):  # subdirectory
+            for svs in findSvsFiles(url + name):
                 yield svs
-        elif child.endswith('.svs'):  # svs file
-            yield url + child
+        elif name.endswith('.svs'):  # svs file
+            mtime = row.xpath('.//td[3]/text()')[0].strip()
+            yield (url + name, mtime)
 
 
 def extractMetadataFromUrl(url):
@@ -39,34 +46,33 @@ def extractMetadataFromUrl(url):
     return basename
 
 
-def isNewer(req, dateThreshold):
-    """
-    Use a HEAD request to the URL to try and detect whether the given resource
-    has been modified since the given date threshold.
-    """
-    mtime = req.headers.get('Last-Modified')
-
-    if mtime is None:
-        return True
-
-    return dateutil.parser.parse(mtime) >= dateThreshold
-
-
-def ingest(clientArgs, parentType, parentId, login=None, password=None,
-           dateThreshold=None):
+def ingest(clientArgs, importUrl, parentType, parentId, login=None,
+           password=None):
+    stamps = stampfile.readStamps()
     client = girder_client.GirderClient(**clientArgs)
     #client.authenticate(login, password, interactive=(password is None))
 
-    for url in findSvsFiles(URLBASE):
-        req = requests.head(url)
+    dateThreshold = stamps.get(importUrl)
 
-        if dateThreshold and not isNewer(req, dateThreshold):
-            print 'Skipping %s due to mtime.' % url
+    if dateThreshold:
+        print('--- Limiting to files newer than %s.' % str(dateThreshold))
+
+    maxDate = dateThreshold or datetime.datetime.min
+
+    for url, mtime in findSvsFiles(importUrl):
+        date = dateutil.parser.parse(mtime)
+        maxDate = max(maxDate, date)
+
+        if dateThreshold and date < dateThreshold:
+            print('--- Skipping %s due to mtime.' % url)
             continue
 
         metadata = extractMetadataFromUrl(url)
-        print metadata
 
+    if maxDate:
+        stamps[importUrl] = maxDate
+
+    stampfile.writeStamps(stamps)
 
 if __name__ == '__main__':
     import argparse
@@ -92,5 +98,5 @@ if __name__ == '__main__':
         'scheme': args.scheme
     }
 
-    ingest(clientArgs, args.parent_type, args.parent_id, login=args.username,
-           password=args.password, dateThreshold=THRESHOLD)
+    ingest(clientArgs, URLBASE, args.parent_type, args.parent_id,
+           login=args.username, password=args.password)
