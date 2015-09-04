@@ -8,6 +8,14 @@ import stampfile
 # Root path for scraping SVS files
 URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/bcr/nationwidechildrens.org/tissue_images/'
 
+_slideTypes = {
+    'DX': 'Diagnostic',
+    'TS': 'Frozen'
+}
+
+class MetadataParseException(Exception):
+    pass
+
 
 def findSvsFiles(url):
     """
@@ -42,16 +50,50 @@ def extractMetadataFromUrl(url):
     """
     basename = url.split('/')[-1]
 
-    # TODO implement metadata extraction
-    return basename
+    try:
+        barcode, uuid, _ = basename.split('.')
+        barcodeParts = barcode.split('-')
+
+        if barcodeParts[0] != 'TCGA':
+            raise MetadataParseException('First barcode token should be "TCGA"')
+
+        metadata = {
+            'OriginalUrl': url,
+            'FullBarcode': barcode,
+            'TSS': barcodeParts[1],
+            'Participant': barcodeParts[2],
+            'Sample': barcodeParts[3][:2],
+            'Vial': barcodeParts[3][2:],
+            'Portion': barcodeParts[4][:2],
+            #'Analyte': barcodeParts[4][2:],
+            'Slide': barcodeParts[5][:2],
+            'SlideOrder': barcodeParts[5][2:]
+        }
+
+        metadata['SlideType'] = _slideTypes.get(metadata['Slide'], 'Unknown')
+
+        return {
+            'basename': basename,
+            'folderName': '-'.join(barcodeParts[1:3]),
+            'itemName': uuid,
+            'metadata': metadata
+        }
+    except Exception:
+        print('!!! Malformed filename, could not parse: ' + basename)
+        raise
 
 
-def ingest(clientArgs, importUrl, parentType, parentId, login=None,
-           password=None, verbose=False):
+def createGirderData(client, parent, parentType, info, url):
+    folder = client.load_or_create_folder(
+        info['folderName'], parent['_id'], parentType)
+
+    item = client.load_or_create_item(info['itemName'], folder['_id'])
+
+    client.addMetadataToItem(item['_id'], info['metadata'])
+
+
+def ingest(client, importUrl, parent, parentType, verbose=False):
     stamps = stampfile.readStamps()
-    client = girder_client.GirderClient(**clientArgs)
-    #client.authenticate(login, password, interactive=(password is None))
-
     dateThreshold = stamps.get(importUrl)
 
     if dateThreshold:
@@ -63,16 +105,17 @@ def ingest(clientArgs, importUrl, parentType, parentId, login=None,
         date = dateutil.parser.parse(mtime)
         maxDate = max(maxDate, date)
 
-        if dateThreshold and date < dateThreshold:
+        if dateThreshold and date <= dateThreshold:
             if verbose:
                 print('--- Skipping %s due to mtime.' % url)
             continue
 
-        metadata = extractMetadataFromUrl(url)
-        print metadata
+        info = extractMetadataFromUrl(url)
+        createGirderData(client, parent, parentType, info, url)
 
     stamps[importUrl] = maxDate
     stampfile.writeStamps(stamps)
+
 
 if __name__ == '__main__':
     import argparse
@@ -92,12 +135,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    clientArgs = {
-        'host': args.host,
-        'port': int(args.port),
-        'apiRoot': args.api_root,
-        'scheme': args.scheme
-    }
+    client = girder_client.GirderClient(
+        host=args.host, port=int(args.port), apiRoot=args.api_root, scheme=args.scheme)
+    client.authenticate(args.username, args.password, interactive=(args.password is None))
 
-    ingest(clientArgs, URLBASE, args.parent_type, args.parent_id,
-           login=args.username, password=args.password, verbose=args.verbose)
+    parent = client.getResource(args.parent_type, args.parent_id)
+
+    ingest(client, URLBASE, parent, args.parent_type, verbose=args.verbose)
