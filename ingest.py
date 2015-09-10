@@ -1,3 +1,4 @@
+import data_transfer
 import datetime
 import dateutil.parser
 import girder_client
@@ -10,7 +11,9 @@ URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anon
 
 _slideTypes = {
     'DX': 'Diagnostic',
-    'TS': 'Frozen'
+    'TS': 'Frozen',
+    'BS': 'Frozen',
+    'MS': 'Frozen'
 }
 
 class MetadataParseException(Exception):
@@ -65,7 +68,7 @@ def extractMetadataFromUrl(url):
             'Sample': barcodeParts[3][:2],
             'Vial': barcodeParts[3][2:],
             'Portion': barcodeParts[4][:2],
-            #'Analyte': barcodeParts[4][2:],
+            'Analyte': barcodeParts[4][2:],
             'Slide': barcodeParts[5][:2],
             'SlideOrder': barcodeParts[5][2:]
         }
@@ -76,20 +79,11 @@ def extractMetadataFromUrl(url):
             'basename': basename,
             'folderName': '-'.join(barcodeParts[1:3]),
             'itemName': uuid,
-            'metadata': metadata
+            'itemMetadata': metadata
         }
     except Exception:
         print('!!! Malformed filename, could not parse: ' + basename)
         raise
-
-
-def createGirderData(client, parent, parentType, info, url):
-    folder = client.load_or_create_folder(
-        info['folderName'], parent['_id'], parentType)
-
-    item = client.load_or_create_item(info['itemName'], folder['_id'])
-
-    client.addMetadataToItem(item['_id'], info['metadata'])
 
 
 def ingest(client, importUrl, parent, parentType, verbose=False):
@@ -111,7 +105,8 @@ def ingest(client, importUrl, parent, parentType, verbose=False):
             continue
 
         info = extractMetadataFromUrl(url)
-        createGirderData(client, parent, parentType, info, url)
+        info['itemMetadata']['MTime'] = mtime
+        data_transfer.createGirderData(client, parent, parentType, info, url)
 
     stamps[importUrl] = maxDate
     stampfile.writeStamps(stamps)
