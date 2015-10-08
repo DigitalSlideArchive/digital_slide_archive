@@ -6,21 +6,13 @@ import lxml.html
 import requests
 import stampfile
 
+from server.utils import extractMetadataFromUrl
+
 # Root path for scraping SVS files
 URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/bcr/nationwidechildrens.org/tissue_images/'
 
-_slideTypes = {
-    'DX': 'Diagnostic',
-    'TS': 'Frozen',
-    'BS': 'Frozen',
-    'MS': 'Frozen'
-}
 
-class MetadataParseException(Exception):
-    pass
-
-
-def findSvsFiles(url):
+def findSvsFilesAutoIndex(url):
     """
     Given a URL to an apache mod_autoindex directory listing, recursively
     scrapes the listing for .svs files. This is a generator that yields each
@@ -39,51 +31,11 @@ def findSvsFiles(url):
         name = name[0].strip()
 
         if name.endswith('/'):  # subdirectory
-            for svs in findSvsFiles(url + name):
+            for svs in findSvsFilesAutoIndex(url + name):
                 yield svs
         elif name.endswith('.svs'):  # svs file
             mtime = row.xpath('.//td[3]/text()')[0].strip()
             yield (url + name, mtime)
-
-
-def extractMetadataFromUrl(url):
-    """
-    Given a full path to an SVS file, we extract all relevant metadata that is
-    represented in the filename and its absolute path.
-    """
-    basename = url.split('/')[-1]
-
-    try:
-        barcode, uuid, _ = basename.split('.')
-        barcodeParts = barcode.split('-')
-
-        if barcodeParts[0] != 'TCGA':
-            raise MetadataParseException('First barcode token should be "TCGA"')
-
-        metadata = {
-            'OriginalUrl': url,
-            'FullBarcode': barcode,
-            'TSS': barcodeParts[1],
-            'Participant': barcodeParts[2],
-            'Sample': barcodeParts[3][:2],
-            'Vial': barcodeParts[3][2:],
-            'Portion': barcodeParts[4][:2],
-            'Analyte': barcodeParts[4][2:],
-            'Slide': barcodeParts[5][:2],
-            'SlideOrder': barcodeParts[5][2:]
-        }
-
-        metadata['SlideType'] = _slideTypes.get(metadata['Slide'], 'Unknown')
-
-        return {
-            'basename': basename,
-            'folderName': '-'.join(barcodeParts[1:3]),
-            'itemName': uuid,
-            'itemMetadata': metadata
-        }
-    except Exception:
-        print('!!! Malformed filename, could not parse: ' + basename)
-        raise
 
 
 def ingest(client, importUrl, parent, parentType, verbose=False):
