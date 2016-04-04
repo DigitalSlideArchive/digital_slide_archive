@@ -2,7 +2,7 @@ import os
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import loadmodel, Resource, RestException
+from girder.api.rest import Resource, RestException
 from girder.constants import AccessType
 from girder.utility.progress import ProgressContext
 from girder.plugins.tcga_ingest import utils
@@ -16,6 +16,9 @@ class Tcga(Resource):
 
     @access.admin
     def importData(self, params):
+        for key in list(params):
+            if params[key] == '':
+                params.pop(key, None)
         self.requireParams(('path', 'destType', 'destId'), params)
         progress = self.boolParam('progress', params, default=True)
         model = params['destType']
