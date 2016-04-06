@@ -37,8 +37,8 @@ from .datasets.tcga.ingest import ingestTCGA
            ' to a specific filesystem assetstore. If not passed, will use '
            'the normal target assetstore for the given destination.',
            required=False)
-    .param('limit', 'If set, limit the import to just this number of files.',
-           required=False, dataType='integer')
+    .param('limit', 'If not "all", limit the import to just this number of '
+           'files.', required=False)
     .param('localImportPath', 'A local path on the filesystem where the root '
            'ingest path is mirrored. Files found under this path will be '
            'imported (instead of downloaded).', required=False)
@@ -62,13 +62,16 @@ def ingest(self, params):
         if params.get('assetstoreId') \
         else None
 
-    if params.get('limit', '') == '':
+    if params.get('limit') == 'all':
         limit = 0
     else:
         try:
             limit = int(params['limit'])
+            if limit < 1:
+                raise ValueError()
         except ValueError:
-            raise RestException('Parameter "limit" must be an integer.')
+            raise RestException('Parameter "limit" must be a positive integer '
+                                'or "all".')
 
     localImportPath = \
         params['localImportPath'] \

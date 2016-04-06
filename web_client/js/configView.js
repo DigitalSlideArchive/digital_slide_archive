@@ -29,7 +29,7 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
             var dataset = this.$('#g-tcga-ingest-datasource').val(),
                 assetstoreId = this.$('#g-tcga-ingest-assetstore-id').val().trim(),
                 limit = this.$('#g-tcga-ingest-amount').val();
-            this.$('.g-validation-failed-message').empty();
+            this.$('#g-tcga-ingest-error-message').empty();
             var callback = _.bind(function () {
                 this._ingest({
                     dataset: dataset,
@@ -37,7 +37,7 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
                     limit: limit
                 });
             }, this);
-            if (!limit) {
+            if (limit === 'all') {
                 girder.confirm({
                     text: 'Ingesting all data will use a massive amount of space.  Are you sure you want to do this?',
                     confirmCallback: callback
