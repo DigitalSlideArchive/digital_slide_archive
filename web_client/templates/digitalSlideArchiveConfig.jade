@@ -1,0 +1,42 @@
+.g-config-breadcrumb-container
+
+div.g-plugin-restart
+  button.g-plugin-restart-button.btn.btn-danger
+    i.icon-cw
+    | Restart Server
+  .g-plugin-restart-text
+    | Some settings have changed that require restarting the server for them to
+    | take effect.
+  .g-plugin-clear
+
+form#g-dsa-form(role="form")
+  .form-group
+    label(for="g-dsa-brand_name") Brand Name
+    input.form-control.input-sm#g-dsa-brand_name(
+      type="text" value="#{brand_name}" placeholder="Digital Slide Archive")
+  p#g-dsa-error-message.g-validation-failed-message
+  input.btn.btn-sm.btn-primary(type="submit", value="Save")
+
+p.gap &nbsp;
+
+form#g-tcga-ingest-form(role="form")
+  p.g-tcga-ingest-description
+    | Ingest can add TCGA files to a collection.
+  .form-group
+    label(for="g-tcga-ingest-datasource") Data Source
+    select.form-control.g-tcga-ingest-datasource
+      option(value='tcga') TCGA
+  .form-group(title="You must ingest TCGA files to a filesystem assetstore.")
+    label(for="g-tcga-ingest-assetstore-id") Assetstore ID
+    input.form-control.input-sm#g-tcga-ingest-assetstore-id(
+      type="text"
+      placeholder="Optional assetstore ID where ingested items will be stored")
+  .form-group
+    label(for="g-tcga-ingest-amount") Number of Items to Ingest
+    input.form-control.input-sm#g-tcga-ingest-amount(
+      type="text"
+      placeholder="Leave blank to ingest all items, otherwise a subset of items will be ingested")
+  #g-tcga-ingest-error-message
+  button.g-submit-tcga-ingest.btn.btn-success(type="submit")
+    i.icon-link-ext
+    |  Begin Ingest

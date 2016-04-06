@@ -1,17 +1,33 @@
 /* globals girder */
 
 /**
- * Show the TCGA Ingest settings (which is really an ingest control).
+ * Show the Digital Slide Archive config settings.  This includes the TCGA
+ * Ingest settings (which is really an ingest control).
  */
-girder.views.tcgaIngest_ConfigView = girder.View.extend({
+girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
     events: {
+        'submit #g-dsa-form': function (event) {
+            event.preventDefault();
+            this.$('#g-dsa-error-message').empty();
+            this._saveSettings([{
+                key: 'digital_slide_archive.brand_name',
+                value: this.$('#g-dsa-brand_name').val()
+            }]);
+        },
+        'click .g-plugin-restart-button': function () {
+            var params = {
+                text: 'Are you sure you want to restart the server?  This ' +
+                      'will interrupt all running tasks for all users.',
+                yesText: 'Restart',
+                confirmCallback: girder.restartServer
+            };
+            girder.confirm(params);
+        },
         'submit #g-tcga-ingest-form': function (event) {
             event.preventDefault();
 
             var assetstoreId = this.$('#g-tcga-ingest-assetstore-id').val().trim(),
                 srcPath = this.$('#g-tcga-ingest-path').val().trim(),
-                destId = this.$('#g-tcga-ingest-dest-id').val().trim(),
-                destType = this.$('#g-tcga-ingest-dest-type').val(),
                 count = this.$('#g-tcga-ingest-amount').val();
             this.$('.g-validation-failed-message').empty();
             this._ingest({
@@ -25,20 +41,55 @@ girder.views.tcgaIngest_ConfigView = girder.View.extend({
     },
 
     initialize: function () {
-        this.render();
+        girder.restRequest({
+            type: 'GET',
+            path: 'system/setting',
+            data: {
+                list: JSON.stringify(['digital_slide_archive.brand_name'])
+            }
+        }).done(_.bind(function (resp) {
+            this.settings = resp;
+            this.render();
+        }, this));
     },
 
     render: function () {
-        this.$el.html(girder.templates.tcgaIngestConfig({}));
+        this.$el.html(girder.templates.digitalSlideArchiveConfig({
+            brand_name: this.settings['digital_slide_archive.brand_name'] || ''
+        }));
         if (!this.breadcrumb) {
             this.breadcrumb = new girder.views.PluginConfigBreadcrumbWidget({
-                pluginName: 'TCGA Ingest',
+                pluginName: 'Digital Slide Archive',
                 el: this.$('.g-config-breadcrumb-container'),
                 parentView: this
             }).render();
         }
 
         return this;
+    },
+
+    _saveSettings: function (settings) {
+        girder.restRequest({
+            type: 'PUT',
+            path: 'system/setting',
+            data: {
+                list: JSON.stringify(settings)
+            },
+            error: null
+        }).done(_.bind(function () {
+            girder.events.trigger('g:alert', {
+                icon: 'ok',
+                text: 'Settings saved.',
+                type: 'success',
+                timeout: 4000
+            });
+            girder.pluginsChanged = true;
+            $('.g-plugin-restart').addClass('g-plugin-restart-show');
+        }, this)).error(_.bind(function (resp) {
+            this.$('#g-dsa-error-message').text(
+                resp.responseJSON.message
+            );
+        }, this));
     },
 
     _ingest: function (params) {
@@ -63,9 +114,10 @@ girder.views.tcgaIngest_ConfigView = girder.View.extend({
 });
 
 girder.router.route(
-    'plugins/digital_slide_archive/config', 'tcgaIngestConfig', function () {
+    'plugins/digital_slide_archive/config', 'digitalSlideArchiveConfig',
+    function () {
         girder.events.trigger('g:navigateTo',
-                              girder.views.tcgaIngest_ConfigView);
+                              girder.views.digitalSlideArchive_ConfigView);
     });
 
 girder.exposePluginConfig(

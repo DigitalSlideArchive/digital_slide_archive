@@ -19,6 +19,7 @@
 
 from girder import events
 from girder.utility.model_importer import ModelImporter
+from girder.utility import webroot
 
 from . import constants
 from .rest import ingest
@@ -27,8 +28,19 @@ from .rest import ingest
 def setBranding(info):
     brandName = ModelImporter.model('setting').get(
         constants.PluginSettings.BRAND_NAME)
+    if brandName is None or brandName.strip() == '':
+        brandName = ModelImporter.model('setting').getDefault(
+            constants.PluginSettings.BRAND_NAME)
 
     info['serverRoot'].updateHtmlVars({'title': brandName})
+
+    oldinit = webroot.Webroot.__init__
+
+    def newinit(self, templatePath=None):
+        oldinit(self, templatePath)
+        self.vars['title'] = brandName
+
+    webroot.Webroot.__init__ = newinit
 
     # TODO: render 'layoutHeader.jade' and 'frontPage.jade' using brandName
 
