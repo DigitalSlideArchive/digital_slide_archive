@@ -295,7 +295,12 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                     raise MetadataParseException('Could not parse slide barcode: "%s"' % slideFileUrl)
                                 slideBarcode = slideBarcodeMatch.groupdict()
 
-                                ingestCount += 1
+                                if limit and ingestCount >= limit:
+                                    global ingestUser
+                                    ingestUser = None
+                                    collectionCache.clear()
+                                    folderCache.clear()
+                                    return
                                 if progress is not None:
                                     progress.update(
                                         current=ingestCount,
@@ -305,13 +310,8 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                             not limit else
                                             ('%d left' % (
                                                 limit - ingestCount))))
-                                if limit and ingestCount > limit:
-                                    global ingestUser
-                                    ingestUser = None
-                                    collectionCache.clear()
-                                    folderCache.clear()
-                                    return
 
+                                ingestCount += 1
                                 grDiseaseFolder = _getOrCreateFolder(
                                     name=diseaseStudyCode.upper(),
                                     description=TcgaCodes.DISEASE_STUDIES[diseaseStudyCode.upper()],
@@ -395,6 +395,15 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                         continue
                                 else:
                                     log('file already exists: %s' % slideFileUrl)
+                                if progress is not None:
+                                    progress.update(
+                                        current=ingestCount,
+                                        total=limit if limit else None,
+                                        message='Ingesting items (%s)' % (
+                                            ('%d done' % ingestCount) if
+                                            not limit else
+                                            ('%d left' % (
+                                                limit - ingestCount))))
 
                                 # TODO: fix creation / updated dates (for everyone first)
                     else:
