@@ -1,0 +1,6 @@
+---
+
+- name: vagrant setup
+  hosts: all
+  roles:
+    - role: DigitalSlideArchive.vips
