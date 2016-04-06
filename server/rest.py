@@ -46,14 +46,13 @@ from .datasets.tcga.ingest import ingestTCGA
 @access.admin
 @boundHandler()
 def ingest(self, params):
-    self.requireParams(('dataset', 'path'), params)
+    self.requireParams(('dataset', ), params)
 
     dataset = params['dataset']
     if dataset == 'tcga':
         ingestFunc = ingestTCGA
     else:
         raise RestException('Unknown dataset: %s' % dataset)
-
 
     progressEnabled = self.boolParam('progress', params, default=True)
 
@@ -63,12 +62,13 @@ def ingest(self, params):
         if params.get('assetstoreId') \
         else None
 
-    try:
-        limit = int(params['limit'])
-    except ValueError:
-        raise RestException('Parameter "limit" must be an integer.')
-    except KeyError:
-        pass
+    if params.get('limit', '') == '':
+        limit = 0
+    else:
+        try:
+            limit = int(params['limit'])
+        except ValueError:
+            raise RestException('Parameter "limit" must be an integer.')
 
     localImportPath = \
         params['localImportPath'] \
@@ -80,10 +80,10 @@ def ingest(self, params):
     with ProgressContext(
             on=progressEnabled,
             title='Ingesting TCGA data',
-            user=self.getCurrentUser()) as p:
-        # TODO: progress
+            user=self.getCurrentUser()) as ctx:
         ingestFunc(
             limit=limit,
             assetstore=assetstore,
-            localImportPath=localImportPath
+            localImportPath=localImportPath,
+            progress=ctx
         )

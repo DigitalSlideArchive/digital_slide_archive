@@ -42,8 +42,6 @@ def setBranding(info):
 
     webroot.Webroot.__init__ = newinit
 
-    # TODO: render 'layoutHeader.jade' and 'frontPage.jade' using brandName
-
 
 def load(info):
     events.bind('model.setting.validate',

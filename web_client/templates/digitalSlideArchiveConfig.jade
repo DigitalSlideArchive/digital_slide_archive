@@ -24,7 +24,7 @@ form#g-tcga-ingest-form(role="form")
     | Ingest can add TCGA files to a collection.
   .form-group
     label(for="g-tcga-ingest-datasource") Data Source
-    select.form-control.g-tcga-ingest-datasource
+    select.form-control#g-tcga-ingest-datasource
       option(value='tcga') TCGA
   .form-group(title="You must ingest TCGA files to a filesystem assetstore.")
     label(for="g-tcga-ingest-assetstore-id") Assetstore ID

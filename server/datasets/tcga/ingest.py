@@ -25,6 +25,7 @@ import six
 import lxml.html
 import requests
 
+import girder
 from girder.models.model_base import ValidationException
 from girder.utility.assetstore_utilities import AssetstoreType, getAssetstoreAdapter
 from girder.utility.model_importer import ModelImporter
@@ -170,7 +171,39 @@ def _filterMaxBatchRevision(batchDirectories, dataProvider, diseaseStudyCode, da
 # importBasePath = '/mnt/tcga_mirror/TCGA_RAW/tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor'
 
 
-def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=None):
+def log(*args):
+    if len(args) > 1:
+        msg = ' '.join([str(item) for item in args])
+    else:
+        msg = str(args[0])
+    girder.logger.info(msg)
+
+
+def uploadWithProgress(progress, obj, **kwargs):
+    uploadModel = ModelImporter.model('upload')
+    if progress is None:
+        return uploadModel.uploadFromFile(obj, **kwargs)
+    basemsg = progress.progress['data']['message']
+    basecount = progress.progress['data']['current']
+    if not basecount:
+        basecount = 0
+    upload = uploadModel.createUpload(**kwargs)
+    dataread = 0
+    while True:
+        progress.update(
+            message='%s  %3.1f%% transferred of next item' % (
+                basemsg, 100.0 * dataread / kwargs['size']),
+            current=basecount + float(dataread) / kwargs['size'])
+        data = obj.read(33554432)  # 32MB
+        if not data:
+            break
+        upload = uploadModel.handleChunk(upload, six.BytesIO(data))
+        dataread += len(data)
+    progress.update(message='%s  100%% transferred of next item' % basemsg)
+    return upload
+
+
+def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=None, progress=None):
     Item = ModelImporter.model('item')
 
     grCollection = _getOrCreateCollection(
@@ -257,12 +290,21 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                     slideFileName
                                 )
                                 if not slideBarcodeMatch:
-                                    print 'Could not parse slide barcode: "%s"' % slideFileUrl
+                                    log('Could not parse slide barcode: "%s"' % slideFileUrl)
                                     continue
                                     raise MetadataParseException('Could not parse slide barcode: "%s"' % slideFileUrl)
                                 slideBarcode = slideBarcodeMatch.groupdict()
 
                                 ingestCount += 1
+                                if progress is not None:
+                                    progress.update(
+                                        current=ingestCount,
+                                        total=limit if limit else None,
+                                        message='Ingesting items (%s)' % (
+                                            ('%d done' % ingestCount) if
+                                            not limit else
+                                            ('%d left' % (
+                                                limit - ingestCount))))
                                 if limit and ingestCount > limit:
                                     global ingestUser
                                     ingestUser = None
@@ -300,7 +342,7 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                         slideBarcode
                                     )
                                 else:
-                                    print 'item already exists: %s' % slideFileUrl
+                                    log('item already exists: %s' % slideFileUrl)
 
                                 # Check if file exists
                                 if not grSlideItem['size']:
@@ -312,7 +354,7 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                             repositoryType, dataProvider, dataType,
                                             'slide_images', batchDirectory, slideFileName)
                                         if os.path.exists(importFilePath):
-                                            print 'import found, importing %s' % slideFileUrl
+                                            log('import found, importing %s' % slideFileUrl)
                                             grSlideFile = assetstoreAdapter.importFile(
                                                 item=grSlideItem,
                                                 path=importFilePath,
@@ -323,20 +365,20 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
 
                                     # Could not import, download instead
                                     if not grSlideFile and downloadNew:
-                                        print 'not found, downloading %s' % slideFileUrl
+                                        log('not found, downloading %s' % slideFileUrl)
                                         slideResponse = requests.get(
                                             slideFileUrl,
                                             stream=True
                                         )
-                                        grSlideFile = ModelImporter.model('upload').uploadFromFile(
+                                        grSlideFile = uploadWithProgress(
                                             obj=slideResponse.raw,
                                             size=int(slideResponse.headers['Content-Length']),
                                             name=slideFileName,
                                             parentType='item',
                                             parent=grSlideItem,
                                             user=_getOrCreateIngestUser(),
-                                            mimeType='image/x-aperio-svs'
-                                        )
+                                            mimeType='image/x-aperio-svs',
+                                            progress=progress)
 
                                     if grSlideFile:
                                         # The addition of a file changed the size of the item, so reload it
@@ -349,10 +391,10 @@ def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=No
                                             # TODO: token
                                         )
                                     else:
-                                        print 'not imported %s' % slideFileUrl
+                                        log('not imported %s' % slideFileUrl)
                                         continue
                                 else:
-                                    print 'file already exists: %s' % slideFileUrl
+                                    log('file already exists: %s' % slideFileUrl)
 
                                 # TODO: fix creation / updated dates (for everyone first)
                     else:

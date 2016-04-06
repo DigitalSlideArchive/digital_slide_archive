@@ -26,17 +26,25 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
         'submit #g-tcga-ingest-form': function (event) {
             event.preventDefault();
 
-            var assetstoreId = this.$('#g-tcga-ingest-assetstore-id').val().trim(),
-                srcPath = this.$('#g-tcga-ingest-path').val().trim(),
-                count = this.$('#g-tcga-ingest-amount').val();
+            var dataset = this.$('#g-tcga-ingest-datasource').val(),
+                assetstoreId = this.$('#g-tcga-ingest-assetstore-id').val().trim(),
+                limit = this.$('#g-tcga-ingest-amount').val();
             this.$('.g-validation-failed-message').empty();
-            this._ingest({
-                dataset: 'tcga',
-                path: srcPath,
-                progress: 'true',
-                assetstoreId: assetstoreId,
-                count: count
-            });
+            var callback = _.bind(function () {
+                this._ingest({
+                    dataset: dataset,
+                    assetstoreId: assetstoreId,
+                    limit: limit
+                });
+            }, this);
+            if (!limit) {
+                girder.confirm({
+                    text: 'Ingesting all data will use a massive amount of space.  Are you sure you want to do this?',
+                    confirmCallback: callback
+                });
+            } else {
+                callback();
+            }
         }
     },
 
