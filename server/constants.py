@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -18,26 +17,23 @@
 #  limitations under the License.
 ###############################################################################
 
-from girder import events
-from girder.utility.model_importer import ModelImporter
-
-from . import constants
-from .rest import tcga
+from girder.models.model_base import ValidationException
+from girder.constants import SettingDefault
+import six
 
 
-def setBranding(info):
-    brandName = ModelImporter.model('setting').get(
-        constants.PluginSettings.BRAND_NAME)
-
-    info['serverRoot'].updateHtmlVars({'title': brandName})
-
-    # TODO: render 'layoutHeader.jade' and 'frontPage.jade' using brandName
+class PluginSettings(object):
+    BRAND_NAME = 'digital_slide_archive.brand_name'
 
 
-def load(info):
-    events.bind('model.setting.validate',
-                'digital_slide_archive', constants.validateSettings)
+def validateSettings(event):
+    key, val = event.info['key'], event.info['value']
 
-    setBranding(info)
+    if key == PluginSettings.BRAND_NAME:
+        if not isinstance(val, six.string_types):
+            raise ValidationException(
+                'Brand name must be provided as a string.', 'value')
+        event.preventDefault().stopPropagation()
 
-    info['apiRoot'].tcga = tcga.Tcga()
+
+SettingDefault.defaults[PluginSettings.BRAND_NAME] = 'Digital Slide Archive'
