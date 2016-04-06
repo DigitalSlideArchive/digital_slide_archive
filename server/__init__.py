@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -22,7 +21,7 @@ from girder import events
 from girder.utility.model_importer import ModelImporter
 
 from . import constants
-from .rest import tcga
+from .rest import ingest
 
 
 def setBranding(info):
@@ -40,4 +39,4 @@ def load(info):
 
     setBranding(info)
 
-    info['apiRoot'].tcga = tcga.Tcga()
+    info['apiRoot'].system.route('POST', ('ingest',), ingest)

@@ -15,10 +15,10 @@ girder.views.tcgaIngest_ConfigView = girder.View.extend({
                 count = this.$('#g-tcga-ingest-amount').val();
             this.$('.g-validation-failed-message').empty();
             this._ingest({
-                assetstoreId: assetstoreId,
+                dataset: 'tcga',
                 path: srcPath,
-                destType: destType,
-                destId: destId,
+                progress: 'true',
+                assetstoreId: assetstoreId,
                 count: count
             });
         }
@@ -44,7 +44,7 @@ girder.views.tcgaIngest_ConfigView = girder.View.extend({
     _ingest: function (params) {
         girder.restRequest({
             type: 'POST',
-            path: 'tcga/import',
+            path: 'system/ingest',
             data: params,
             error: null
         }).done(_.bind(function () {
@@ -63,9 +63,10 @@ girder.views.tcgaIngest_ConfigView = girder.View.extend({
 });
 
 girder.router.route(
-    'plugins/tcga_ingest/config', 'tcgaIngestConfig', function () {
+    'plugins/digital_slide_archive/config', 'tcgaIngestConfig', function () {
         girder.events.trigger('g:navigateTo',
                               girder.views.tcgaIngest_ConfigView);
     });
 
-girder.exposePluginConfig('tcga_ingest', 'plugins/tcga_ingest/config');
+girder.exposePluginConfig(
+    'digital_slide_archive', 'plugins/digital_slide_archive/config');

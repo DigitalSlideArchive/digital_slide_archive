@@ -1,3 +1,2 @@
 *.py[cod]
 __pycache__/
-ingest_stamps.txt
