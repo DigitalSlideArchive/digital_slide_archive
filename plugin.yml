@@ -1,0 +1,3 @@
+name: TCGA data ingest
+description: Synchronizes data from The Cancer Genome Atlas archive
+version: 0.1.0

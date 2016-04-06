@@ -21,6 +21,7 @@ from girder import events
 from girder.utility.model_importer import ModelImporter
 
 from . import constants
+from .rest import ingest
 
 
 def setBranding(info):
@@ -37,3 +38,5 @@ def load(info):
                 'digital_slide_archive', constants.validateSettings)
 
     setBranding(info)
+
+    info['apiRoot'].system.route('POST', ('ingest',), ingest)
