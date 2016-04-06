@@ -1,2 +1,5 @@
-roles/DigitalSlideArchive.vips/
 vagrant-playbook.retry
+roles/DigitalSlideArchive.vips/
+roles/nodesource.node/
+roles/Stouts.mongodb
+roles/girder.girder

@@ -2,5 +2,12 @@
 
 - name: vagrant setup
   hosts: all
+  pre_tasks:
+    - name: Update APT Cache
+      apt:
+        update_cache: yes
+      sudo: yes
   roles:
     - role: DigitalSlideArchive.vips
+
+    - role: girder.girder
