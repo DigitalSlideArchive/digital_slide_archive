@@ -52,7 +52,7 @@ class TCGAPath(Path):
 class TCGAIngest(Ingest):
     BASE_URL = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor'
 
-    def __init__(self, limit, assetstore=None, progress=None,
+    def __init__(self, limit, assetstore=None, job=None, notify=True,
                  downloadNew=True, localImportPath=None):
         # Create 'ingestUser' to avoid circular logic
         self.ingestUser = None
@@ -62,7 +62,7 @@ class TCGAIngest(Ingest):
         )
 
         super(TCGAIngest, self).__init__(
-            limit, collection, assetstore, progress)
+            limit, collection, assetstore, job, notify)
 
         self.downloadNew = downloadNew
         self.localImportPath = localImportPath

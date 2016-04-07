@@ -22,9 +22,6 @@ import os
 from girder.api import access
 from girder.api.describe import Description, describeRoute
 from girder.api.rest import boundHandler, RestException
-from girder.utility.progress import ProgressContext
-
-from .datasets import TCGAIngest, IngestException
 
 
 @describeRoute(
@@ -49,21 +46,16 @@ def ingest(self, params):
     self.requireParams(('dataset', ), params)
 
     dataset = params['dataset']
-    datasetMap = {
-        'tcga': TCGAIngest
-    }
-    try:
-        IngestClass = datasetMap[dataset]
-    except KeyError:
+    if dataset != 'tcga':
         raise RestException('Unknown dataset: %s' % dataset)
 
     progressEnabled = self.boolParam('progress', params, default=True)
 
-    assetstore = \
+    assetstoreId = params.get('assetstoreId') or None
+    if assetstoreId:
+        # Validate the asssetstore id
         self.model('assetstore').load(params['assetstoreId'],
-                                      force=True, exc=True) \
-        if params.get('assetstoreId') \
-        else None
+                                      force=True, exc=True)
 
     if params.get('limit') == 'all':
         limit = None
@@ -83,17 +75,20 @@ def ingest(self, params):
     if localImportPath and not os.path.isdir(localImportPath):
         raise RestException('Directory "%s" not found.' % localImportPath)
 
-    with ProgressContext(
-            on=progressEnabled,
-            title='Ingesting TCGA data',
-            user=self.getCurrentUser()) as ctx:
-        ingester = IngestClass(
-            limit=limit,
-            assetstore=assetstore,
-            progress=ctx,
-            localImportPath=localImportPath
-        )
-        try:
-            ingester.ingest()
-        except IngestException as e:
-            raise RestException('Ingest failure: %s' % str(e))
+
+    self.model('job', 'jobs').createLocalJob(
+        module='girder.plugins.digital_slide_archive.worker',
+        function='ingestRunner',
+        kwargs={
+            'dataset': dataset,
+            'progressEnabled': progressEnabled,
+            'assetstoreId': assetstoreId,
+            'limit': limit,
+            'localImportPath': localImportPath
+        },
+        title='Ingesting TCGA data',
+        type='digital_slide_archive.ingest',
+        user=self.getCurrentUser(),
+        public=False,
+        async=True
+    )

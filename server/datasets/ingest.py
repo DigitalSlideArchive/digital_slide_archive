@@ -52,7 +52,8 @@ class Path(tuple):
 
 
 class Ingest(object):
-    def __init__(self, limit, collection, assetstore=None, progress=None):
+    def __init__(self, limit, collection, assetstore=None, job=None,
+                 notify=True):
         """
         Create a new data ingest instance.
 
@@ -61,7 +62,9 @@ class Ingest(object):
         :param collection: The collection to store ingested files in.
         :param assetstore: An optional assetstore to store downloaded files in.
                            Defaults to using the collection-default assetstore.
-        :param progress: An optional progress context object.
+        :param job: An optional job to log and send notifications to.
+        :param notify: If a job is provided, determines if notifications will be
+                       sent.
         """
         self.limit = limit
         self.ingestCount = 0
@@ -81,7 +84,8 @@ class Ingest(object):
             )
         self.assetstoreAdapter = getAssetstoreAdapter(self.assetstore)
 
-        self.progress = progress
+        self.job = job
+        self.notify = notify
 
         # Set up cache
         self.ingestUser = None
@@ -95,16 +99,19 @@ class Ingest(object):
             msg = str(args[0])
         girder.logger.info(msg)
 
-    def _updateProgress(self):
-        if self.progress is None:
+    def _updateProgress(self, messageExtension='', marginalValue=0.0):
+        if not self.job:
             return
-        self.progress.update(
-            current=self.ingestCount,
-            total=self.limit if self.limit else 0,
-            message='Ingesting items (%s)' % (
+        ModelImporter.model('job', 'jobs').updateJob(
+            job=self.job,
+            notify=self.notify,
+            progressTotal=self.limit if self.limit else 0,
+            progressCurrent=self.ingestCount + marginalValue,
+            progressMessage='Ingesting items (%s)%s' % (
                 ('%d done' % self.ingestCount)
                 if not self.limit
-                else ('%d left' % (self.limit - self.ingestCount))
+                else ('%d left' % (self.limit - self.ingestCount)),
+                messageExtension
             )
         )
 
@@ -162,23 +169,26 @@ class Ingest(object):
 
     def _uploadWithProgress(self, obj, **kwargs):
         Upload = ModelImporter.model('upload')
-        if self.progress is None:
+        if not (self.job and self.notify):
+            # If notifications are disabled, there is no need to log marginal
+            # upload progress
             return Upload.uploadFromFile(obj, **kwargs)
-        baseMessage = self.progress.progress['data']['message']
-        baseCount = self.progress.progress['data']['current']
-        if not baseCount:
-            baseCount = 0
+
         upload = Upload.createUpload(**kwargs)
         dataRead = 0
         while True:
-            self.progress.update(
-                message='%s  %3.1f%% transferred of next item' % (
-                    baseMessage, 100.0 * dataRead / kwargs['size']),
-                current=baseCount + float(dataRead) / kwargs['size'])
+            self._updateProgress(
+                messageExtension='  %3.1f%% transferred of next item' %
+                                 (100.0 * dataRead / kwargs['size']),
+                marginalValue=(float(dataRead) / kwargs['size'])
+            )
             data = obj.read(32 * (1024**2))  # 32MB
             if not data:
                 break
             upload = Upload.handleChunk(upload, six.BytesIO(data))
             dataRead += len(data)
-        self.progress.update(message='%s  100%% transferred of next item' % baseMessage)
+        self._updateProgress(
+            messageExtension='  100%% transferred of next item',
+            marginalValue=1.0
+        )
         return upload
