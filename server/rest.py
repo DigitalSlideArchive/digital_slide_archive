@@ -24,7 +24,7 @@ from girder.api.describe import Description, describeRoute
 from girder.api.rest import boundHandler, RestException
 from girder.utility.progress import ProgressContext
 
-from .datasets.tcga.ingest import ingestTCGA
+from .datasets import TCGAIngest, IngestException
 
 
 @describeRoute(
@@ -49,9 +49,12 @@ def ingest(self, params):
     self.requireParams(('dataset', ), params)
 
     dataset = params['dataset']
-    if dataset == 'tcga':
-        ingestFunc = ingestTCGA
-    else:
+    datasetMap = {
+        'tcga': TCGAIngest
+    }
+    try:
+        IngestClass = datasetMap[dataset]
+    except KeyError:
         raise RestException('Unknown dataset: %s' % dataset)
 
     progressEnabled = self.boolParam('progress', params, default=True)
@@ -63,7 +66,7 @@ def ingest(self, params):
         else None
 
     if params.get('limit') == 'all':
-        limit = 0
+        limit = None
     else:
         try:
             limit = int(params['limit'])
@@ -84,9 +87,13 @@ def ingest(self, params):
             on=progressEnabled,
             title='Ingesting TCGA data',
             user=self.getCurrentUser()) as ctx:
-        ingestFunc(
+        ingester = IngestClass(
             limit=limit,
             assetstore=assetstore,
-            localImportPath=localImportPath,
-            progress=ctx
+            progress=ctx,
+            localImportPath=localImportPath
         )
+        try:
+            ingester.ingest()
+        except IngestException as e:
+            raise RestException('Ingest failure: %s' % str(e))

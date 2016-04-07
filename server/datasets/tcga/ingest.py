@@ -25,392 +25,312 @@ import six
 import lxml.html
 import requests
 
-import girder
-from girder.models.model_base import ValidationException
-from girder.utility.assetstore_utilities import AssetstoreType, getAssetstoreAdapter
 from girder.utility.model_importer import ModelImporter
 
+from ..ingest import Ingest, Path, IngestException
 from .constants import TcgaCodes
 
 
-# Root path for scraping SVS files
-URLBASE = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/lgg/bcr/nationwidechildrens.org/tissue_images/'
+class TCGAPath(Path):
+    @property
+    def diseaseStudyCode(self):
+        return self[1]
+
+    @property
+    def repositoryType(self):
+        return self[2]
+
+    @property
+    def dataProvider(self):
+        return self[3]
+
+    @property
+    def dataType(self):
+        return self[4]
 
 
-class MetadataParseException(Exception):
-    pass
+class TCGAIngest(Ingest):
+    BASE_URL = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor'
 
-
-def listAutoIndex(*urlComponents):
-    """
-    Given a URL to an apache mod_autoindex directory listing, recursively
-    scrapes the listing for .svs files. This is a generator that yields each
-    such file found in the listing as a tuple whose first element is the URL
-    and whose second element is its modified time as reported by the server.
-    """
-    dirNames = list()
-    fileNames = list()
-
-    url = '/'.join(urlComponents)
-    if not url.endswith('/'):
-        url += '/'
-
-    doc = lxml.html.fromstring(requests.get(url + '?F=2').text)
-    rows = doc.xpath('.//table//tr')
-
-    for row in rows:
-        name = row.xpath('.//td[2]/a/text()')
-
-        if not name:  # F=2 gives us some header rows that only contain <th>
-            continue
-
-        name = name[0].strip()
-
-        if name in {'Parent Directory', 'lost+found/'}:
-            continue
-        elif name.endswith('/'):  # subdirectory
-            dirNames.append(name[:-1])
-        else:
-            mtime = row.xpath('.//td[3]/text()')[0].strip()
-            fileNames.append((name, mtime))
-
-    return dirNames, fileNames
-
-
-def _getOrCreateIngestUser():
-    global ingestUser
-    if not ingestUser:
-        User = ModelImporter.model('user')
-        ingestUser = User.findOne({'login': 'dsa-robot'})
-        if not ingestUser:
-            ingestUser = User.createUser(
-                login='dsa-robot',
-                password=None,
-                firstName='DSA',
-                lastName='Robot',
-                email='robot@digitalslidearchive.emory.edu',
-                admin=False,
-                public=False,
-            )
-            # Remove default Public / Private folders
-            ModelImporter.model('folder').removeWithQuery({
-                'parentCollection': 'user',
-                'parentId': ingestUser['_id']
-            })
-    return ingestUser
-ingestUser = None
-
-
-def _getOrCreateCollection(name, description):
-    try:
-        return collectionCache[name]
-    except KeyError:
-        Collection = ModelImporter.model('collection')
-        collection = Collection.findOne({'name': name})
-        if not collection:
-            collection = Collection.createCollection(
-                name=name,
-                creator=_getOrCreateIngestUser(),
-                description=description
-            )
-        collectionCache[name] = collection
-        return collection
-collectionCache = dict()
-
-
-def _getOrCreateFolder(name, description, parent, parentType):
-    key = (name, parent['_id'])
-    try:
-        return folderCache[key]
-    except KeyError:
-        folder = ModelImporter.model('folder').createFolder(
-            parent=parent,
-            name=name,
-            description=description,
-            parentType=parentType,
-            creator=_getOrCreateIngestUser(),
-            reuseExisting=True
+    def __init__(self, limit, assetstore=None, progress=None,
+                 downloadNew=True, localImportPath=None):
+        # Create 'ingestUser' to avoid circular logic
+        self.ingestUser = None
+        collection = self._getOrCreateCollection(
+            name='TCGA',
+            description='The Cancer Genome Atlas'
         )
-        folderCache[key] = folder
-        return folder
-folderCache = dict()
 
+        super(TCGAIngest, self).__init__(
+            limit, collection, assetstore, progress)
 
-def _filterMaxBatchRevision(batchDirectories, dataProvider, diseaseStudyCode, dataType):
-    batchDirectoriesById = collections.defaultdict(dict)
+        self.downloadNew = downloadNew
+        self.localImportPath = localImportPath
 
-    for batchDirectory in batchDirectories:
-        batchMatch = re.match(
-            r'^%s_%s\.%s\.'
-            r'(?P<dataLevel>\w+)\.'
-            r'(?P<batchId>[0-9]+)\.'
-            r'(?P<batchRevision>[0-9]+)\.'
-            r'0$' % (
-                dataProvider,
-                diseaseStudyCode.upper(),
-                dataType),
-            batchDirectory
-        )
-        if not batchMatch:
-            raise MetadataParseException('Could not parse batch directory: "%s"' % batchDirectory)
-        batchMatchDict = batchMatch.groupdict()
+    @staticmethod
+    def _listAutoIndex(urlPath):
+        """
+        Given a URL to an apache mod_autoindex directory listing, recursively
+        scrapes the listing for .svs files. This is a generator that yields each
+        such file found in the listing as a tuple whose first element is the URL
+        and whose second element is its modified time as reported by the server.
 
-        dataLevel = batchMatch.groupdict()['dataLevel']
-        if dataLevel != 'Level_1':
-            raise MetadataParseException('Unknown data level: "%s"' % dataLevel)
-        batchId = int(batchMatchDict['batchId'])
-        batchRevision = int(batchMatchDict['batchRevision'])
+        type urlPath: Path
+        rtype: (list[Path], list[(Path, str)])
+        """
+        dirPaths = list()
+        filePaths = list()
 
-        batchDirectoriesById[batchId][batchRevision] = batchDirectory
+        url = urlPath.join()
+        if not url.endswith('/'):
+            url += '/'
 
-    for batchDirectoriesByRevision in six.viewvalues(batchDirectoriesById):
-        batchRevision, batchDirectory = max(six.viewitems(batchDirectoriesByRevision))
-        yield batchDirectory
+        doc = lxml.html.fromstring(requests.get(url + '?F=2').text)
+        rows = doc.xpath('.//table//tr')
 
+        for row in rows:
+            name = row.xpath('.//td[2]/a/text()')
 
-# importBasePath = '/mnt/tcga_mirror/TCGA_RAW/tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor'
-
-
-def log(*args):
-    if len(args) > 1:
-        msg = ' '.join([str(item) for item in args])
-    else:
-        msg = str(args[0])
-    girder.logger.info(msg)
-
-
-def uploadWithProgress(progress, obj, **kwargs):
-    uploadModel = ModelImporter.model('upload')
-    if progress is None:
-        return uploadModel.uploadFromFile(obj, **kwargs)
-    basemsg = progress.progress['data']['message']
-    basecount = progress.progress['data']['current']
-    if not basecount:
-        basecount = 0
-    upload = uploadModel.createUpload(**kwargs)
-    dataread = 0
-    while True:
-        progress.update(
-            message='%s  %3.1f%% transferred of next item' % (
-                basemsg, 100.0 * dataread / kwargs['size']),
-            current=basecount + float(dataread) / kwargs['size'])
-        data = obj.read(33554432)  # 32MB
-        if not data:
-            break
-        upload = uploadModel.handleChunk(upload, six.BytesIO(data))
-        dataread += len(data)
-    progress.update(message='%s  100%% transferred of next item' % basemsg)
-    return upload
-
-
-def ingestTCGA(limit=None, downloadNew=True, assetstore=None, localImportPath=None, progress=None):
-    Item = ModelImporter.model('item')
-
-    grCollection = _getOrCreateCollection(
-        name='TCGA',
-        description='The Cancer Genome Atlas'
-    )
-
-    if not assetstore:
-        assetstore = ModelImporter.model('upload').getTargetAssetstore(
-            modelType='collection',
-            resource=grCollection
-        )
-    if assetstore['type'] != AssetstoreType.FILESYSTEM:
-        raise ValidationException(
-            'Assetstore "%s" is not a filesystem assetstore.' %
-            assetstore['name']
-        )
-    assetstoreAdapter = getAssetstoreAdapter(assetstore)
-
-    tcgaBaseUrl = 'https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor'
-
-    ingestCount = 0
-    for diseaseStudyCode in listAutoIndex(tcgaBaseUrl)[0]:
-        if diseaseStudyCode.upper() not in TcgaCodes.DISEASE_STUDIES:
-            raise MetadataParseException('Unknown disease study: "%s"' % diseaseStudyCode)
-
-        for repositoryType in listAutoIndex(tcgaBaseUrl, diseaseStudyCode)[0]:
-            if repositoryType not in TcgaCodes.REPOSITORY_TYPES:
-                raise MetadataParseException('Unknown repository type: "%s"' % repositoryType)
-            if repositoryType != 'bcr':
-                # Only use 'bcr' now
+            if not name:  # F=2 gives us some header rows that only contain <th>
                 continue
 
-            for dataProvider in listAutoIndex(tcgaBaseUrl, diseaseStudyCode, repositoryType)[0]:
-                if dataProvider not in TcgaCodes.DATA_PROVIDERS:
-                    raise MetadataParseException('Unknown data provider: "%s"' % dataProvider)
-                if dataProvider == 'biotab':
-                    # Clinical metadata, skip
+            name = name[0].strip()
+
+            if name in {'Parent Directory', 'lost+found/'}:
+                continue
+            elif name.endswith('/'):  # subdirectory
+                dirPaths.append(urlPath.push(name[:-1]))
+            else:
+                mtime = row.xpath('.//td[3]/text()')[0].strip()
+                filePaths.append((urlPath.push(name), mtime))
+
+        return dirPaths, filePaths
+
+    @staticmethod
+    def _filterMaxBatchRevision(batchDirectoryPaths):
+        batchDirectoryPathsByRevisionById = collections.defaultdict(dict)
+
+        for batchDirectoryPath in batchDirectoryPaths:
+            batchMatch = re.match(
+                r'^%s_%s\.%s\.'
+                r'(?P<dataLevel>\w+)\.'
+                r'(?P<batchId>[0-9]+)\.'
+                r'(?P<batchRevision>[0-9]+)\.'
+                r'0$' % (
+                    batchDirectoryPath.dataProvider,
+                    batchDirectoryPath.diseaseStudyCode.upper(),
+                    batchDirectoryPath.dataType),
+                batchDirectoryPath.tail()
+            )
+            if not batchMatch:
+                raise IngestException('Could not parse batch directory: "%s"' % str(batchDirectoryPath))
+            batchMatchDict = batchMatch.groupdict()
+
+            dataLevel = batchMatch.groupdict()['dataLevel']
+            if dataLevel != 'Level_1':
+                raise IngestException('Unknown data level: "%s"' % str(batchDirectoryPath))
+            batchId = int(batchMatchDict['batchId'])
+            batchRevision = int(batchMatchDict['batchRevision'])
+
+            batchDirectoryPathsByRevisionById[batchId][batchRevision] = batchDirectoryPath
+
+        for batchDirectoryPathsByRevision in six.viewvalues(batchDirectoryPathsByRevisionById):
+            batchRevision, batchDirectoryPath = max(six.viewitems(batchDirectoryPathsByRevision))
+            yield batchDirectoryPath
+
+    @staticmethod
+    def _getSlideMetadata(slideFilePath):
+        slideFileName = slideFilePath.tail()
+
+        slideBarcodeMatch = re.match(
+            r'^TCGA-'
+            r'(?P<TSS>\w{2})-'  # Tissue source site ID
+            r'(?P<Participant>\w{4})-'  # Study participant
+            r'(?P<Sample>\d{2})'  # Sample type
+            r'(?P<Vial>[A-Z])-'  # Order of sample in a sequence of samples
+            r'(?P<Portion>\d{2})-'  # Order of portion in a sequence of 100 - 120 mg sample portions
+            r'(?P<SlideLocation>TS|MS|BS|DX)'
+            r'(?P<SlidePortion>[0-9A-Z]?)\.'
+            # TODO: UUID should always be uppercase?
+            r'(?P<UUID>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12})\.'
+            r'svs$',
+            slideFileName
+        )
+        if not slideBarcodeMatch:
+            raise IngestException('Could not parse slide barcode: "%s"' % str(slideFilePath))
+        slideMetadata = slideBarcodeMatch.groupdict()
+
+        slideMetadata['DiseaseStudy'] = slideFilePath[1]
+        slideMetadata['RepositoryType'] = slideFilePath[2]
+        slideMetadata['DataProvider'] = slideFilePath[3]
+        slideMetadata['DataType'] = slideFilePath[4]
+
+        return slideMetadata
+
+    def _ingestSlide(self, slideFilePath):
+        Item = ModelImporter.model('item')
+
+        slideFileName = slideFilePath.tail()
+
+        slideMetadata = self._getSlideMetadata(slideFilePath)
+
+        grDiseaseFolder = self._getOrCreateFolder(
+            name=slideMetadata['DiseaseStudy'].upper(),
+            description=TcgaCodes.DISEASE_STUDIES[slideMetadata['DiseaseStudy'].upper()],
+            parent=self.collection,
+            parentType='collection'
+        )
+        grPatientFolder = self._getOrCreateFolder(
+            name='TCGA-%s-%s' % (slideMetadata['TSS'], slideMetadata['Participant']),
+            description='',
+            parent=grDiseaseFolder,
+            parentType='folder'
+        )
+
+        self._log('Ingesting image: %s' % str(slideFilePath))
+
+        # Get or create item
+        grSlideItem = Item.findOne({
+            'folderId': grPatientFolder['_id'],
+            'name': slideMetadata['UUID']
+        })
+        if not grSlideItem:
+            self._log('  Creating item')
+            grSlideItem = Item.createItem(
+                name=slideMetadata['UUID'],
+                creator=self._getOrCreateIngestUser(),
+                folder=grPatientFolder,
+                description=''
+            )
+            grSlideItem = Item.setMetadata(
+                grSlideItem,
+                slideMetadata
+            )
+        else:
+            self._log('  Item already exists')
+
+        # Check if file exists
+        if not grSlideItem['size']:
+            self._log('  File does not exist')
+
+            # Import if possible
+            grSlideFile = None
+            if self.localImportPath:
+                localImportSlideFilePath = Path(self.localImportPath, *slideFilePath[1:])
+                if os.path.exists(localImportSlideFilePath.join()):
+                    self._log('  File found for local import at: %s' % str(localImportSlideFilePath))
+                    grSlideFile = self.assetstoreAdapter.importFile(
+                        item=grSlideItem,
+                        path=localImportSlideFilePath.join(),
+                        user=self._getOrCreateIngestUser(),
+                        name=slideFileName,
+                        mimeType='image/x-aperio-svs'
+                    )
+                    self._log('  Local import complete')
+                else:
+                    self._log('  File not found for local import at: %s' % str(localImportSlideFilePath))
+
+            # Could not import, download instead
+            if not grSlideFile and self.downloadNew:
+                self._log('  Downloading file')
+                slideResponse = requests.get(slideFilePath.join(), stream=True)
+                grSlideFile = self._uploadWithProgress(
+                    obj=slideResponse.raw,
+                    size=int(slideResponse.headers['Content-Length']),
+                    name=slideFileName,
+                    parentType='item',
+                    parent=grSlideItem,
+                    user=self._getOrCreateIngestUser(),
+                    mimeType='image/x-aperio-svs'
+                )
+                self._log('  Download complete')
+            else:
+                # Get just the HTTP headers for later use
+                slideResponse = requests.head(slideFilePath.join())
+
+            if grSlideFile:
+                self._log('  Setting internal metadata')
+                # The addition of a file changed the size of the item, so reload it
+                grSlideItem = Item.findOne({'_id': grSlideItem['_id']})
+
+                # Attempt to mirror the upstream creation date
+                if 'Last-Modified' in slideResponse.headers:
+                    grSlideItem['created'] = grSlideFile['created'] = \
+                        self._httpDateToDatetime(
+                            slideResponse.headers['Last-Modified'])
+                    grSlideFile = ModelImporter.model('file').save(grSlideFile)
+                    # 'createImageItem' will save the item
+
+                # Mark as a large_image
+                try:
+                    ModelImporter.model('image_item', 'large_image').createImageItem(
+                        item=grSlideItem,
+                        fileObj=grSlideFile,
+                        user=self._getOrCreateIngestUser(),
+                        # TODO: token
+                        token=None
+                    )
+                except Exception as e:
+                    # TODO: remove this, large_image creation should not normally fail
+                    # (though the job may eventually fail once started)
+                    self._log('  ERROR: large_image creation failed: %s' % str(e))
+            else:
+                self._log('  File not ingested')
+        else:
+            self._log('  File already exists')
+
+    def ingest(self):
+        self.ingestCount = 0
+        self._updateProgress()
+        basePath = TCGAPath(self.BASE_URL)
+
+        for diseaseStudyPath in self._listAutoIndex(basePath)[0]:
+            if diseaseStudyPath.diseaseStudyCode.upper() not in TcgaCodes.DISEASE_STUDIES:
+                raise IngestException('Unknown disease study: "%s"' % str(diseaseStudyPath))
+
+            for repositoryPath in self._listAutoIndex(diseaseStudyPath)[0]:
+                if repositoryPath.repositoryType not in TcgaCodes.REPOSITORY_TYPES:
+                    raise IngestException('Unknown repository type: "%s"' % str(repositoryPath))
+                if repositoryPath.repositoryType != 'bcr':
+                    # Only use 'bcr' now
                     continue
-                elif dataProvider == 'supplemental':
-                    # Unknown, skip
-                    continue
 
-                for dataType in listAutoIndex(
-                        tcgaBaseUrl, diseaseStudyCode, repositoryType, dataProvider)[0]:
-                    if dataType not in TcgaCodes.DATA_TYPES:
-                        raise MetadataParseException('Unknown data type: "%s"' % dataType)
-                    if dataType in {'diagnostic_images', 'tissue_images'}:
-
-                        if listAutoIndex(
-                                tcgaBaseUrl, diseaseStudyCode, repositoryType,
-                                dataProvider, dataType)[0] != ['slide_images']:
-                            raise MetadataParseException('Missing sub-directory "slide_images"')
-
-                        for batchDirectory in _filterMaxBatchRevision(
-                                listAutoIndex(
-                                    tcgaBaseUrl, diseaseStudyCode, repositoryType,
-                                    dataProvider, dataType, 'slide_images')[0],
-                                dataProvider, diseaseStudyCode, dataType):
-
-                            for slideFileName, modifiedTime in listAutoIndex(
-                                    tcgaBaseUrl, diseaseStudyCode, repositoryType, dataProvider,
-                                    dataType, 'slide_images', batchDirectory)[1]:
-                                if not slideFileName.endswith('.svs'):
-                                    continue
-
-                                slideFileUrl = '/'.join([
-                                    tcgaBaseUrl, diseaseStudyCode, repositoryType,
-                                    dataProvider, dataType, 'slide_images',
-                                    batchDirectory, slideFileName])
-
-                                slideBarcodeMatch = re.match(
-                                    r'^TCGA-'
-                                    r'(?P<TSS>\w{2})-'  # Tissue source site ID
-                                    r'(?P<Participant>\w{4})-'  # Study participant
-                                    r'(?P<Sample>\d{2})'  # Sample type
-                                    r'(?P<Vial>[A-Z])-'  # Order of sample in a sequence of samples
-                                    r'(?P<Portion>\d{2})-'  # Order of portion in a sequence of 100 - 120 mg sample portions
-                                    r'(?P<SlideLocation>TS|MS|BS|DX)'
-                                    r'(?P<SlidePortion>[0-9A-Z]?)\.'
-                                    # TODO: UUID should always be uppercase?
-                                    r'(?P<UUID>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12})\.'
-                                    r'svs$',
-                                    slideFileName
-                                )
-                                if not slideBarcodeMatch:
-                                    log('Could not parse slide barcode: "%s"' % slideFileUrl)
-                                    continue
-                                    raise MetadataParseException('Could not parse slide barcode: "%s"' % slideFileUrl)
-                                slideBarcode = slideBarcodeMatch.groupdict()
-
-                                if limit and ingestCount >= limit:
-                                    global ingestUser
-                                    ingestUser = None
-                                    collectionCache.clear()
-                                    folderCache.clear()
-                                    return
-                                if progress is not None:
-                                    progress.update(
-                                        current=ingestCount,
-                                        total=limit if limit else None,
-                                        message='Ingesting items (%s)' % (
-                                            ('%d done' % ingestCount) if
-                                            not limit else
-                                            ('%d left' % (
-                                                limit - ingestCount))))
-
-                                ingestCount += 1
-                                grDiseaseFolder = _getOrCreateFolder(
-                                    name=diseaseStudyCode.upper(),
-                                    description=TcgaCodes.DISEASE_STUDIES[diseaseStudyCode.upper()],
-                                    parent=grCollection,
-                                    parentType='collection'
-                                )
-                                grPatientFolder = _getOrCreateFolder(
-                                    name='TCGA-%s-%s' % (slideBarcode['TSS'], slideBarcode['Participant']),
-                                    description='',
-                                    parent=grDiseaseFolder,
-                                    parentType='folder'
-                                )
-
-                                # Get or create item
-                                grSlideItem = Item.findOne({
-                                    'folderId': grPatientFolder['_id'],
-                                    'name': slideBarcode['UUID']
-                                })
-                                if not grSlideItem:
-                                    grSlideItem = Item.createItem(
-                                        name=slideBarcode['UUID'],
-                                        creator=_getOrCreateIngestUser(),
-                                        folder=grPatientFolder,
-                                        description=''
-                                    )
-                                    grSlideItem = Item.setMetadata(
-                                        grSlideItem,
-                                        slideBarcode
-                                    )
-                                else:
-                                    log('item already exists: %s' % slideFileUrl)
-
-                                # Check if file exists
-                                if not grSlideItem['size']:
-                                    # File does not exist, import if possible
-                                    grSlideFile = None
-                                    if localImportPath:
-                                        importFilePath = os.path.join(
-                                            localImportPath, diseaseStudyCode,
-                                            repositoryType, dataProvider, dataType,
-                                            'slide_images', batchDirectory, slideFileName)
-                                        if os.path.exists(importFilePath):
-                                            log('import found, importing %s' % slideFileUrl)
-                                            grSlideFile = assetstoreAdapter.importFile(
-                                                item=grSlideItem,
-                                                path=importFilePath,
-                                                user=_getOrCreateIngestUser(),
-                                                name=slideFileName,
-                                                mimeType='image/x-aperio-svs'
-                                            )
-
-                                    # Could not import, download instead
-                                    if not grSlideFile and downloadNew:
-                                        log('not found, downloading %s' % slideFileUrl)
-                                        slideResponse = requests.get(
-                                            slideFileUrl,
-                                            stream=True
-                                        )
-                                        grSlideFile = uploadWithProgress(
-                                            obj=slideResponse.raw,
-                                            size=int(slideResponse.headers['Content-Length']),
-                                            name=slideFileName,
-                                            parentType='item',
-                                            parent=grSlideItem,
-                                            user=_getOrCreateIngestUser(),
-                                            mimeType='image/x-aperio-svs',
-                                            progress=progress)
-
-                                    if grSlideFile:
-                                        # The addition of a file changed the size of the item, so reload it
-                                        grSlideItem = Item.findOne({'_id': grSlideItem['_id']})
-                                        # Mark as a large_image
-                                        ModelImporter.model('image_item', 'large_image').createImageItem(
-                                            item=grSlideItem,
-                                            fileObj=grSlideFile,
-                                            user=_getOrCreateIngestUser(),
-                                            # TODO: token
-                                        )
-                                    else:
-                                        log('not imported %s' % slideFileUrl)
-                                        continue
-                                else:
-                                    log('file already exists: %s' % slideFileUrl)
-                                if progress is not None:
-                                    progress.update(
-                                        current=ingestCount,
-                                        total=limit if limit else None,
-                                        message='Ingesting items (%s)' % (
-                                            ('%d done' % ingestCount) if
-                                            not limit else
-                                            ('%d left' % (
-                                                limit - ingestCount))))
-
-                                # TODO: fix creation / updated dates (for everyone first)
-                    else:
+                for providerPath in self._listAutoIndex(repositoryPath)[0]:
+                    if providerPath.dataProvider not in TcgaCodes.DATA_PROVIDERS:
+                        raise IngestException('Unknown data provider: "%s"' % str(providerPath))
+                    if providerPath.dataProvider == 'biotab':
+                        # Clinical metadata, skip
+                        continue
+                    elif providerPath.dataProvider == 'supplemental':
+                        # Unknown, skip
                         continue
 
-    global ingestUser
-    ingestUser = None
-    collectionCache.clear()
-    folderCache.clear()
+                    for dataTypePath in self._listAutoIndex(providerPath)[0]:
+                        if dataTypePath.dataType not in TcgaCodes.DATA_TYPES:
+                            raise IngestException('Unknown data type: "%s"' % str(dataTypePath))
+                        if dataTypePath.dataType in {'diagnostic_images', 'tissue_images'}:
+                            dataTypeSubPaths = self._listAutoIndex(dataTypePath)[0]
+                            if len(dataTypeSubPaths) != 1:
+                                raise IngestException('Unexpected sub-directory at: %s' % str(dataTypePath))
+                            if dataTypeSubPaths[0].tail() != 'slide_images':
+                                raise IngestException('Missing sub-directory "slide_images" at: %s' % str(dataTypePath))
+                            dataTypeSubPath = dataTypeSubPaths[0]
 
+                            for batchPath in self._filterMaxBatchRevision(self._listAutoIndex(dataTypeSubPath)[0]):
+
+                                for slideFilePath, modifiedTime in self._listAutoIndex(batchPath)[1]:
+                                    if not slideFilePath.tail().endswith('.svs'):
+                                        continue
+                                    try:
+                                        self._ingestSlide(slideFilePath)
+                                    except IngestException as e:
+                                        # Failures of single slides should not be fatal
+                                        self._log(str(e))
+                                    else:
+                                        self.ingestCount += 1
+                                        self._updateProgress()
+                                    if self.limit and self.ingestCount >= self.limit:
+                                        return
+                        else:
+                            # Other data types will be handled here
+                            continue
