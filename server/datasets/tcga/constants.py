@@ -79,7 +79,8 @@ class TcgaCodes(object):
         'biotab',  # CSV format clinical metadata, skip
         'pathology_reports',  # PDF format pathology reports, skip
         'diagnostic_images',  # SVS format images, use
-        'tissue_images'  # SVS format images, use
+        'tissue_images',  # SVS format images, use
+        'minbio'  # unknown, appears under 'tumor/gbm/bcr/intgen.org/', skip
     }
 
     SLIDE_LOCATION = {
