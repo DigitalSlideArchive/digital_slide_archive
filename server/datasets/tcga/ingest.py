@@ -279,6 +279,37 @@ class TCGAIngest(Ingest):
         else:
             self._log('  File already exists')
 
+    def _setFolderTimes(self):
+        Collection = ModelImporter.model('collection')
+        Folder = ModelImporter.model('folder')
+        Item = ModelImporter.model('item')
+        earliestCollectionTime = self.collection['created']
+        for grDiseaseFolder in Folder.find({'parentId': self.collection['_id']}):
+            earliestDiseaseTime = grDiseaseFolder['created']
+            for grPatientFolder in Folder.find({'parentId': grDiseaseFolder['_id']}):
+                earliestItemQuery = Item.collection.aggregate([
+                    {'$match': {'folderId': grPatientFolder['_id']}},
+                    {'$group': {
+                        '_id': None,
+                        'earliest': {'$min': '$created'}
+                    }}
+                ])
+                earliestPatientTime = earliestItemQuery.next()['earliest']
+                Folder.update(
+                    {'_id': grPatientFolder['_id']},
+                    {'$set': {'created': earliestPatientTime}}
+                )
+                earliestDiseaseTime = min(earliestPatientTime, earliestDiseaseTime)
+            Folder.update(
+                {'_id': grDiseaseFolder['_id']},
+                {'$set': {'created': earliestDiseaseTime}}
+            )
+            earliestCollectionTime = min(earliestDiseaseTime, earliestCollectionTime)
+        Collection.update(
+            {'_id': self.collection['_id']},
+            {'$set': {'created': earliestCollectionTime}}
+        )
+
     def ingest(self):
         self.ingestCount = 0
         self._updateProgress()
@@ -334,3 +365,4 @@ class TCGAIngest(Ingest):
                         else:
                             # Other data types will be handled here
                             continue
+        self._setFolderTimes()
