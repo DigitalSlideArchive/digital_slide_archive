@@ -1,12 +1,15 @@
 .g-frontpage-header
   img.g-frontpage-logo(src="#{staticRoot}/img/Girder_Mark.png", width="82")
   .g-frontpage-title-container
-    .g-frontpage-title Digital Slide Archive
+    .g-frontpage-title
+      =brandName || 'Digital Slide Archive'
     .g-frontpage-subtitle Bioinformatics Platform
 
 .g-frontpage-body
   p.g-frontpage-paragraph
-    b Welcome to the Digital Slide Archive!
+    b Welcome to the
+      =brandName || 'Digital Slide Archive'
+      | !
     |  If this is your first time here, you might want to check out the
     a(target="_blank", href='http://girder.readthedocs.org/en/latest/user-guide.html')  User Guide
     |  to learn the basics of how to use the application.

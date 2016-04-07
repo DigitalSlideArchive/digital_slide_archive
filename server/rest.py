@@ -37,8 +37,8 @@ from .datasets.tcga.ingest import ingestTCGA
            ' to a specific filesystem assetstore. If not passed, will use '
            'the normal target assetstore for the given destination.',
            required=False)
-    .param('limit', 'If set, limit the import to just this number of files.',
-           required=False, dataType='integer')
+    .param('limit', 'If not "all", limit the import to just this number of '
+           'files.', required=False)
     .param('localImportPath', 'A local path on the filesystem where the root '
            'ingest path is mirrored. Files found under this path will be '
            'imported (instead of downloaded).', required=False)
@@ -46,14 +46,13 @@ from .datasets.tcga.ingest import ingestTCGA
 @access.admin
 @boundHandler()
 def ingest(self, params):
-    self.requireParams(('dataset', 'path'), params)
+    self.requireParams(('dataset', ), params)
 
     dataset = params['dataset']
     if dataset == 'tcga':
         ingestFunc = ingestTCGA
     else:
         raise RestException('Unknown dataset: %s' % dataset)
-
 
     progressEnabled = self.boolParam('progress', params, default=True)
 
@@ -63,12 +62,16 @@ def ingest(self, params):
         if params.get('assetstoreId') \
         else None
 
-    try:
-        limit = int(params['limit'])
-    except ValueError:
-        raise RestException('Parameter "limit" must be an integer.')
-    except KeyError:
-        pass
+    if params.get('limit') == 'all':
+        limit = 0
+    else:
+        try:
+            limit = int(params['limit'])
+            if limit < 1:
+                raise ValueError()
+        except ValueError:
+            raise RestException('Parameter "limit" must be a positive integer '
+                                'or "all".')
 
     localImportPath = \
         params['localImportPath'] \
@@ -80,10 +83,10 @@ def ingest(self, params):
     with ProgressContext(
             on=progressEnabled,
             title='Ingesting TCGA data',
-            user=self.getCurrentUser()) as p:
-        # TODO: progress
+            user=self.getCurrentUser()) as ctx:
         ingestFunc(
             limit=limit,
             assetstore=assetstore,
-            localImportPath=localImportPath
+            localImportPath=localImportPath,
+            progress=ctx
         )
