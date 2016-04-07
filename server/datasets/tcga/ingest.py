@@ -310,11 +310,10 @@ class TCGAIngest(Ingest):
             {'$set': {'created': earliestCollectionTime}}
         )
 
-    def ingest(self):
+    def _ingestData(self):
         self.ingestCount = 0
-        self._updateProgress()
-        basePath = TCGAPath(self.BASE_URL)
 
+        basePath = TCGAPath(self.BASE_URL)
         for diseaseStudyPath in self._listAutoIndex(basePath)[0]:
             if diseaseStudyPath.diseaseStudyCode.upper() not in TcgaCodes.DISEASE_STUDIES:
                 raise IngestException('Unknown disease study: "%s"' % str(diseaseStudyPath))
@@ -365,4 +364,9 @@ class TCGAIngest(Ingest):
                         else:
                             # Other data types will be handled here
                             continue
+
+    def ingest(self):
+        self._updateProgress()
+        self._ingestData()
         self._setFolderTimes()
+        self._updateProgress()
