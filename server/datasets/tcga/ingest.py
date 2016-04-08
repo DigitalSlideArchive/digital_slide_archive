@@ -331,9 +331,6 @@ class TCGAIngest(Ingest):
                     if providerPath.dataProvider == 'biotab':
                         # Clinical metadata, skip
                         continue
-                    elif providerPath.dataProvider == 'supplemental':
-                        # Unknown, skip
-                        continue
 
                     for dataTypePath in self._listAutoIndex(providerPath)[0]:
                         if dataTypePath.dataType not in TcgaCodes.DATA_TYPES:
