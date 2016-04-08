@@ -71,7 +71,7 @@ class TcgaCodes(object):
         'biotab',  # Clinical metadata, skip
         'intgen.org',
         'nationwidechildrens.org',
-        # 'supplemental'
+        'genome.wustl.edu'
     }
 
     DATA_TYPES = {
