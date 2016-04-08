@@ -331,8 +331,9 @@ class TCGAIngest(Ingest):
                 for providerPath in self._listAutoIndex(repositoryPath)[0]:
                     if providerPath.dataProvider not in TcgaCodes.DATA_PROVIDERS:
                         raise IngestException('Unknown data provider: "%s"' % str(providerPath))
-                    if providerPath.dataProvider == 'biotab':
-                        # Clinical metadata, skip
+                    if providerPath.dataProvider in {'biotab', 'supplemental'}:
+                        # 'biotab' is clinical metadata, skip
+                        # 'supplemental' contains no sub-directories, skip
                         continue
 
                     for dataTypePath in self._listAutoIndex(providerPath)[0]:
