@@ -34,7 +34,7 @@ from .constants import TcgaCodes
 class TCGAPath(Path):
     @property
     def diseaseStudyCode(self):
-        return self[1]
+        return self[1].upper()
 
     @property
     def repositoryType(self):
@@ -118,7 +118,7 @@ class TCGAIngest(Ingest):
                 r'(?P<batchRevision>[0-9]+)\.'
                 r'0$' % (
                     batchDirectoryPath.dataProvider,
-                    batchDirectoryPath.diseaseStudyCode.upper(),
+                    batchDirectoryPath.diseaseStudyCode,
                     batchDirectoryPath.dataType),
                 batchDirectoryPath.tail()
             )
@@ -160,10 +160,10 @@ class TCGAIngest(Ingest):
             raise IngestException('Could not parse slide barcode: "%s"' % str(slideFilePath))
         slideMetadata = slideBarcodeMatch.groupdict()
 
-        slideMetadata['DiseaseStudy'] = slideFilePath[1]
-        slideMetadata['RepositoryType'] = slideFilePath[2]
-        slideMetadata['DataProvider'] = slideFilePath[3]
-        slideMetadata['DataType'] = slideFilePath[4]
+        slideMetadata['DiseaseStudy'] = slideFilePath.diseaseStudyCode
+        slideMetadata['RepositoryType'] = slideFilePath.repositoryType
+        slideMetadata['DataProvider'] = slideFilePath.dataProvider
+        slideMetadata['DataType'] = slideFilePath.dataType
 
         return slideMetadata
 
@@ -315,10 +315,10 @@ class TCGAIngest(Ingest):
 
         basePath = TCGAPath(self.BASE_URL)
         for diseaseStudyPath in self._listAutoIndex(basePath)[0]:
-            if diseaseStudyPath.diseaseStudyCode.upper() == 'LNNH':
-                # An undocumented disease study code
+            if diseaseStudyPath.diseaseStudyCode in {'LNNH', 'PAN_LUNG'}:
+                # Undocumented disease study codes
                 continue
-            if diseaseStudyPath.diseaseStudyCode.upper() not in TcgaCodes.DISEASE_STUDIES:
+            if diseaseStudyPath.diseaseStudyCode not in TcgaCodes.DISEASE_STUDIES:
                 raise IngestException('Unknown disease study: "%s"' % str(diseaseStudyPath))
 
             for repositoryPath in self._listAutoIndex(diseaseStudyPath)[0]:
