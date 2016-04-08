@@ -99,11 +99,6 @@ class Ingest(object):
         else:
             msg = str(args[0])
         girder.logger.info(msg)
-        if self.job:
-            ModelImporter.model('job', 'jobs').updateJob(
-                job=self.job,
-                log=msg + '\n'
-            )
 
     def _updateProgress(self, messageExtension='', marginalValue=0.0):
         if not self.job:
