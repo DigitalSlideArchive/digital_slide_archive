@@ -315,8 +315,8 @@ class TCGAIngest(Ingest):
 
         basePath = TCGAPath(self.BASE_URL)
         for diseaseStudyPath in self._listAutoIndex(basePath)[0]:
-            if diseaseStudyPath.diseaseStudyCode.upper() == 'LNNH':
-                # An undocumented disease study code
+            if diseaseStudyPath.diseaseStudyCode.upper() in {'LNNH', 'PAN_LUNG'}:
+                # Undocumented disease study codes
                 continue
             if diseaseStudyPath.diseaseStudyCode.upper() not in TcgaCodes.DISEASE_STUDIES:
                 raise IngestException('Unknown disease study: "%s"' % str(diseaseStudyPath))
