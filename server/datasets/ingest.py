@@ -23,8 +23,10 @@ import os
 import six
 
 import girder
+from girder.constants import SettingKey
 from girder.models.model_base import ValidationException
-from girder.utility.assetstore_utilities import AssetstoreType, getAssetstoreAdapter
+from girder.utility.assetstore_utilities import AssetstoreType, \
+    getAssetstoreAdapter
 from girder.utility.model_importer import ModelImporter
 
 
@@ -91,13 +93,17 @@ class Ingest(object):
         self.ingestUser = None
         self.folderCache = dict()
 
-    @staticmethod
-    def _log(*args):
+    def _log(self, *args):
         if len(args) > 1:
             msg = ' '.join([str(item) for item in args])
         else:
             msg = str(args[0])
         girder.logger.info(msg)
+        if self.job:
+            ModelImporter.model('job', 'jobs').updateJob(
+                job=self.job,
+                log=msg + '\n'
+            )
 
     def _updateProgress(self, messageExtension='', marginalValue=0.0):
         if not self.job:
@@ -176,13 +182,15 @@ class Ingest(object):
 
         upload = Upload.createUpload(**kwargs)
         dataRead = 0
+        chunkSize = max(ModelImporter.model('setting').get(
+            SettingKey.UPLOAD_MINIMUM_CHUNK_SIZE), 32 * 1024**2)
         while True:
             self._updateProgress(
                 messageExtension='  %3.1f%% transferred of next item' %
                                  (100.0 * dataRead / kwargs['size']),
                 marginalValue=(float(dataRead) / kwargs['size'])
             )
-            data = obj.read(32 * (1024**2))  # 32MB
+            data = obj.read(chunkSize)
             if not data:
                 break
             upload = Upload.handleChunk(upload, six.BytesIO(data))

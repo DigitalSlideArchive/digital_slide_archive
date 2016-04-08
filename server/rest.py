@@ -75,8 +75,7 @@ def ingest(self, params):
     if localImportPath and not os.path.isdir(localImportPath):
         raise RestException('Directory "%s" not found.' % localImportPath)
 
-
-    self.model('job', 'jobs').createLocalJob(
+    job = self.model('job', 'jobs').createLocalJob(
         module='girder.plugins.digital_slide_archive.worker',
         function='ingestRunner',
         kwargs={
@@ -92,3 +91,4 @@ def ingest(self, params):
         public=False,
         async=True
     )
+    self.model('job', 'jobs').scheduleJob(job)

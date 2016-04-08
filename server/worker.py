@@ -17,9 +17,6 @@
 #  limitations under the License.
 ###############################################################################
 
-from girder.api.rest import RestException
-from girder.utility.progress import ProgressContext
-
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility.model_importer import ModelImporter
 
@@ -56,6 +53,14 @@ def ingestRunner(job):
         Job.updateJob(
             job,
             log='TCGA ingest failed: %s\n' % str(e),
+            status=JobStatus.ERROR,
+            notify=notify,
+            progressMessage='TCGA ingest failed'
+        )
+    except Exception as e:
+        Job.updateJob(
+            job,
+            log='TCGA ingest failed unexpectedly: %s\n' % str(e),
             status=JobStatus.ERROR,
             notify=notify,
             progressMessage='TCGA ingest failed'
