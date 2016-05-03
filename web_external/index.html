@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset = UTF-8">
+  <title>DSA Viewer</title>
+
+  <!-- jquery -->
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+
+  <!-- bootstrap -->
+  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap-theme.min.css">
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+  <!-- datatables -->
+  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/datatables/1.10.11/css/dataTables.bootstrap.min.css">
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/datatables/1.10.11/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/datatables/1.10.11/js/dataTables.bootstrap.min.js"></script>
+
+  <!-- local -->
+  <link rel="stylesheet" type="text/css" href="css/dsa-viewer.css">
+  <script type="text/javascript" src="js/dsa-viewer.js"></script>
+</head>
+
+<body>
+
+  <!-- navbar -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+
+      <!-- mobile header dropdown -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#dsa-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <!-- Insert href to project page... -->
+        <a class="navbar-brand" href="#">
+          <img alt="CDSA Viewer" src="img/CDSA_Slide_50.png" height="25px" width="75px">
+        </a>
+      </div>
+
+      <!-- collapsible header -->
+      <div class="collapse navbar-collapse" id="dsa-navbar-collapse">
+
+        <!-- left aligned -->
+        <ul class="nav navbar-nav">
+          <!-- Insert navbar buttons here -->
+        </ul>
+
+        <!-- right aligned -->
+        <ul class="nav navbar-nav navbar-right">
+          <!-- Insert navbar buttons here -->
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- body container -->
+  <div class="container-fluid dsa-body">
+    <div class="row dsa-full-height">
+
+      <!-- control panel -->
+      <div class="col-md-3 dsa-control-panel">
+
+        <!-- image selection form -->
+        <form>
+          <div class="form-group">
+            <label for="dsa-select-collection">Collection</label>
+            <select class="form-control" id="dsa-select-collection" autofocus></select>
+          </div>
+          <div class="form-group">
+            <label for="dsa-select-tumor">Tumor type</label>
+            <select class="form-control" id="dsa-select-tumor" disabled></select>
+          </div>
+          <div class="form-group">
+            <label for="dsa-select-patient">Patient</label>
+            <select class="form-control" id="dsa-select-patient" disabled></select>
+          </div>
+        </form>
+
+        <!-- slide thumbnail list -->
+        <div class="dsa-slide-list hidden">
+
+          <!-- pager buttons -->
+          <nav>
+            <ul class="pager">
+              <li class="previous hidden"><a href="#">Previous</a></li>
+              <li class="next hidden"><a href="#">Next</a></li>
+            </ul>
+          </nav>
+
+        </div>
+      </div>
+
+      <!-- image panel -->
+      <div class="col-md-9 dsa-image-panel dsa-full-height">
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

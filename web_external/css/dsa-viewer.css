@@ -1,0 +1,40 @@
+select:invalid {
+  color: gray;
+}
+
+.dsa-control-panel {
+  padding-top: 20px;
+  max-height: 100%;
+  overflow-y: scroll;
+}
+
+.dsa-image-panel {
+  padding: 0;
+}
+
+html,body,.dsa-full-height {
+  height: 100%;
+}
+
+.dsa-body {
+  position: absolute;
+  top: 52px;
+  height: calc(100% - 52px);
+  width: 100%;
+}
+
+.dsa-slide-page {
+  text-align: center;
+}
+
+.dsa-select-slide.selected {
+  background-color: rgba(51, 122, 183, 0.65) !important;
+}
+
+.dsa-slide-page h4 {
+  font-size: 12px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
