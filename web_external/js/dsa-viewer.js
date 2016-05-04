@@ -36,7 +36,7 @@ $(function () {
                 select.parent().addClass('has-error');
                 select.find('option').text('Load failed!');
             });
-        };
+        }
 
         select.attr('disabled', false);
         return fetch();
@@ -139,6 +139,9 @@ $(function () {
             }
 
             // add elements for each slide returned
+            // (we should filter out possible items that
+            // aren't `large_image` items, but we would need
+            // more sophisticated handling of the pager)
             slides.forEach(function (slide) {
                 var link = $('<a/>').addClass('dsa-select-slide')
                     .addClass('list-group-item')
@@ -149,7 +152,65 @@ $(function () {
                 link.append(thumbnail(slide._id)).append(h4).appendTo($page);
             });
         });
-        
+    }
+
+    // load the given slide in the main viewer
+    function load_slide(slide) {
+
+        return $.ajax(api + '/item/' + slide + '/tiles')
+            .then(function (data) {
+                var w = data.sizeX;
+                var h = data.sizeY;
+
+                var $image = $('.dsa-image-panel');
+                var map = $image.data('dsa-map');
+
+                if (map) {
+                    // free the current map object, if it exists
+                    map.exit();
+                    $image.data('map', null);
+                }
+                $image.empty();
+
+                var mapParams = {
+                    node: $image.get(0),
+                    ingcs: '+proj=longlat +axis=esu',
+                    gcs: '+proj=longlat +axis=enu',
+                    maxBounds: {left: 0, top: 0, right: w, bottom: h},
+                    center: {x: w / 2, y: h / 2},
+                    max: Math.ceil(Math.log(Math.max(
+                        w / data.tileWidth,
+                        h / data.tileHeight)) / Math.log(2)),
+                    clampBoundsX: true,
+                    clampBoundsY: true,
+                    zoom: 0
+                };
+                var maxLevel = mapParams.max;
+                mapParams.unitsPerPixel = Math.pow(2, maxLevel);
+                var layerParams = {
+                    useCredentials: true,
+                    url: api + '/item/' + slide + '/tiles/zxy/{z}/{x}/{y}',
+                    maxLevel: mapParams.max,
+                    wrapX: false,
+                    wrapY: false,
+                    tileOffset: function () {return {x: 0, y: 0};},
+                    attribution: '',
+                    tileWidth: data.tileWidth,
+                    tileHeight: data.tileHeight,
+                    tilesAtZoom: function (level) {
+                        var scale = Math.pow(2, maxLevel - level);
+                        return {
+                            x: Math.ceil(w / data.tileWidth / scale),
+                            y: Math.ceil(h / data.tileHeight / scale)
+                        };
+                    }
+                };
+
+                map = geo.map(mapParams);
+                map.createLayer('osm', layerParams);
+                $image.data('dsa-map', map);
+                return map;
+            });
     }
 
     // add event handlers to select boxes
@@ -172,6 +233,7 @@ $(function () {
         }
         $('.dsa-select-slide').removeClass('selected');
         $el.addClass('selected');
+        load_slide($el.data('dsa-slide-id'));
     });
 
     // finally load the collection list from the server
