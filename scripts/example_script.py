@@ -30,7 +30,7 @@ def recurse_get_resource(client, parent_folder, resource_type,
             folders = client.listFolder(parent_folder)
         except HttpError as err:
             print_http_error(err)
-            exit()
+            return
         folder_id_list = get_field(folders, '_id')
 
         if resource_type is 'item':
@@ -76,6 +76,13 @@ def turn_into_a_large_image(girder_client, file_id):
         print_http_error(err)
 
 
+def isEmpty(girder_client, folder):
+    item_list = []
+    recurse_get_resource(girder_client, folder, 'item', item_list)
+    if len(item_list) == 0:
+        return True
+    else:
+        return False
 girder_location = 'http://localhost:8080/api/v1'
 
 collection_name = 'DG TCGA'
@@ -101,7 +108,7 @@ except HttpError as err:
     exit()
 
 collection_id = collection_data['_id']
-
+new_folder_data = None
 # create a folder under this collection or load a preexisting folder that exists
 # with the same name and parent
 try:
@@ -118,7 +125,6 @@ try:
     collection_composition = gc.listFolder(collection_id, 'collection')
 except HttpError as err:
     print_http_error(err)
-    print_http_error()
     print ('exited')
     exit()
 
@@ -128,7 +134,8 @@ item_list = []
 # create a list to store id of all svs items
 img_list = []
 # get a list of all items within each folder of the collection
-recurse_get_resource(gc, collection_id, 'item', item_list,parent_is_collection=True)
+recurse_get_resource(gc, collection_id, 'item', item_list,
+                     parent_is_collection=True)
 
 temp_img_id = None
 print('Listing all %s items in the collection %s' % (img_type, collection_name))
@@ -148,9 +155,10 @@ for i in range(1, 4):
     temp_name = patient_folder_name % (i)
     try:
         patient_folder_list.append(gc.load_or_create_folder(temp_name,
-                                                    new_folder_id, 'folder'))
+                                                            new_folder_id,
+                                                            'folder'))
     except HttpError as err:
-        print_http_error()
+        print_http_error(err)
         print ('exited')
         exit()
 
@@ -182,7 +190,7 @@ patient1_meta_data = {'PatientAge': 22, 'PatientDeceased': True}
 try:
     gc.addMetadataToFolder(patient1_folder_id, patient1_meta_data)
 except HttpError as err:
-    print_http_error()
+    print_http_error(err)
     print ('exited')
     exit()
 
@@ -192,7 +200,7 @@ new_src_img_meta_data = {'SlideSource': 'FromTCGA', 'SlideType': 'DX'}
 try:
     gc.addMetadataToItem(src_img_id, new_src_img_meta_data)
 except HttpError as err:
-    print_http_error()
+    print_http_error(err)
     print ('exited')
     exit()
 
@@ -205,13 +213,14 @@ recurse_get_resource(gc, collection_id, 'folder',
 # if the folder size is zero then delete it
 for folder in all_folders:
 
-    if 'size' in folder and folder['size'] == 0:
+    if 'size' in folder and isEmpty(gc, folder['_id']):
         try:
-            print('will delete folder %s'%folder['name'])
+            print('will delete folder %s' % folder['name'])
+
             gc.delete('folder/%s' % folder['_id'])
 
         except HttpError as err:
-            print_http_error()
+            print_http_error(err)
             print('could not delete folder %s' % (folder['name']))
             print ('exited')
             exit()
@@ -220,14 +229,13 @@ for folder in all_folders:
 # if so delete the entire item
 for item in item_list:
     temp_files = gc.listFile(item['_id'])
-    for file in temp_files:
-        if 'README.txt' in file['name']:
+    for girder_file in temp_files:
+        if 'README.txt' in girder_file['name']:
             print('deleting item %s' % item['name'])
             try:
                 gc.delete('item/%s' % item['_id'])
             except HttpError as err:
-                print_http_error()
+                print_http_error(err)
                 print('could not delete item %s' % (item['name']))
                 print ('exited')
                 exit()
-
