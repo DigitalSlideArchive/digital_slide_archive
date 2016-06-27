@@ -17,147 +17,145 @@
 #  limitations under the License.
 ###############################################################################
 
-import girder_client
-from girder_client import HttpError
 import json
 
-
-def print_http_error(err):
-    print ('Request Error:\nstatus:%s\nresponse%s\nurl:%s'
-           '\nmethod:%s ' % (err.status, err.responseText, err.url, err.method))
+import girder_client
 
 
-def recurse_get_resource(client, parentFolder, resourceType,
-                         parentType='folder'):
+def printHttpError(err):
+    print ('Request Error:\n'
+           'status:%s\n'
+           'response%s\n'
+           'url:%s\n'
+           'method:%s' % (err.status, err.responseText, err.url, err.method))
+
+
+def recurseGetResource(client, parentId, resourceType,
+                       parentType='folder'):
+    """
+    Recurse below the parent(indicated by parentId) and generate a list of all
+    resources of type resourceType that existed under the parent.
+
+    :param parentId: Id of the collection or folder to be searched.
+    :type parentId: ObjectId
+    :param resourceType: Either 'item' or 'folder'. Indicates whether nested
+    folder data or item data should be collected.
+    :type resourceType: str
+    :param parentType: Either 'folder' or 'collection'. Indicates whether
+    the parentId is a collection id or a folder id.
+    :type parentType: str
+    :returns: A list of all folders or items below parentId.
+    :rtype: list of dict
+    """
     # now get all folders
-    folders = None
-    folderIdList = None
     resourceList = []
     try:
-        folders = client.listFolder(parentFolder, parentFolderType=parentType)
-    except HttpError as err:
-        print_http_error(err)
+        folders = client.listFolder(parentId, parentFolderType=parentType)
+    except girder_client.HttpError as err:
+        printHttpError(err)
         return []
-    folderIdList = get_field(folders, '_id')
+    folderIdList = getField(folders, '_id')
 
     if resourceType is 'item' and parentType is not 'collection':
         try:
-            data = client.listItem(parentFolder)
+            data = client.listItem(parentId)
 
             resourceList.extend(data)
-        except HttpError as err:
-            print_http_error(err)
+        except girder_client.HttpError as err:
+            printHttpError(err)
             return []
     elif resourceType is 'folder':
         resourceList.extend(folders)
     elif resourceType is not 'item' and resourceType is not 'folder':
-        return []
+        raise Exception('Invalid resourceType: %s' % resourceType)
     for folderId in folderIdList:
         resourceList.extend(
-            recurse_get_resource(client, folderId,
-                                 resourceType))
+            recurseGetResource(client, folderId, resourceType))
     return resourceList
 
 
-def print_field(data, strKey):
+def printField(data, strKey):
     for i in range(len(data)):
         print(data[i][strKey])
 
 
-def get_field(data, strKey):
+def getField(data, strKey):
     return [i[strKey] for i in data]
 
 
-def make_large_image(girderClient, file_id):
+def makeLargeImage(gc, itemId):
     # first check if the file is already a large image
-    item_data = None
     try:
-        item_data = girderClient.getItem(file_id)
-    except HttpError as err:
-        print_http_error(err)
-        print('bad item id ')
+        itemData = gc.getItem(itemId)
+    except girder_client.HttpError as err:
+        print('bad item id: %s' % itemId)
+        raise
+
     # if the item is already a large image return
-
-    if 'largeImage' in item_data:
-        return
-    try:
-        girderClient.post('item/%s/tiles' % file_id)
-    except HttpError as err:
-        print_http_error(err)
+    if 'largeImage' not in itemData:
+        gc.post('item/%s/tiles' % itemId)
 
 
-def isEmpty(girderClient, folder):
-    itemList = recurse_get_resource(girderClient, folder, 'item',)
-    if len(itemList) == 0:
-        return True
-    else:
-        return False
+def hasItems(gc, folder):
+    itemList = recurseGetResource(gc, folder, 'item',)
+    return len(itemList) != 0
 
-girderLocation = 'http://localhost:8080/api/v1'
 
-collectionName = 'DG TCGA'
-collectionId = None
+GIRDER_LOCATION = 'http://localhost:8080/api/v1'
 
-collection_data = None
+COLLECTION_NAME = 'DG TCGA'
 
-new_folder_name = 'GBM'
-newFolderId = None
+NEW_FOLDER_NAME = 'GBM'
 
-img_type = '.jpeg'
+IMG_TYPE = '.svs'
 
 
 def main():
     # login to girder, you will be prompted for credentials
-    gc = girder_client.GirderClient(apiUrl=girderLocation)
+    gc = girder_client.GirderClient(apiUrl=GIRDER_LOCATION)
     gc.authenticate(interactive=True)
 
     # get the id of the desired collection
+    requestUrl = 'resource/lookup?path=collection/%s' % COLLECTION_NAME
+    collectionData = gc.getResource(requestUrl)
 
-    request_url = 'resource/lookup?path=collection/%s' % (collectionName)
-    collection_data = gc.getResource(request_url)
-
-    collectionId = collection_data['_id']
-    newFolderData = None
+    collectionId = collectionData['_id']
 
     # create a folder under this collection or
     # load a preexisting folder that exists with the same name and parent
-
-    newFolderData = gc.load_or_create_folder(new_folder_name,
+    newFolderData = gc.load_or_create_folder(NEW_FOLDER_NAME,
                                              collectionId, 'collection')
     newFolderId = newFolderData['_id']
 
     # get a list of all items within each folder of the collection
-    itemList = recurse_get_resource(gc, collectionId, 'item', 'collection')
+    itemList = recurseGetResource(gc, collectionId, 'item', 'collection')
 
-    tempImageId = None
-    print('Listing all %s items in the collection %s' % (img_type,
-                                                         collectionName))
+    print('Listing all %s items in the collection %s' % (IMG_TYPE,
+                                                         COLLECTION_NAME))
     # create a list to store id of all svs items
-    img_list = []
+    imgList = []
     for item in itemList:
-        if img_type in item['name']:
-            tempImageId = item['_id']
-            print('image name %s ' % (item['name']))
-            img_list.append(tempImageId)
-            make_large_image(gc, tempImageId)
+        if item['name'].endswith(IMG_TYPE):
+            print('image name %s ' % item['name'])
+            imgList.append(item['_id'])
+            makeLargeImage(gc, item['_id'])
 
     # now create PATIENT folders inside our new folder
-
     patientFolderList = []
-    patient_folder_name = 'Patient%d'
-
+    patientFolderName = 'Patient%d'
     for i in range(1, 4):
-        tempName = patient_folder_name % (i)
+        patientFolder = gc.load_or_create_folder(
+            patientFolderName % i, newFolderId, 'folder')
+        patientFolderList.append(patientFolder)
 
-        patientFolderList.append(
-                gc.load_or_create_folder(tempName, newFolderId, 'folder'))
-
-    # now let us move an image into the PATIENT1 folder
-
+    # now let's move an image into the PATIENT1 folder
     patient1Folder = patientFolderList[0]
     patient1FolderId = patient1Folder['_id']
 
-    srcImageId = img_list[0]
+    if imgList:
+        srcImageId = imgList[0]
+    else:
+        raise Exception("There were no images of type %s found" % IMG_TYPE)
 
     moveParams = {
         'resources': json.dumps({
@@ -165,74 +163,46 @@ def main():
         'parentType': 'folder',
         'parentId': patient1FolderId
     }
-
-    try:
-        gc.put('resource/move', moveParams)
-    except HttpError as err:
-        print_http_error(err)
-        print ('exited')
-        exit()
+    gc.put('resource/move', moveParams)
 
     # now let us edit the PATIENT1 folder
-
     patient1MetaData = {'PatientAge': 22, 'PatientDeceased': True}
-
-    try:
-        gc.addMetadataToFolder(patient1FolderId, patient1MetaData)
-    except HttpError as err:
-        print_http_error(err)
-        print ('exited')
-        exit()
+    gc.addMetadataToFolder(patient1FolderId, patient1MetaData)
 
     # let us add meta data to the image we moved
     # note how the id remains the same
     newSrcImageMetaData = {'SlideSource': 'FromTCGA', 'SlideType': 'DX'}
-    try:
-        gc.addMetadataToItem(srcImageId, newSrcImageMetaData)
-    except HttpError as err:
-        print_http_error(err)
-        print ('exited')
-        exit()
+    gc.addMetadataToItem(srcImageId, newSrcImageMetaData)
 
     # find all folders determine if whether each folder is empty or not
-    allFolders = []
-
-    allFolders = recurse_get_resource(gc, collectionId,
-                                      'folder', 'collection')
+    allFolders = recurseGetResource(gc, collectionId, 'folder', 'collection')
 
     # if the folder size is zero then delete it
     for folder in allFolders:
-
-        if folder['size'] == 0 and isEmpty(gc, folder['_id']):
+        if folder['size'] == 0 and not hasItems(gc, folder['_id']):
+            # if an empty folder has many child folders
+            # then trying to delete one of the children folders after
+            # deleting the parent will cause an exception, do not want to exit
             try:
                 print('will delete folder %s' % folder['name'])
-
                 gc.delete('folder/%s' % folder['_id'])
-
-            except HttpError as err:
-                print_http_error(err)
+            except girder_client.HttpError as err:
+                printHttpError(err)
                 print('could not delete folder %s' % (folder['name']))
-                print ('exited')
-                exit()
+
     # already have a list of all items under the designated collection
     # check whether a file under an item is a README.txt
     # if so delete the entire item
     for item in itemList:
         fileIdList = gc.listFile(item['_id'])
-        for girder_file in fileIdList:
-            if 'README.txt' in girder_file['name']:
+        for girderFile in fileIdList:
+            if 'readme.txt' == girderFile['name'].lower():
                 print('deleting item %s' % item['name'])
-                try:
-                    gc.delete('item/%s' % item['_id'])
-                except HttpError as err:
-                    print_http_error(err)
-                    print('could not delete item %s' % (item['name']))
-                    print ('exited')
-                    exit()
+                gc.delete('item/%s' % item['_id'])
 
 if __name__ == '__main__':
     try:
         main()
-    except HttpError as err:
-        print_http_error(err)
+    except girder_client.HttpError as err:
+        printHttpError(err)
         print ('exited')
