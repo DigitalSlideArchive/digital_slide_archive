@@ -2,5 +2,5 @@
     "name": "Digital Slide Archive",
     "description": "The top-level Girder plugin for Digital Slide Archive deployments.",
     "version": "0.1.0",
-    "dependencies": ["large_image", "jobs"]
+    "dependencies": ["large_image", "jobs", "homepage"]
 }
