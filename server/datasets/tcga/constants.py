@@ -17,6 +17,8 @@
 #  limitations under the License.
 ###############################################################################
 
+# flake8: noqa: E501
+
 
 class TcgaCodes(object):
 

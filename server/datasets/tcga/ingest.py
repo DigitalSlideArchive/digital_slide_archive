@@ -123,7 +123,8 @@ class TCGAIngest(Ingest):
                 batchDirectoryPath.tail()
             )
             if not batchMatch:
-                raise IngestException('Could not parse batch directory: "%s"' % str(batchDirectoryPath))
+                raise IngestException(
+                    'Could not parse batch directory: "%s"' % str(batchDirectoryPath))
             batchMatchDict = batchMatch.groupdict()
 
             dataLevel = batchMatch.groupdict()['dataLevel']
@@ -152,7 +153,7 @@ class TCGAIngest(Ingest):
             r'(?P<SlideLocation>TS|MS|BS|DX)'
             r'(?P<SlidePortion>[0-9A-Z]?)\.'
             # TODO: UUID should always be uppercase?
-            r'(?P<UUID>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12})\.'
+            r'(?P<UUID>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12})\.'  # noqa
             r'svs$',
             slideFileName
         )
@@ -218,7 +219,8 @@ class TCGAIngest(Ingest):
             if self.localImportPath:
                 localImportSlideFilePath = Path(self.localImportPath, *slideFilePath[1:])
                 if os.path.exists(localImportSlideFilePath.join()):
-                    self._log('  File found for local import at: %s' % str(localImportSlideFilePath))
+                    self._log('  File found for local import at: %s' % str(
+                        localImportSlideFilePath))
                     grSlideFile = self.assetstoreAdapter.importFile(
                         item=grSlideItem,
                         path=localImportSlideFilePath.join(),
@@ -228,7 +230,8 @@ class TCGAIngest(Ingest):
                     )
                     self._log('  Local import complete')
                 else:
-                    self._log('  File not found for local import at: %s' % str(localImportSlideFilePath))
+                    self._log('  File not found for local import at: %s' % str(
+                        localImportSlideFilePath))
 
             # Could not import, download instead
             if not grSlideFile and self.downloadNew:
@@ -310,7 +313,7 @@ class TCGAIngest(Ingest):
             {'$set': {'created': earliestCollectionTime}}
         )
 
-    def _ingestData(self):
+    def _ingestData(self):  # noqa
         self.ingestCount = 0
 
         basePath = TCGAPath(self.BASE_URL)
@@ -342,14 +345,19 @@ class TCGAIngest(Ingest):
                         if dataTypePath.dataType in {'diagnostic_images', 'tissue_images'}:
                             dataTypeSubPaths = self._listAutoIndex(dataTypePath)[0]
                             if len(dataTypeSubPaths) != 1:
-                                raise IngestException('Unexpected sub-directory at: %s' % str(dataTypePath))
+                                raise IngestException(
+                                    'Unexpected sub-directory at: %s' % str(dataTypePath))
                             if dataTypeSubPaths[0].tail() != 'slide_images':
-                                raise IngestException('Missing sub-directory "slide_images" at: %s' % str(dataTypePath))
+                                raise IngestException(
+                                    'Missing sub-directory "slide_images" at: %s' % str(
+                                        dataTypePath))
                             dataTypeSubPath = dataTypeSubPaths[0]
 
-                            for batchPath in self._filterMaxBatchRevision(self._listAutoIndex(dataTypeSubPath)[0]):
+                            for batchPath in self._filterMaxBatchRevision(
+                                    self._listAutoIndex(dataTypeSubPath)[0]):
 
-                                for slideFilePath, modifiedTime in self._listAutoIndex(batchPath)[1]:
+                                for slideFilePath, modifiedTime in \
+                                        self._listAutoIndex(batchPath)[1]:
                                     if not slideFilePath.tail().endswith('.svs'):
                                         continue
                                     try:
