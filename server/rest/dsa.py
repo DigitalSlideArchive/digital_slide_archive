@@ -1,3 +1,10 @@
+# How to add a new endpoint:
+# 1. Add the route in the __init__ method.  See
+# http://girder.readthedocs.io/en/latest/plugin-development.html?highlight=route
+#    for details.
+# 2. Add a new method to the DSAEndpointsResource class.  If it has a
+#    @describeRoute decorator, it will show up in the Swagger API.
+
 from girder import logger
 from girder.api import access
 from girder.api.describe import describeRoute, Description
