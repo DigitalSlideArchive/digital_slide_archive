@@ -1,2 +1,5 @@
 *.py[cod]
 __pycache__/
+_build
+.*.swp
+.*.swo

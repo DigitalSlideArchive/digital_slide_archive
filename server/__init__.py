@@ -22,7 +22,7 @@ from girder.utility.model_importer import ModelImporter
 from girder.utility import webroot
 
 from . import constants
-from .rest import ingest
+from . import rest
 
 
 def setBranding(info):
@@ -49,4 +49,4 @@ def load(info):
 
     setBranding(info)
 
-    info['apiRoot'].system.route('POST', ('ingest',), ingest)
+    rest.addEndpoints(info['apiRoot'])
