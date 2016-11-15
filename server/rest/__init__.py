@@ -18,6 +18,7 @@
 ############################################################################
 
 from . import dsa
+from . import tcga
 from . import system
 
 
@@ -29,3 +30,4 @@ def addEndpoints(apiRoot):
     """
     system.addSystemEndpoints(apiRoot)
     apiRoot.dsa_endpoints = dsa.DSAEndpointsResource()
+    apiRoot.tcga = tcga.TCGAResource()
