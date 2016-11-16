@@ -6,52 +6,119 @@ Endpoints providing a simplified interface for handling TCGA datasets.
 from __future__ import print_function
 from girder.api import access
 from girder.api.describe import describeRoute, Description
-from girder.api.rest import Resource  # , RestException
+from girder.api.rest import Resource, RestException, loadmodel
+from girder.constants import TokenScope, AccessType
+from girder.utility import setting_utilities
+from girder.models.model_base import ValidationException
 
 
 class TCGAResource(Resource):
 
+    TCGACollectionSettingKey = 'tcga.tcga_collection_id'
+
     def __init__(self):
         super(TCGAResource, self).__init__()
 
-        self.resourceName = 'tcga'
-        self.route('GET', (), self.findCase)
-        self.route('GET', (':case',), self.getCase)
-        self.route('GET', (':case', 'slide'), self.findSlide)
-        self.route('GET', (':case', 'slide', ':slide'), self.getSlide)
+        @setting_utilities.validator({
+            self.TCGACollectionSettingKey
+        })
+        def validateTCGACollection(doc):
+            model = self.model('collection').load(
+                doc['value'], force=True
+            )
+            if model is None:
+                raise ValidationException(
+                    'Invalid collection id', 'value'
+                )
 
+        self.resourceName = 'tcga'
+        self.route('GET', (), self.getCollection)
+        self.route('GET', ('case',), self.findCase)
+        self.route('GET', ('case', ':id',), self.getCase)
+        self.route('GET', ('slide',), self.findSlide)
+        self.route('GET', ('slide', ':id'), self.getSlide)
+        self.route('GET', ('slide', ':id', 'image'), self.getImage)
+
+    def getTCGACollection(self):
+        tcga = self.model('setting').get(
+            self.TCGACollectionSettingKey
+        )
+        if tcga is None:
+            raise RestException(
+                'TCGA collection id not initialized in settings',
+                code=404
+            )
+        return self.model('collection').load(
+            tcga, level=AccessType.READ, user=self.getCurrentUser()
+        )
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @describeRoute(
+        Description('Get the TCGA collection')
+    )
+    def getCollection(self, params):
+        return self.getTCGACollection()
+
+    @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('List cases in the TCGA dataset')
+        .pagingParams(defaultSort='name')
     )
-    @access.public
     def findCase(self, params):
-        print(params)
+        user = self.getCurrentUser()
+        tcga = self.getTCGACollection()
+        limit, offset, sort = self.getPagingParameters(params, 'name')
 
+        return list(self.model('case', 'digital_slide_archive').childFolders(
+            parentType='collection', parent=tcga,
+            user=user, offset=offset, limit=limit, sort=sort
+        ))
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.READ)
     @describeRoute(
         Description('Get a case document from an id')
-        .param('case', 'The id of the case', paramType='path')
+        .param('id', 'The id of the case', paramType='path')
     )
-    @access.public
     def getCase(self, case, params):
-        print(case)
-        print(params)
+        return case
 
+    @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find slide images for a case')
-        .param('case', 'The id of the case', paramType='path')
+        .param('case', 'The id of case document', required=True)
+        .pagingParams(defaultSort='name')
     )
-    @access.public
-    def findSlide(self, case, params):
-        print(case)
-        print(params)
+    def findSlide(self, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        user = self.getCurrentUser()
+        case = self.model('case', 'digital_slide_archive').load(
+            id=params['case'], user=user, level=AccessType.READ,
+            exc=True
+        )
+        return list(self.model('slide', 'digital_slide_archive').childFolders(
+            parentType='folder', parent=case, user=user,
+            offset=offset, limit=limit, sort=sort
+        ))
 
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='slide', plugin='digital_slide_archive',
+               level=AccessType.READ)
     @describeRoute(
         Description('Get a slide document for a case by id')
-        .param('case', 'The id of the case', paramType='path')
-        .param('slide', 'The id of the slide', paramType='path')
+        .param('id', 'The id of the slide', paramType='path')
     )
-    @access.public
-    def getSlide(self, case, slide, params):
-        print(case)
-        print(slide)
-        print(params)
+    def getSlide(self, slide, params):
+        return slide
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='slide', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('Get the image item from a slide')
+        .param('id', 'The id of the slide', paramType='path')
+    )
+    def getImage(self, slide, params):
+        slideModel = self.model('slide', 'digital_slide_archive')
+        return slideModel.getImage(slide)
