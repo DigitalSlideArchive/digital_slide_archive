@@ -16,7 +16,29 @@ class Image(TCGAModel, Item):
             )
         slide = self.model('slide', 'digital_slide_archive').load(
             doc['folderId'], force=True)
-        if not slide.get('tcgaType') == 'case':
+        if not self.getTCGAType(slide) == 'slide':
             raise ValidationException(
-                'An image must be a child of a Slide'
+                'An image must be a child of a slide'
             )
+        return doc
+
+    def importImage(self, doc, user=None):
+        """Import a slide item into a `case` folder."""
+        name = doc['name']
+        tcga = self.parseImage(name)
+        self.setTCGA(doc, **tcga)
+
+        case = self.model('case', 'digital_slide_archive').createFolder(
+            parent=self.getTCGACollection(),
+            name=tcga['case'], parentType='collection',
+            creator=user, reuseExisting=True
+        )
+
+        slide = self.model('slide', 'digital_slide_archive').createFolder(
+            parent=case,
+            name=tcga['barcode'], parentType='folder',
+            creator=user, reuseExisting=True
+        )
+
+        self.move(doc, slide)
+        return doc

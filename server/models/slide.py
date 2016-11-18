@@ -16,9 +16,9 @@ class Slide(TCGAModel, Folder):
             )
         case = self.model('case', 'digital_slide_archive').load(
             doc['parentId'], force=True)
-        if not case.get('tcgaType') == 'case':
+        if not self.getTCGAType(case) == 'case':
             raise ValidationException(
-                'A Slide model must be a child of a Case'
+                'A Slide model must be a child of a case'
             )
         return doc
 

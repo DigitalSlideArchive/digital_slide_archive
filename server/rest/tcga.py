@@ -10,17 +10,16 @@ from girder.api.rest import Resource, RestException, loadmodel
 from girder.constants import TokenScope, AccessType
 from girder.utility import setting_utilities
 from girder.models.model_base import ValidationException
+from ..constants import TCGACollectionSettingKey
 
 
 class TCGAResource(Resource):
-
-    TCGACollectionSettingKey = 'tcga.tcga_collection_id'
 
     def __init__(self):
         super(TCGAResource, self).__init__()
 
         @setting_utilities.validator({
-            self.TCGACollectionSettingKey
+            TCGACollectionSettingKey
         })
         def validateTCGACollection(doc):
             model = self.model('collection').load(
@@ -38,10 +37,12 @@ class TCGAResource(Resource):
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
         self.route('GET', ('slide', ':id', 'image'), self.getImage)
+        self.route('POST', ('image',), self.importImage)
+        self.route('POST', ('pathology',), self.importPathology)
 
-    def getTCGACollection(self):
+    def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
-            self.TCGACollectionSettingKey
+            TCGACollectionSettingKey
         )
         if tcga is None:
             raise RestException(
@@ -122,3 +123,43 @@ class TCGAResource(Resource):
     def getImage(self, slide, params):
         slideModel = self.model('slide', 'digital_slide_archive')
         return slideModel.getImage(slide)
+
+    @access.user(scope=TokenScope.DATA_WRITE)
+    @describeRoute(
+        Description('Import an image into the TCGA collection')
+        .param('itemId', 'The ID of the source item')
+    )
+    def importImage(self, params):
+        self.getTCGACollection(AccessType.WRITE)
+        user = self.getCurrentUser()
+        self.requireParams(('itemId',), params)
+
+        item = self.model('item').load(
+            id=params['itemId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        self.model('image', 'digital_slide_archive').importImage(
+            item, user
+        )
+        return item
+
+    @access.user(scope=TokenScope.DATA_WRITE)
+    @describeRoute(
+        Description('Import a pathology report into the TCGA collection')
+        .param('itemId', 'The ID of the source item')
+    )
+    def importPathology(self, params):
+        self.getTCGACollection(AccessType.WRITE)
+        user = self.getCurrentUser()
+        self.requireParams(('itemId',), params)
+
+        item = self.model('item').load(
+            id=params['itemId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        self.model('pathology', 'digital_slide_archive').importPathology(
+            item, user
+        )
+        return item

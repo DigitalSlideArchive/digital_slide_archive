@@ -37,3 +37,5 @@ def validateSettings(event):
 
 
 SettingDefault.defaults[PluginSettings.BRAND_NAME] = 'Digital Slide Archive'
+
+TCGACollectionSettingKey = 'tcga.tcga_collection_id'
