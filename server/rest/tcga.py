@@ -32,15 +32,23 @@ class TCGAResource(Resource):
 
         self.resourceName = 'tcga'
         self.route('GET', (), self.getCollection)
+        self.route('POST', (), self.setCollection)
+
         self.route('GET', ('cancer',), self.findCancer)
         self.route('GET', ('cancer', ':id'), self.getCancer)
+        self.route('POST', ('cancer',), self.importCancer)
 
         self.route('GET', ('case',), self.findCase)
         self.route('GET', ('case', ':id',), self.getCase)
+        self.route('POST', ('case',), self.importCase)
 
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
-        self.route('GET', ('slide', ':id', 'image'), self.getImage)
+        self.route('POST', ('slide',), self.importSlide)
+
+        self.route('GET', ('image',), self.findImage)
+        self.route('GET', ('image', ':id'), self.getImage)
+        self.route('POST', ('image',), self.importImage)
 
     def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
@@ -61,6 +69,25 @@ class TCGAResource(Resource):
     )
     def getCollection(self, params):
         return self.getTCGACollection()
+
+    @access.admin
+    @describeRoute(
+        Description('Set the TCGA collection')
+        .param('collectionId', 'The id of the collection')
+    )
+    def setCollection(self, params):
+        user = self.getCurrentUser()
+        self.requireParams('collectionId', params)
+
+        # this is to ensure the collection exists
+        collection = self.model('collection').load(
+            id=params['collectionId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+        return self.model('setting').set(
+            TCGACollectionSettingKey,
+            collection['_id']
+        )
 
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
@@ -87,6 +114,26 @@ class TCGAResource(Resource):
     def getCancer(self, cancer, params):
         return cancer
 
+    @access.admin
+    @describeRoute(
+        Description('Import a folder as a TCGA cancer type')
+        .param('folderId', 'The id of the folder to import')
+    )
+    def importCancer(self, params):
+        user = self.getCurrentUser()
+        token = self.getCurrentToken()
+        self.requireParams('folderId', params)
+
+        folder = self.model('folder').load(
+            id=params['folderId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        cancer = self.model('cancer', 'digital_slide_archive').importDocument(
+            folder, user=user, token=token
+        )
+        return cancer
+
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('List cases in the TCGA dataset')
@@ -96,13 +143,13 @@ class TCGAResource(Resource):
     def findCase(self, params):
         user = self.getCurrentUser()
         limit, offset, sort = self.getPagingParameters(params, 'name')
-        case = self.model('cancer', 'digital_slide_archive').load(
+        cancer = self.model('cancer', 'digital_slide_archive').load(
             id=params['cancer'], user=user, level=AccessType.READ,
             exc=True
         )
 
         return list(self.model('case', 'digital_slide_archive').childFolders(
-            parentType='folder', parent=tcga,
+            parentType='folder', parent=cancer,
             user=user, offset=offset, limit=limit, sort=sort
         ))
 
@@ -116,9 +163,29 @@ class TCGAResource(Resource):
     def getCase(self, case, params):
         return case
 
+    @access.admin
+    @describeRoute(
+        Description('Import a folder as a TCGA case')
+        .param('folderId', 'The id of the folder to import')
+    )
+    def importCase(self, params):
+        user = self.getCurrentUser()
+        token = self.getCurrentToken()
+        self.requireParams('folderId', params)
+
+        folder = self.model('folder').load(
+            id=params['folderId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        case = self.model('case', 'digital_slide_archive').importDocument(
+            folder, user=user, token=token
+        )
+        return case
+
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
-        Description('Find slide images for a case')
+        Description('Find slides for a case')
         .param('case', 'The id of case document', required=True)
         .pagingParams(defaultSort='name')
     )
@@ -138,59 +205,76 @@ class TCGAResource(Resource):
     @loadmodel(model='slide', plugin='digital_slide_archive',
                level=AccessType.READ)
     @describeRoute(
-        Description('Get a slide document for a case by id')
+        Description('Get a slide document by id')
         .param('id', 'The id of the slide', paramType='path')
     )
     def getSlide(self, slide, params):
         return slide
 
+    @access.admin
+    @describeRoute(
+        Description('Import a folder as a TCGA slide')
+        .param('folderId', 'The id of the folder to import')
+    )
+    def importSlide(self, params):
+        user = self.getCurrentUser()
+        token = self.getCurrentToken()
+        self.requireParams('folderId', params)
+
+        folder = self.model('folder').load(
+            id=params['folderId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        slide = self.model('slide', 'digital_slide_archive').importDocument(
+            folder, user=user, token=token
+        )
+        return slide
+
     @access.public(scope=TokenScope.DATA_READ)
-    @loadmodel(model='slide', plugin='digital_slide_archive',
+    @describeRoute(
+        Description('Find images for a slide')
+        .param('slide', 'The id of slide document', required=True)
+        .pagingParams(defaultSort='name')
+    )
+    def findImage(self, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        user = self.getCurrentUser()
+        slide = self.model('slide', 'digital_slide_archive').load(
+            id=params['slide'], user=user, level=AccessType.READ,
+            exc=True
+        )
+        return list(self.model('image', 'digital_slide_archive').find(
+            {'folderId': slide['_id']},
+            offset=offset, limit=limit, sort=sort
+        ))
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='image', plugin='digital_slide_archive',
                level=AccessType.READ)
     @describeRoute(
-        Description('Get the image item from a slide')
-        .param('id', 'The id of the slide', paramType='path')
+        Description('Get an image document by id')
+        .param('id', 'The id of the image', paramType='path')
     )
-    def getImage(self, slide, params):
-        slideModel = self.model('slide', 'digital_slide_archive')
-        return slideModel.getImage(slide)
+    def getImage(self, image, params):
+        return image
 
-    @access.user(scope=TokenScope.DATA_WRITE)
+    @access.admin
     @describeRoute(
-        Description('Import an image into the TCGA collection')
-        .param('itemId', 'The ID of the source item')
+        Description('Import an item as a TCGA slide image')
+        .param('itemId', 'The id of the item to import')
     )
     def importImage(self, params):
-        self.getTCGACollection(AccessType.WRITE)
         user = self.getCurrentUser()
-        self.requireParams(('itemId',), params)
+        token = self.getCurrentToken()
+        self.requireParams('itemId', params)
 
         item = self.model('item').load(
             id=params['itemId'], user=user,
             level=AccessType.WRITE, exc=True
         )
 
-        self.model('image', 'digital_slide_archive').importImage(
-            item, user
+        image = self.model('image', 'digital_slide_archive').importDocument(
+            item, user=user, token=token
         )
-        return item
-
-    @access.user(scope=TokenScope.DATA_WRITE)
-    @describeRoute(
-        Description('Import a pathology report into the TCGA collection')
-        .param('itemId', 'The ID of the source item')
-    )
-    def importPathology(self, params):
-        self.getTCGACollection(AccessType.WRITE)
-        user = self.getCurrentUser()
-        self.requireParams(('itemId',), params)
-
-        item = self.model('item').load(
-            id=params['itemId'], user=user,
-            level=AccessType.WRITE, exc=True
-        )
-
-        self.model('pathology', 'digital_slide_archive').importPathology(
-            item, user
-        )
-        return item
+        return image

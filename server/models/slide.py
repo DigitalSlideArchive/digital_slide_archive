@@ -21,7 +21,3 @@ class Slide(TCGAModel, Folder):
                 'A Slide model must be a child of a case'
             )
         return doc
-
-    def getImage(self, doc):
-        return self.model('image', 'digital_slide_archive').findOne(
-            {'folderId': doc['_id']})

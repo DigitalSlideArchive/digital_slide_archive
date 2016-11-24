@@ -39,12 +39,12 @@ class TCGAModel(object):
 
     def find(self, query=None, **kwargs):
         query = query or {}
-        self.setTCGA(query, type=self.TCGAType)
+        query['tcga.type'] = self.TCGAType
         return super(TCGAModel, self).find(query, **kwargs)
 
     def findOne(self, query=None, **kwargs):
         query = query or {}
-        self.setTCGA(query, type=self.TCGAType)
+        query['tcga.type'] = self.TCGAType
         return super(TCGAModel, self).findOne(query, **kwargs)
 
     def setTCGA(self, doc, **tcga):
@@ -82,7 +82,7 @@ class TCGAModel(object):
     def parsePathology(self, name):
         return self._parse(name, self.pathology_re)
 
-    def importDocument(self, doc):
+    def importDocument(self, doc, **kwargs):
         self.setTCGA(doc)
         self.save(doc)
         return doc

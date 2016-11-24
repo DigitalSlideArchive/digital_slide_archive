@@ -16,16 +16,16 @@ class Case(TCGAModel, Folder):
             )
         cancer = self.model('cancer', 'digital_slide_archive').load(
             doc['parentId'], force=True)
-        if not self.getTCGAType(case) == 'cancer':
+        if self.getTCGAType(cancer) != 'cancer':
             raise ValidationException(
                 'A Case model must be a child of a cancer'
             )
-        if not self.case_re.match(self.getTCGA().get('label', '')):
+        if not self.case_re.match(self.getTCGA(doc).get('label', '')):
             raise ValidationException(
                 'Invalid label in TCGA metadata'
             )
         return doc
 
-    def importDocument(self, doc):
+    def importDocument(self, doc, **kwargs):
         self.setTCGA(doc, label=doc['name'])
-        return super(Case, self).importDocument(doc)
+        return super(Case, self).importDocument(doc, **kwargs)

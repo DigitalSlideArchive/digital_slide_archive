@@ -20,7 +20,7 @@ class Image(TCGAModel, Item):
             raise ValidationException(
                 'An image must be a child of a slide'
             )
-        tcga = self.getTCGA()
+        tcga = self.getTCGA(doc)
         if not self.case_re.match(tcga.get('case', '')):
             raise ValidationException(
                 'Invalid case name in TCGA metadata'
@@ -49,8 +49,10 @@ class Image(TCGAModel, Item):
             if self.image_re.match(file['name']):
                 return file['_id']
 
-    def importDocument(self, doc, user=None, token=None):
+    def importDocument(self, doc, **kwargs):
         """Import a slide item into a `case` folder."""
+        user = kwargs.get('user')
+        token = kwargs.get('token')
         fileId = self._findImageFile(doc)
         if fileId is None:
             raise ValidationException(
@@ -61,4 +63,4 @@ class Image(TCGAModel, Item):
         name = doc['name']
         tcga = self.parseImage(name)
         self.setTCGA(doc, **tcga)
-        return super(Image, self).importDocument(doc)
+        return super(Image, self).importDocument(doc, **kwargs)
