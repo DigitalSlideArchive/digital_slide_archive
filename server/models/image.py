@@ -36,8 +36,28 @@ class Image(TCGAModel, Item):
 
         return doc
 
-    def importDocument(self, doc):
+    def _setLargeImage(self, doc, fileId, user, token):
+        if doc.get('largeImage', {}).get('fileId') == fileId:
+            return
+        return self.model('ImageItem', 'large_image').createImageItem(
+            doc, fileId,
+            user=user, token=token
+        )
+
+    def _findImageFile(self, doc):
+        for file in self.childFiles(doc):
+            if self.image_re.match(file['name']):
+                return file['_id']
+
+    def importDocument(self, doc, user=None, token=None):
         """Import a slide item into a `case` folder."""
+        fileId = self._findImageFile(doc)
+        if fileId is None:
+            raise ValidationException(
+                'Could not find a TCGA slide in item'
+            )
+        self._setLargeImage(doc, fileId, user, token)
+
         name = doc['name']
         tcga = self.parseImage(name)
         self.setTCGA(doc, **tcga)
