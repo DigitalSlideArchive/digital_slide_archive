@@ -32,13 +32,15 @@ class TCGAResource(Resource):
 
         self.resourceName = 'tcga'
         self.route('GET', (), self.getCollection)
+        self.route('GET', ('cancer',), self.findCancer)
+        self.route('GET', ('cancer', ':id'), self.getCancer)
+
         self.route('GET', ('case',), self.findCase)
         self.route('GET', ('case', ':id',), self.getCase)
+
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
         self.route('GET', ('slide', ':id', 'image'), self.getImage)
-        self.route('POST', ('image',), self.importImage)
-        self.route('POST', ('pathology',), self.importPathology)
 
     def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
@@ -62,16 +64,45 @@ class TCGAResource(Resource):
 
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
-        Description('List cases in the TCGA dataset')
+        Description('List cancers in the TCGA dataset')
         .pagingParams(defaultSort='name')
     )
-    def findCase(self, params):
+    def findCancer(self, params):
         user = self.getCurrentUser()
         tcga = self.getTCGACollection()
         limit, offset, sort = self.getPagingParameters(params, 'name')
 
-        return list(self.model('case', 'digital_slide_archive').childFolders(
+        return list(self.model('cancer', 'digital_slide_archive').childFolders(
             parentType='collection', parent=tcga,
+            user=user, offset=offset, limit=limit, sort=sort
+        ))
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='cancer', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('Get a cancer document from an id')
+        .param('id', 'The id of the cancer', paramType='path')
+    )
+    def getCancer(self, cancer, params):
+        return cancer
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @describeRoute(
+        Description('List cases in the TCGA dataset')
+        .param('cancer', 'The id of the cancer document', required=True)
+        .pagingParams(defaultSort='name')
+    )
+    def findCase(self, params):
+        user = self.getCurrentUser()
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        case = self.model('cancer', 'digital_slide_archive').load(
+            id=params['cancer'], user=user, level=AccessType.READ,
+            exc=True
+        )
+
+        return list(self.model('case', 'digital_slide_archive').childFolders(
+            parentType='folder', parent=tcga,
             user=user, offset=offset, limit=limit, sort=sort
         ))
 
