@@ -4,13 +4,19 @@ Endpoints providing a simplified interface for handling TCGA datasets.
 """
 
 from __future__ import print_function
+
+import re
+
 from girder.api import access
 from girder.api.describe import describeRoute, Description
 from girder.api.rest import Resource, RestException, loadmodel
 from girder.constants import TokenScope, AccessType
 from girder.utility import setting_utilities
 from girder.models.model_base import ValidationException
+
 from ..constants import TCGACollectionSettingKey
+
+invalid_key_re = re.compile('[.$]')
 
 
 class TCGAResource(Resource):
@@ -45,6 +51,7 @@ class TCGAResource(Resource):
         self.route('GET', ('case', ':id',), self.getCase)
         self.route('POST', ('case',), self.importCase)
         self.route('DELETE', ('case', ':id'), self.deleteCase)
+        self.route('GET', ('case', 'search'), self.searchCase)
 
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
@@ -237,6 +244,57 @@ class TCGAResource(Resource):
     )
     def deleteCase(self, case, params):
         return self.model('case', 'digital_slide_archive').removeTCGA(case)
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @describeRoute(
+        Description('Search for cases by clinical data')
+        .param('table', 'A table to search',
+               required=True)
+        .param('key', 'A key that should be present',
+               required=False)
+        .param('value', 'The value associated with the given key',
+               required=False)
+        .pagingParams(defaultSort='name')
+    )
+    def searchCase(self, params):
+        user = self.getCurrentUser()
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        self.requireParams('table', params)
+
+        table = params.get('table')
+        key = params.get('key')
+        value = params.get('value')
+
+        if value and not key:
+            raise RestException(
+                'A key must be provided to search by value'
+            )
+        if key and invalid_key_re.search(key):
+            raise RestException(
+                'Invalid key parameter'
+            )
+
+        query = {}
+        if not key:
+            query = {
+                'tcga.meta.' + table: {
+                    '$exists': True
+                }
+            }
+        elif not value:
+            query = {
+                'tcga.meta.' + table + '.' + key: {
+                    '$exists': True
+                }
+            }
+        else:
+            query = {
+                'tcga.meta.' + table + '.' + key: value
+            }
+
+        return list(self.model('case', 'digital_slide_archive').find(
+            query, user=user, offset=offset, limit=limit, sort=sort
+        ))
 
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
