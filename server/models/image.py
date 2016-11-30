@@ -39,8 +39,9 @@ class Image(TCGAModel, Item):
     def _setLargeImage(self, doc, fileId, user, token):
         if doc.get('largeImage', {}).get('fileId') == fileId:
             return
-        return self.model('ImageItem', 'large_image').createImageItem(
-            doc, fileId,
+        file = self.model('file').load(fileId, user=user)
+        return self.model('image_item', 'large_image').createImageItem(
+            doc, file,
             user=user, token=token
         )
 

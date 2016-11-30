@@ -21,3 +21,20 @@ class Slide(TCGAModel, Folder):
                 'A Slide model must be a child of a case'
             )
         return doc
+
+    def importDocument(self, doc, **kwargs):
+        recurse = kwargs.get('recurse', False)
+        doc = super(Slide, self).importDocument(doc, **kwargs)
+        if not recurse:
+            return doc
+
+        childModel = self.model('image', 'digital_slide_archive')
+        children = self.model('folder').childItems(
+            doc, user=kwargs.get('user')
+        )
+        for child in children:
+            try:
+                childModel.importDocument(child, **kwargs)
+            except ValidationException:
+                pass
+        return doc

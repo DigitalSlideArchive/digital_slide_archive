@@ -27,5 +27,19 @@ class Case(TCGAModel, Folder):
         return doc
 
     def importDocument(self, doc, **kwargs):
+        recurse = kwargs.get('recurse', False)
         self.setTCGA(doc, label=doc['name'])
-        return super(Case, self).importDocument(doc, **kwargs)
+        doc = super(Case, self).importDocument(doc, **kwargs)
+        if not recurse:
+            return doc
+
+        childModel = self.model('slide', 'digital_slide_archive')
+        children = self.model('folder').childFolders(
+            doc, 'folder', user=kwargs.get('user')
+        )
+        for child in children:
+            try:
+                childModel.importDocument(child, **kwargs)
+            except ValidationException:
+                pass
+        return doc

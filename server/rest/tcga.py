@@ -33,6 +33,7 @@ class TCGAResource(Resource):
         self.resourceName = 'tcga'
         self.route('GET', (), self.getCollection)
         self.route('POST', (), self.setCollection)
+        self.route('POST', ('import',), self.importCollection)
 
         self.route('GET', ('cancer',), self.findCancer)
         self.route('GET', ('cancer', ':id'), self.getCancer)
@@ -60,7 +61,7 @@ class TCGAResource(Resource):
                 code=404
             )
         return self.model('collection').load(
-            tcga, level=AccessType.READ, user=self.getCurrentUser()
+            tcga, level=level, user=self.getCurrentUser()
         )
 
     @access.public(scope=TokenScope.DATA_READ)
@@ -88,6 +89,27 @@ class TCGAResource(Resource):
             TCGACollectionSettingKey,
             collection['_id']
         )
+
+    @access.admin
+    @describeRoute(
+        Description('Recursively import the TCGA collection')
+    )
+    def importCollection(self, params):
+        user = self.getCurrentUser()
+        token = self.getCurrentToken()
+        tcga = self.getTCGACollection(level=AccessType.WRITE)
+
+        childModel = self.model('cancer', 'digital_slide_archive')
+        children = self.model('folder').childFolders(
+            tcga, 'collection', user=user
+        )
+        for child in children:
+            try:
+                childModel.importDocument(
+                    child, recurse=True, user=user, token=token
+                )
+            except ValidationException:
+                pass
 
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
