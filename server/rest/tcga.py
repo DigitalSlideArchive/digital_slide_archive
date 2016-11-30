@@ -34,22 +34,27 @@ class TCGAResource(Resource):
         self.route('GET', (), self.getCollection)
         self.route('POST', (), self.setCollection)
         self.route('POST', ('import',), self.importCollection)
+        self.route('DELETE', (), self.deleteCollection)
 
         self.route('GET', ('cancer',), self.findCancer)
         self.route('GET', ('cancer', ':id'), self.getCancer)
         self.route('POST', ('cancer',), self.importCancer)
+        self.route('DELETE', ('cancer', ':id'), self.deleteCancer)
 
         self.route('GET', ('case',), self.findCase)
         self.route('GET', ('case', ':id',), self.getCase)
         self.route('POST', ('case',), self.importCase)
+        self.route('DELETE', ('case', ':id'), self.deleteCase)
 
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
         self.route('POST', ('slide',), self.importSlide)
+        self.route('DELETE', ('slide', ':id'), self.deleteSlide)
 
         self.route('GET', ('image',), self.findImage)
         self.route('GET', ('image', ':id'), self.getImage)
         self.route('POST', ('image',), self.importImage)
+        self.route('DELETE', ('image', ':id'), self.deleteImage)
 
     def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
@@ -111,6 +116,13 @@ class TCGAResource(Resource):
             except ValidationException:
                 pass
 
+    @access.admin
+    @describeRoute(
+        Description('Remove the TCGA collection')
+    )
+    def deleteCollection(self, params):
+        return self.model('setting').unset(TCGACollectionSettingKey)
+
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('List cancers in the TCGA dataset')
@@ -155,6 +167,17 @@ class TCGAResource(Resource):
             folder, user=user, token=token
         )
         return cancer
+
+    @access.admin
+    @loadmodel(model='cancer', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Remove a cancer type')
+        .param('id', 'The id of the cancer', paramType='path')
+    )
+    def deleteCancer(self, cancer, params):
+        return self.model('cancer', 'digital_slide_archive').removeTCGA(
+            cancer)
 
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
@@ -205,6 +228,16 @@ class TCGAResource(Resource):
         )
         return case
 
+    @access.admin
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Remove a case document')
+        .param('id', 'The id of the case', paramType='path')
+    )
+    def deleteCase(self, case, params):
+        return self.model('case', 'digital_slide_archive').removeTCGA(case)
+
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find slides for a case')
@@ -253,6 +286,16 @@ class TCGAResource(Resource):
         )
         return slide
 
+    @access.admin
+    @loadmodel(model='slide', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Remove a slide')
+        .param('id', 'The id of the slide', paramType='path')
+    )
+    def deleteSlide(self, slide, params):
+        return self.model('slide', 'digital_slide_archive').removeTCGA(slide)
+
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find images for a slide')
@@ -300,3 +343,13 @@ class TCGAResource(Resource):
             item, user=user, token=token
         )
         return image
+
+    @access.admin
+    @loadmodel(model='image', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Remove an image')
+        .param('id', 'The id of the image', paramType='path')
+    )
+    def deleteImage(self, image, params):
+        return self.model('image', 'digital_slide_archive').removeTCGA(image)

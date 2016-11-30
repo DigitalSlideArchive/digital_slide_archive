@@ -33,8 +33,9 @@ class TCGAModel(object):
         self.exposeFields(AccessType.READ, fields='tcga')
         super(TCGAModel, self).initialize(**kwargs)
 
-    def save(self, doc, **kwargs):
-        self.setTCGA(doc, type=self.TCGAType)
+    def save(self, doc, baseModel=False, **kwargs):
+        if not baseModel:
+            self.setTCGA(doc, type=self.TCGAType)
         return super(TCGAModel, self).save(doc, **kwargs)
 
     def find(self, query=None, **kwargs):
@@ -54,6 +55,11 @@ class TCGAModel(object):
         if 'tcga' not in doc:
             doc['tcga'] = {}
         return doc['tcga']
+
+    def removeTCGA(self, doc):
+        del doc['tcga']
+        self.save(doc, baseModel=True)
+        return doc
 
     def getTCGAType(self, doc):
         return self.getTCGA(doc).get('type')
