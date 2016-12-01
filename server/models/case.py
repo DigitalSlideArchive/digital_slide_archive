@@ -43,3 +43,11 @@ class Case(TCGAModel, Folder):
             except ValidationException:
                 pass
         return doc
+
+    def updateMetadata(self, doc, meta, replace=False):
+        tcga = self.getTCGA(doc)
+        if replace:
+            del tcga['meta']
+        tcga.setdefault('meta', {})
+        tcga['meta'].update(meta)
+        return self.save(doc)

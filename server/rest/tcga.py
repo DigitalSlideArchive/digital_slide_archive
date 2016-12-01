@@ -297,6 +297,19 @@ class TCGAResource(Resource):
         ))
 
     @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('Get a case document from an id')
+        .param('id', 'The id of the case', paramType='path')
+    )
+    def setCaseMetadata(self, case, params):
+        pass
+
+    def updateCaseMetadata(self, case, params):
+        pass
+
+    @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find slides for a case')
         .param('case', 'The id of case document', required=True)
