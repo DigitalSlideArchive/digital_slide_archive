@@ -28,6 +28,11 @@ class TCGAModel(object):
         ')\.pdf$',
         flags=re.I
     )
+    aperio_re = re.compile(
+        '^(?P<barcode>(?P<case>' +
+        case_re.pattern + ')[0-9a-z-]*)\.xml',
+        flags=re.I
+    )
 
     def initialize(self, **kwargs):
         self.exposeFields(AccessType.READ, fields='tcga')
@@ -99,6 +104,9 @@ class TCGAModel(object):
 
     def parsePathology(self, name):
         return self._parse(name, self.pathology_re)
+
+    def parseAperio(self, name):
+        return self._parse(name, self.aperio_re)
 
     def importDocument(self, doc, **kwargs):
         self.setTCGA(doc)

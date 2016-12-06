@@ -3,13 +3,13 @@ from girder.models.item import Item
 from .meta import TCGAModel
 
 
-class Pathology(TCGAModel, Item):
+class Aperio(TCGAModel, Item):
 
-    TCGAType = 'pathology'
+    TCGAType = 'aperio'
 
     def importDocument(self, doc, **kwargs):
         name = doc['name']
-        tcga = self.parsePathology(name)
+        tcga = self.parseAperio(name)
         self.setTCGA(doc, **tcga)
 
-        return super(Pathology, self).importDocument(doc, **kwargs)
+        return super(Aperio, self).importDocument(doc, **kwargs)

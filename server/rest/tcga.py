@@ -69,6 +69,11 @@ class TCGAResource(Resource):
         self.route('POST', ('pathology',), self.importPathology)
         self.route('DELETE', ('pathology', ':id'), self.deletePathology)
 
+        self.route('GET', ('aperio',), self.findAperio)
+        self.route('GET', ('aperio', ':id'), self.getAperio)
+        self.route('POST', ('aperio',), self.importAperio)
+        self.route('DELETE', ('aperio', ':id'), self.deleteAperio)
+
     def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
             TCGACollectionSettingKey
@@ -515,3 +520,63 @@ class TCGAResource(Resource):
     )
     def deletePathology(self, pathology, params):
         return self.model('pathology', 'digital_slide_archive').removeTCGA(pathology)
+
+    # Aperio endpoints
+    #####################
+    @access.public(scope=TokenScope.DATA_READ)
+    @describeRoute(
+        Description('Find Aperio annotations for a case')
+        .param('case', 'The id of a case document', required=True)
+        .pagingParams(defaultSort='name')
+    )
+    def findAperio(self, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        user = self.getCurrentUser()
+        case = self.model('case', 'digital_slide_archive').load(
+            id=params['case'], user=user, level=AccessType.READ,
+            exc=True
+        )
+        return list(self.model('aperio', 'digital_slide_archive').find(
+            {'tcga.case': case['tcga']['label']},
+            offset=offset, limit=limit, sort=sort
+        ))
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='aperio', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('Get an Aperio document by id')
+        .param('id', 'The id of the Aperio item', paramType='path')
+    )
+    def getAperio(self, aperio, params):
+        return aperio
+
+    @access.admin
+    @describeRoute(
+        Description('Import an item as a TCGA Aperio XML item')
+        .param('itemId', 'The id of the item to import')
+    )
+    def importAperio(self, params):
+        user = self.getCurrentUser()
+        token = self.getCurrentToken()
+        self.requireParams('itemId', params)
+
+        item = self.model('item').load(
+            id=params['itemId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        aperio = self.model('aperio', 'digital_slide_archive').importDocument(
+            item, user=user, token=token
+        )
+        return aperio
+
+    @access.admin
+    @loadmodel(model='aperio', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Remove an Aperio XML item')
+        .param('id', 'The id of the Aperio item', paramType='path')
+    )
+    def deleteAperio(self, aperio, params):
+        return self.model('aperio', 'digital_slide_archive').removeTCGA(aperio)
