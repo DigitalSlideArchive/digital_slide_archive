@@ -135,6 +135,8 @@ class TCGAResource(Resource):
     def deleteCollection(self, params):
         return self.model('setting').unset(TCGACollectionSettingKey)
 
+    # Cancer endpoints
+    #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('List cancers in the TCGA dataset')
@@ -191,6 +193,8 @@ class TCGAResource(Resource):
         return self.model('cancer', 'digital_slide_archive').removeTCGA(
             cancer)
 
+    # Case endpoints
+    #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('List cases in the TCGA dataset')
@@ -314,6 +318,8 @@ class TCGAResource(Resource):
     def updateCaseMetadata(self, case, params):
         pass
 
+    # Slide endpoints
+    #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find slides for a case')
@@ -372,6 +378,8 @@ class TCGAResource(Resource):
     def deleteSlide(self, slide, params):
         return self.model('slide', 'digital_slide_archive').removeTCGA(slide)
 
+    # Image endpoints
+    #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find images for a slide')
@@ -430,6 +438,8 @@ class TCGAResource(Resource):
     def deleteImage(self, image, params):
         return self.model('image', 'digital_slide_archive').removeTCGA(image)
 
+    # Pathology endpoints
+    #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('Find pathologies for a case')
