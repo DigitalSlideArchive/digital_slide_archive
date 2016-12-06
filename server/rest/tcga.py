@@ -63,6 +63,11 @@ class TCGAResource(Resource):
         self.route('POST', ('image',), self.importImage)
         self.route('DELETE', ('image', ':id'), self.deleteImage)
 
+        self.route('GET', ('pathology',), self.findPathology)
+        self.route('GET', ('pathology', ':id'), self.getPathology)
+        self.route('POST', ('pathology',), self.importPathology)
+        self.route('DELETE', ('pathology', ':id'), self.deletePathology)
+
     def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
             TCGACollectionSettingKey
@@ -424,3 +429,61 @@ class TCGAResource(Resource):
     )
     def deleteImage(self, image, params):
         return self.model('image', 'digital_slide_archive').removeTCGA(image)
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @describeRoute(
+        Description('Find pathologies for a case')
+        .param('case', 'The id of a case document', required=True)
+        .pagingParams(defaultSort='name')
+    )
+    def findPathology(self, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        user = self.getCurrentUser()
+        case = self.model('case', 'digital_slide_archive').load(
+            id=params['case'], user=user, level=AccessType.READ,
+            exc=True
+        )
+        return list(self.model('pathology', 'digital_slide_archive').find(
+            {'tcga.case': case['tcga']['label']},
+            offset=offset, limit=limit, sort=sort
+        ))
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='pathology', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('Get a pathology document by id')
+        .param('id', 'The id of the pathology', paramType='path')
+    )
+    def getPathology(self, pathology, params):
+        return pathology
+
+    @access.admin
+    @describeRoute(
+        Description('Import an item as a TCGA pathology')
+        .param('itemId', 'The id of the item to import')
+    )
+    def importPathology(self, params):
+        user = self.getCurrentUser()
+        token = self.getCurrentToken()
+        self.requireParams('itemId', params)
+
+        item = self.model('item').load(
+            id=params['itemId'], user=user,
+            level=AccessType.WRITE, exc=True
+        )
+
+        pathology = self.model('pathology', 'digital_slide_archive').importDocument(
+            item, user=user, token=token
+        )
+        return pathology
+
+    @access.admin
+    @loadmodel(model='pathology', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Remove a pathology')
+        .param('id', 'The id of the pathology', paramType='path')
+    )
+    def deletePathology(self, pathology, params):
+        return self.model('pathology', 'digital_slide_archive').removeTCGA(pathology)
