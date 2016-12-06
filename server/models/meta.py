@@ -76,11 +76,23 @@ class TCGAModel(object):
             tcga, force=True
         )
 
+    def __upper(self, obj, key):
+        if key in obj:
+            obj[key] = obj[key].upper()
+
+    def __lower(self, obj, key):
+        if key in obj:
+            obj[key] = obj[key].lower()
+
     def _parse(self, name, regex):
         m = regex.match(name)
         if m is None:
             raise ValidationException('Invalid name')
-        return m.groupdict()
+        d = m.groupdict()
+        self.__lower(d, 'uuid')
+        self.__upper(d, 'barcode')
+        self.__upper(d, 'case')
+        return d
 
     def parseImage(self, name):
         return self._parse(name, self.image_re)
