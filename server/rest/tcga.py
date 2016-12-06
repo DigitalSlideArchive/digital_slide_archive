@@ -48,7 +48,8 @@ class TCGAResource(Resource):
         self.route('DELETE', ('cancer', ':id'), self.deleteCancer)
 
         self.route('GET', ('case',), self.findCase)
-        self.route('GET', ('case', ':id',), self.getCase)
+        self.route('GET', ('case', ':id'), self.getCase)
+        self.route('GET', ('case', 'label', ':label'), self.getCaseByLabel)
         self.route('POST', ('case',), self.importCase)
         self.route('DELETE', ('case', ':id'), self.deleteCase)
         self.route('GET', ('case', 'search'), self.searchCase)
@@ -222,6 +223,23 @@ class TCGAResource(Resource):
         .param('id', 'The id of the case', paramType='path')
     )
     def getCase(self, case, params):
+        return case
+
+    @access.public(scope=TokenScope.DATA_READ)
+    @describeRoute(
+        Description('Get a case document from a label')
+        .param('label', 'The label of the case', paramType='path')
+        .errorResponse('Label was invalid')
+    )
+    def getCaseByLabel(self, label, params):
+        user = self.getCurrentUser()
+        case = self.model('case', 'digital_slide_archive').findOne(
+            {'tcga.label': label}, user=user
+        )
+        if not case:
+            raise RestException(
+                'TCGA case label not found'
+            )
         return case
 
     @access.admin
