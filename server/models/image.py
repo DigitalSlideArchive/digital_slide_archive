@@ -40,10 +40,15 @@ class Image(TCGAModel, Item):
         if doc.get('largeImage', {}).get('fileId') == fileId:
             return
         file = self.model('file').load(fileId, user=user)
-        return self.model('image_item', 'large_image').createImageItem(
-            doc, file,
-            user=user, token=token
-        )
+        try:
+            return self.model('image_item', 'large_image').createImageItem(
+                doc, file,
+                user=user, token=token
+            )
+        except Exception:
+            raise ValidationException(
+                'Could not generate a large_image item'
+            )
 
     def _findImageFile(self, doc):
         for file in self.childFiles(doc):
