@@ -112,3 +112,28 @@ class TCGAModel(object):
         self.setTCGA(doc)
         self.save(doc)
         return doc
+
+    def loadDocument(self, id, **kwargs):
+        """Load a user, folder, item, or collection document."""
+        for modelType in ('collection', 'user', 'folder', 'item'):
+            model = self.model(modelType)
+            try:
+                doc = model.load(id, **kwargs)
+                doc['_modelType'] = modelType
+                return doc
+            except ValidationException:
+                pass
+        raise ValidationException(
+            'Invalid document id provided'
+        )
+
+    def iterateItems(self, doc, **kwargs):
+        """Iterate over all items under the given document."""
+        folder = self.model('folder')
+        item = self.model('item')
+        for child in item.find({'folderId': doc['_id']}):
+            yield child
+
+        for child in folder.find({'parentId': doc['_id']}):
+            for subchild in self.iterateItems(child, **kwargs):
+                yield subchild

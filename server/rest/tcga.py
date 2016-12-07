@@ -494,20 +494,22 @@ class TCGAResource(Resource):
     @access.admin
     @describeRoute(
         Description('Import an item as a TCGA pathology')
-        .param('itemId', 'The id of the item to import')
+        .param('id', 'The id of the item to import')
+        .param('recursive', 'Perform a recursive search for pathologies',
+               required=False, dataType='boolean')
     )
     def importPathology(self, params):
         user = self.getCurrentUser()
         token = self.getCurrentToken()
-        self.requireParams('itemId', params)
+        self.requireParams('id', params)
 
-        item = self.model('item').load(
-            id=params['itemId'], user=user,
+        item = self.model('pathology', 'digital_slide_archive').loadDocument(
+            id=params['id'], user=user,
             level=AccessType.WRITE, exc=True
         )
 
         pathology = self.model('pathology', 'digital_slide_archive').importDocument(
-            item, user=user, token=token
+            item, user=user, token=token, recurse=params.get('recursive')
         )
         return pathology
 
