@@ -53,6 +53,8 @@ class TCGAResource(Resource):
         self.route('POST', ('case',), self.importCase)
         self.route('DELETE', ('case', ':id'), self.deleteCase)
         self.route('GET', ('case', 'search'), self.searchCase)
+        self.route('GET', ('case', ':id', 'metadata', ':table'), self.getCaseMetadata)
+        self.route('PUT', ('case', ':id', 'metadata', ':table'), self.setCaseMetadata)
 
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
@@ -328,18 +330,45 @@ class TCGAResource(Resource):
             query, user=user, offset=offset, limit=limit, sort=sort
         ))
 
-    @access.public(scope=TokenScope.DATA_READ)
+    @access.user(scope=TokenScope.DATA_READ)
     @loadmodel(model='case', plugin='digital_slide_archive',
                level=AccessType.READ)
     @describeRoute(
-        Description('Get a case document from an id')
+        Description('Get case metadata')
         .param('id', 'The id of the case', paramType='path')
+        .param('table', 'The table name to get', paramType='path')
     )
-    def setCaseMetadata(self, case, params):
-        pass
+    def getCaseMetadata(self, case, table, params):
+        return self.model('case', 'digital_slide_archive').getTCGA(
+            case).get('meta', {}).get(table)
 
-    def updateCaseMetadata(self, case, params):
-        pass
+
+    @access.user(scope=TokenScope.DATA_WRITE)
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Set case metadata')
+        .notes('Set metadata fields to null to delete them.')
+        .param('id', 'The id of the case', paramType='path')
+        .param('table', 'The table to update', paramType='path')
+        .param('body', 'A JSON object containing the metadata to update',
+               paramType='body')
+    )
+    def setCaseMetadata(self, case, table, params):
+        metadata = self.getBodyJson()
+        for k in metadata:
+            if not len(k) or '.' in k or k[0] == '$':
+                raise RestException(
+                    'Invalid key name'
+                )
+        tcga = {
+            'meta': {
+                table: metadata
+            }
+        }
+        # need to merge here:
+        self.model('case', 'digital_slide_archive').setTCGA(
+            case, **tcga).save(case)
 
     # Slide endpoints
     #####################

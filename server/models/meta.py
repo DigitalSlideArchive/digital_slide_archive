@@ -1,9 +1,20 @@
 import re
 
+import six
+
 from girder.constants import AccessType
 from girder.models.model_base import ValidationException
 
 from ..constants import TCGACollectionSettingKey
+
+
+def pruneNoneValues(d):
+    toDelete = [k for k, v in six.viewitems(d) if v is None]
+    for k in toDelete:
+        del d[k]
+    for k, v in six.viewitems(d):
+        if isinstance(v, dict):
+            pruneNoneValues(v)
 
 
 class TCGAModel(object):
@@ -55,6 +66,8 @@ class TCGAModel(object):
 
     def setTCGA(self, doc, **tcga):
         self.getTCGA(doc).update(tcga)
+        pruneNoneValues(self.getTCGA(doc))
+        return self
 
     def getTCGA(self, doc):
         if 'tcga' not in doc:
