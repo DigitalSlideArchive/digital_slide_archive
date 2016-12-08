@@ -53,8 +53,11 @@ class TCGAResource(Resource):
         self.route('POST', ('case',), self.importCase)
         self.route('DELETE', ('case', ':id'), self.deleteCase)
         self.route('GET', ('case', 'search'), self.searchCase)
+        self.route('GET', ('case', ':id', 'metadata', 'tables'), self.listCaseTables)
         self.route('GET', ('case', ':id', 'metadata', ':table'), self.getCaseMetadata)
-        self.route('PUT', ('case', ':id', 'metadata', ':table'), self.setCaseMetadata)
+        self.route('POST', ('case', ':id', 'metadata', ':table'), self.setCaseMetadata)
+        self.route('PUT', ('case', ':id', 'metadata', ':table'), self.updateCaseMetadata)
+        self.route('DELETE', ('case', ':id', 'metadata', ':table'), self.deleteCaseMetadata)
 
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
@@ -330,7 +333,18 @@ class TCGAResource(Resource):
             query, user=user, offset=offset, limit=limit, sort=sort
         ))
 
-    @access.user(scope=TokenScope.DATA_READ)
+    @access.public(scope=TokenScope.DATA_READ)
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('List tables present inside case metadata')
+        .param('id', 'The id of the case', paramType='path')
+    )
+    def listCaseTables(self, case, params):
+        return self.model('case', 'digital_slide_archive').getTCGAMeta(
+            case).keys()
+
+    @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='case', plugin='digital_slide_archive',
                level=AccessType.READ)
     @describeRoute(
@@ -339,36 +353,71 @@ class TCGAResource(Resource):
         .param('table', 'The table name to get', paramType='path')
     )
     def getCaseMetadata(self, case, table, params):
-        return self.model('case', 'digital_slide_archive').getTCGA(
-            case).get('meta', {}).get(table)
-
+        return self.model('case', 'digital_slide_archive').getTCGAMeta(
+            case).get(table)
 
     @access.user(scope=TokenScope.DATA_WRITE)
     @loadmodel(model='case', plugin='digital_slide_archive',
                level=AccessType.WRITE)
     @describeRoute(
-        Description('Set case metadata')
+        Description('Create or replace case metadata')
+        .param('id', 'The id of the case', paramType='path')
+        .param('table', 'The table to update', paramType='path')
+        .param('body', 'A JSON object containing the metadata to create',
+               paramType='body')
+    )
+    def setCaseMetadata(self, case, table, params):
+        metadata = self.getBodyJson()
+        caseModel = self.model('case', 'digital_slide_archive')
+        for k in metadata:
+            if not len(k) or '.' in k or k[0] == '$':
+                raise RestException(
+                    'Invalid key name'
+                )
+        meta = caseModel.getTCGAMeta(case)
+        meta[table] = metadata
+        caseModel.save(case)
+        return metadata
+
+    @access.user(scope=TokenScope.DATA_WRITE)
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Update case metadata')
         .notes('Set metadata fields to null to delete them.')
         .param('id', 'The id of the case', paramType='path')
         .param('table', 'The table to update', paramType='path')
         .param('body', 'A JSON object containing the metadata to update',
                paramType='body')
     )
-    def setCaseMetadata(self, case, table, params):
+    def updateCaseMetadata(self, case, table, params):
         metadata = self.getBodyJson()
+        caseModel = self.model('case', 'digital_slide_archive')
         for k in metadata:
             if not len(k) or '.' in k or k[0] == '$':
                 raise RestException(
                     'Invalid key name'
                 )
-        tcga = {
-            'meta': {
-                table: metadata
-            }
+        meta = {
+            table: metadata
         }
-        # need to merge here:
-        self.model('case', 'digital_slide_archive').setTCGA(
-            case, **tcga).save(case)
+
+        caseModel.updateTCGAMeta(case, meta).save(case)
+        return caseModel.getTCGAMeta(case).get(table)
+
+    @access.user(scope=TokenScope.DATA_WRITE)
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.WRITE)
+    @describeRoute(
+        Description('Delete case metadata')
+        .param('id', 'The id of the case', paramType='path')
+        .param('table', 'The table to remove', paramType='path')
+    )
+    def deleteCaseMetadata(self, case, table, params):
+        caseModel = self.model('case', 'digital_slide_archive')
+        meta = caseModel.getTCGAMeta(case)
+        del meta[table]
+        caseModel.save(case)
 
     # Slide endpoints
     #####################

@@ -17,6 +17,16 @@ def pruneNoneValues(d):
             pruneNoneValues(v)
 
 
+def updateDict(d, u):
+    for k, v in six.viewitems(u):
+        if isinstance(v, dict):
+            r = updateDict(d.get(k, {}), v)
+            d[k] = r
+        else:
+            d[k] = u[k]
+    return d
+
+
 class TCGAModel(object):
     case_re = re.compile('tcga-[a-z0-9]{2}-[a-z0-9]{4}', flags=re.I)
     uuid_re = re.compile(
@@ -70,9 +80,16 @@ class TCGAModel(object):
         return self
 
     def getTCGA(self, doc):
-        if 'tcga' not in doc:
-            doc['tcga'] = {}
-        return doc['tcga']
+        return doc.setdefault('tcga', {})
+
+    def updateTCGAMeta(self, doc, meta):
+        meta = updateDict(self.getTCGAMeta(doc), meta)
+        pruneNoneValues(meta)
+        return self
+
+    def getTCGAMeta(self, doc):
+        tcga = self.getTCGA(doc)
+        return tcga.setdefault('meta', {})
 
     def removeTCGA(self, doc):
         del doc['tcga']
