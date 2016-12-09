@@ -17,6 +17,8 @@
 #  limitations under the License.
 #############################################################################
 import os
+import json
+import unittest
 
 from girder import config
 from girder.models.model_base import ValidationException
@@ -77,6 +79,7 @@ class BaseTest(object):
 
 
 # test tcga models
+@unittest.skip
 class TCGAModelTest(BaseTest, base.TestCase):
     def testPruneNoneValues(self):
         from girder.plugins.digital_slide_archive.models.meta \
@@ -335,24 +338,24 @@ class TCGARestTest(BaseTest, base.TestCase):
 
         self.case1 = self.model('folder').createFolder(
             self.cancer, 'TCGA-OR-A5J1', parentType='folder',
-            public=True, creator=self.admin
+            public=True, creator=self.user
         )
         self.case2 = self.model('folder').createFolder(
             self.cancer, 'TCGA-OR-A5J2', parentType='folder',
-            public=True, creator=self.admin
+            public=True, creator=self.user
         )
 
         self.slide1 = self.model('folder').createFolder(
             self.case1, 'TCGA-OR-A5J1-01A-01-TS1', parentType='folder',
-            public=True, creator=self.admin
+            public=True, creator=self.user
         )
         self.slide2 = self.model('folder').createFolder(
             self.case1, 'TCGA-OR-A5J1-01Z-00-DX1', parentType='folder',
-            public=True, creator=self.admin
+            public=True, creator=self.user
         )
         self.slide3 = self.model('folder').createFolder(
             self.case2, 'TCGA-OR-A5J2-01A-01-TS1', parentType='folder',
-            public=True, creator=self.admin
+            public=True, creator=self.user
         )
 
         self.image1 = self.createImageItem(
@@ -366,6 +369,36 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.image3 = self.createImageItem(
             'TCGA-OR-A5J2-01A-01-TS1.F951E65D-4231-4880-83AB-D17520D1AC95.svs',
             self.slide3
+        )
+
+        self.pathologyFolder = self.model('folder').createFolder(
+            self.publicFolder, 'pathologies',
+            public=True, creator=self.user
+        )
+        self.pathology1 = self.model('item').createItem(
+            'TCGA-OR-A5J1.1130D2F4-FABF-4F97-B6A0-23390E196305.pdf',
+            self.user,
+            self.pathologyFolder
+        )
+        self.pathology2 = self.model('item').createItem(
+            'TCGA-OR-A5J2.33BC8197-BDEB-4EC4-83A4-B871A8C0A094.pdf',
+            self.user,
+            self.pathologyFolder
+        )
+
+        self.aperioFolder = self.model('folder').createFolder(
+            self.publicFolder, 'annotations',
+            public=True, creator=self.user
+        )
+        self.aperio1 = self.model('item').createItem(
+            'TCGA-OR-A5J1-01Z-00-DX1.xml',
+            self.user,
+            self.aperioFolder
+        )
+        self.aperio2 = self.model('item').createItem(
+            'TCGA-OR-A5J2-01Z-00-DX1.xml',
+            self.user,
+            self.aperioFolder
         )
 
     def createImageItem(self, name, slide):
@@ -439,3 +472,523 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertStatusOk(resp)
         images = list(self.model('image', 'digital_slide_archive').find({}))
         self.assertEqual(len(images), 3)
+
+    def testCancerEndpoints(self):
+        resp = self.request(
+            path='/tcga/cancer'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, [])
+
+        resp = self.request(
+            path='/tcga/cancer',
+            params={'folderId': self.cancer['_id']},
+            method='POST'
+        )
+        self.assertStatus(resp, 401)
+
+        resp = self.request(
+            path='/tcga/cancer',
+            params={'folderId': self.cancer['_id']},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/cancer/' + str(self.cancer['_id'])
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.cancer['name'])
+
+        resp = self.request(
+            path='/tcga/cancer/' + str(self.cancer['_id']),
+            method='DELETE',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/cancer'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, [])
+
+    def testCaseEndpoints(self):
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case',
+            params={'cancer': str(self.cancer['_id'])}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 2)
+
+        resp = self.request(
+            path='/tcga/case/' + str(self.case1['_id']),
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.case1['name'])
+
+        resp = self.request(
+            path='/tcga/case/' + str(self.case1['_id']),
+            method='DELETE',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case',
+            params={'cancer': str(self.cancer['_id'])}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+
+        resp = self.request(
+            path='/tcga/case',
+            params={'folderId': self.case1['_id']},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.case1['name'])
+
+        resp = self.request(
+            path='/tcga/case/label/' + self.case2['name']
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['_id'], str(self.case2['_id']))
+
+        resp = self.request(
+            path='/tcga/case/label/' + 'notalabel'
+        )
+        self.assertStatus(resp, 400)
+
+    def testCaseMetadata(self):
+        id1 = str(self.case1['_id'])
+        id2 = str(self.case2['_id'])
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/tables'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, [])
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/table1',
+            method='POST',
+            body=json.dumps({
+                'key1': 'value1',
+                'key2': 'value2'
+            })
+        )
+        self.assertStatus(resp, 401)
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/table1',
+            method='POST',
+            body=json.dumps({
+                'key1': 'value1',
+                'key2': 'value2'
+            }),
+            user=self.user,
+            type='application/json'
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/tables'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['table1'])
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/table1',
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(set(resp.json.keys()), {'key1', 'key2'})
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/table1',
+            method='PUT',
+            body=json.dumps({
+                'key1': None,
+                'key3': 'value3'
+            }),
+            user=self.user,
+            type='application/json'
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case/' + id1 + '/metadata/table1',
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(set(resp.json.keys()), {'key2', 'key3'})
+
+        resp = self.request(
+            path='/tcga/case/' + id2 + '/metadata/table1',
+            method='POST',
+            body=json.dumps({
+                'key1': 'value1'
+            }),
+            user=self.user,
+            type='application/json'
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case/search',
+            params={'table': 'table1'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 2)
+
+        resp = self.request(
+            path='/tcga/case/search',
+            params={'table': 'table1', 'key': 'key1'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(resp.json[0]['_id'], id2)
+
+        resp = self.request(
+            path='/tcga/case/search',
+            params={'table': 'table1', 'key': 'key1', 'value': 'value2'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 0)
+
+        resp = self.request(
+            path='/tcga/case/' + id2 + '/metadata/table1',
+            method='DELETE',
+            user=self.user
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case/' + id2 + '/metadata/tables'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, [])
+
+    def testSlideEndpoints(self):
+        case1 = str(self.case1['_id'])
+        slide1 = str(self.slide1['_id'])
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/slide',
+            params={'case': case1}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 2)
+
+        resp = self.request(
+            path='/tcga/slide/' + slide1
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.slide1['name'])
+
+        resp = self.request(
+            path='/tcga/slide/' + slide1,
+            method='DELETE',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/slide/' + slide1,
+            method='DELETE',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/slide/' + slide1
+        )
+        self.assertStatus(resp, 400)
+
+        resp = self.request(
+            path='/tcga/slide',
+            params={'folderId': slide1},
+            method='POST',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/slide',
+            params={'folderId': slide1},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/slide/' + slide1
+        )
+        self.assertStatusOk(resp)
+
+    def testImageEndpoints(self):
+        slide1 = str(self.slide1['_id'])
+        image1 = str(self.image1['_id'])
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/image',
+            params={'slide': slide1}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+
+        resp = self.request(
+            path='/tcga/image/' + image1
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.image1['name'])
+
+        resp = self.request(
+            path='/tcga/image/' + image1,
+            method='DELETE',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/image/' + image1,
+            method='DELETE',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/image/' + image1
+        )
+        self.assertStatus(resp, 400)
+
+        resp = self.request(
+            path='/tcga/image',
+            params={'itemId': image1},
+            method='POST',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/image',
+            params={'itemId': image1},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/image/' + image1
+        )
+        self.assertStatusOk(resp)
+
+    def testPathologyEndpoints(self):
+        case1 = str(self.case1['_id'])
+        pathology1 = str(self.pathology1['_id'])
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/pathology',
+            params={'id': pathology1},
+            method='POST',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/pathology',
+            params={'id': pathology1},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/pathology',
+            params={'case': case1}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+
+        resp = self.request(
+            path='/tcga/pathology/' + pathology1
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.pathology1['name'])
+
+        resp = self.request(
+            path='/tcga/pathology/' + pathology1,
+            method='DELETE',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/pathology/' + pathology1,
+            method='DELETE',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/pathology/' + pathology1
+        )
+        self.assertStatus(resp, 400)
+
+        resp = self.request(
+            path='/tcga/pathology',
+            params={'itemId': pathology1},
+            method='POST',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/pathology',
+            params={'id': pathology1},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/pathology/' + pathology1
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/pathology',
+            params={'id': str(self.pathologyFolder['_id']), 'recursive': True},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/pathology/' + str(self.pathology2['_id'])
+        )
+        self.assertStatusOk(resp)
+
+    def testAperioEndpoints(self):
+        case1 = str(self.case1['_id'])
+        aperio1 = str(self.aperio1['_id'])
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/aperio',
+            params={'id': aperio1},
+            method='POST',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/aperio',
+            params={'id': aperio1},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/aperio',
+            params={'case': case1}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+
+        resp = self.request(
+            path='/tcga/aperio/' + aperio1
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], self.aperio1['name'])
+
+        resp = self.request(
+            path='/tcga/aperio/' + aperio1,
+            method='DELETE',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/aperio/' + aperio1,
+            method='DELETE',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/aperio/' + aperio1
+        )
+        self.assertStatus(resp, 400)
+
+        resp = self.request(
+            path='/tcga/aperio',
+            params={'id': aperio1},
+            method='POST',
+            user=self.user
+        )
+        self.assertStatus(resp, 403)
+
+        resp = self.request(
+            path='/tcga/aperio',
+            params={'id': aperio1},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/aperio/' + aperio1
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/aperio',
+            params={'id': str(self.aperioFolder['_id']), 'recursive': True},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/aperio/' + str(self.aperio2['_id'])
+        )
+        self.assertStatusOk(resp)

@@ -93,7 +93,7 @@ class TCGAModel(object):
 
     def removeTCGA(self, doc):
         del doc['tcga']
-        self.save(doc, baseModel=True)
+        self.save(doc, baseModel=True, validate=False)
         return doc
 
     def getTCGAType(self, doc):
