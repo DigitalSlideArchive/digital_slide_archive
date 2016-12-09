@@ -149,8 +149,9 @@ class TCGAModel(object):
             model = self.model(modelType)
             try:
                 doc = model.load(id, **kwargs)
-                doc['_modelType'] = modelType
-                return doc
+                if doc:
+                    doc['_modelType'] = modelType
+                    return doc
             except ValidationException:
                 pass
         raise ValidationException(

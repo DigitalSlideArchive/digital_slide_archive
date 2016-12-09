@@ -16,7 +16,7 @@ class Image(TCGAModel, Item):
             )
         slide = self.model('slide', 'digital_slide_archive').load(
             doc['folderId'], force=True)
-        if not self.getTCGAType(slide) == 'slide':
+        if not slide or self.getTCGAType(slide) != 'slide':
             raise ValidationException(
                 'An image must be a child of a slide'
             )

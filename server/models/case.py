@@ -9,14 +9,14 @@ class Case(TCGAModel, Folder):
     TCGAType = 'case'
 
     def validate(self, doc, **kwargs):
-        super(Case, self).validate(doc, **kwargs)
-        if not doc['parentCollection'] == 'folder':
+        if doc.get('parentCollection') != 'folder':
             raise ValidationException(
                 'A Case model must be a child of a folder'
             )
+        super(Case, self).validate(doc, **kwargs)
         cancer = self.model('cancer', 'digital_slide_archive').load(
             doc['parentId'], force=True)
-        if self.getTCGAType(cancer) != 'cancer':
+        if not cancer or self.getTCGAType(cancer) != 'cancer':
             raise ValidationException(
                 'A Case model must be a child of a cancer'
             )
@@ -43,11 +43,3 @@ class Case(TCGAModel, Folder):
             except ValidationException:
                 pass
         return doc
-
-    def updateMetadata(self, doc, meta, replace=False):
-        tcga = self.getTCGA(doc)
-        if replace:
-            del tcga['meta']
-        tcga.setdefault('meta', {})
-        tcga['meta'].update(meta)
-        return self.save(doc)
