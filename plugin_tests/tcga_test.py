@@ -18,7 +18,6 @@
 #############################################################################
 import os
 import json
-import unittest
 
 from girder import config
 from girder.models.model_base import ValidationException
@@ -79,7 +78,6 @@ class BaseTest(object):
 
 
 # test tcga models
-@unittest.skip
 class TCGAModelTest(BaseTest, base.TestCase):
     def testPruneNoneValues(self):
         from girder.plugins.digital_slide_archive.models.meta \
