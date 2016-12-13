@@ -9,6 +9,7 @@ from ..constants import TCGACollectionSettingKey
 
 
 def pruneNoneValues(d):
+    """Recursively prune dictionary items with value `None`."""
     toDelete = [k for k, v in six.viewitems(d) if v is None]
     for k in toDelete:
         del d[k]
@@ -18,6 +19,7 @@ def pruneNoneValues(d):
 
 
 def updateDict(d, u):
+    """Recursively update a dictionary with items from another."""
     for k, v in six.viewitems(u):
         if isinstance(v, dict):
             r = updateDict(d.get(k, {}), v)
@@ -28,27 +30,52 @@ def updateDict(d, u):
 
 
 class TCGAModel(object):
+    """
+    This class is used as a mixin for all TCGA model classes.  TCGA models
+    are distinguished by the existence of a `tcga` property at the top level
+    of their document.  Each model can use this key differently, but all
+    models must set `tcga.type` to be the model subclass.  This is handled
+    automatically by the mixin from the TCGAType static call property.
+    This mixin overrides several Girder core methods to properly set tcga
+    metadata as well as limit queries to only the given model type.
+
+    The special `tcga` object contained in these documents can contain an
+    additional `meta` field which is interpreted as model specific metadata.
+    This is analogous to the `meta` field in Girder core items and folders.
+    """
+
+    #: Matches valid case names
     case_re = re.compile('tcga-[a-z0-9]{2}-[a-z0-9]{4}', flags=re.I)
+
+    #: Matches valid uuid's
     uuid_re = re.compile(
         '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
         flags=re.I
     )
+
+    #: Matches valid tcga barcodes
     barcode_re = re.compile(
         case_re.pattern + '[0-9a-z-]*',
         flags=re.I
     )
+
+    #: Parses tcga slide image file names
     image_re = re.compile(
         '^(?P<barcode>(?P<case>' +
         case_re.pattern + ')[0-9a-z-]*)\.' +
         '(?P<uuid>' + uuid_re.pattern + ')\.svs$',
         flags=re.I
     )
+
+    #: Parses tcga pathology report file names
     pathology_re = re.compile(
         '^(?P<case>' + case_re.pattern +
         ')\.(?P<uuid>' + uuid_re.pattern +
         ')\.pdf$',
         flags=re.I
     )
+
+    #: Parses tcga Aperio annotation file names
     aperio_re = re.compile(
         '^(?P<barcode>(?P<case>' +
         case_re.pattern + ')[0-9a-z-]*)\.xml',
@@ -56,50 +83,67 @@ class TCGAModel(object):
     )
 
     def initialize(self, **kwargs):
+        """Expose the tcga key as public metadata."""
         self.exposeFields(AccessType.READ, fields='tcga')
         super(TCGAModel, self).initialize(**kwargs)
 
     def save(self, doc, baseModel=False, **kwargs):
+        """Set the TCGA model type on save."""
         if not baseModel:
             self.setTCGA(doc, type=self.TCGAType)
         return super(TCGAModel, self).save(doc, **kwargs)
 
     def find(self, query=None, **kwargs):
+        """Append TCGA model type to any query on this model."""
         query = query or {}
         query['tcga.type'] = self.TCGAType
         return super(TCGAModel, self).find(query, **kwargs)
 
     def findOne(self, query=None, **kwargs):
+        """Append TCGA model type to any query on this model."""
         query = query or {}
         query['tcga.type'] = self.TCGAType
         return super(TCGAModel, self).findOne(query, **kwargs)
 
     def setTCGA(self, doc, **tcga):
+        """Update the TCGA object and prune values of None."""
         self.getTCGA(doc).update(tcga)
         pruneNoneValues(self.getTCGA(doc))
         return self
 
     def getTCGA(self, doc):
+        """Return the TCGA object."""
         return doc.setdefault('tcga', {})
 
     def updateTCGAMeta(self, doc, meta):
+        """Update TCGA metadata."""
         meta = updateDict(self.getTCGAMeta(doc), meta)
         pruneNoneValues(meta)
         return self
 
     def getTCGAMeta(self, doc):
+        """Return TCGA metadata from a document."""
         tcga = self.getTCGA(doc)
         return tcga.setdefault('meta', {})
 
     def removeTCGA(self, doc):
+        """Remove the tcga key and save the document.
+
+        This method will effectively reset the document so that
+        it no longer behaves as a TCGA document.  This is the
+        opposite of the import methods that promote Girder models
+        to TCGA types.
+        """
         del doc['tcga']
         self.save(doc, baseModel=True, validate=False)
         return doc
 
     def getTCGAType(self, doc):
+        """Get the type of model expressed by the document."""
         return self.getTCGA(doc).get('type')
 
     def getTCGACollection(self):
+        """Get the unique TCGA collection from the settings collection."""
         tcga = self.model('setting').get(
             TCGACollectionSettingKey
         )
@@ -130,15 +174,19 @@ class TCGAModel(object):
         return d
 
     def parseImage(self, name):
+        """Parse a slide image file name."""
         return self._parse(name, self.image_re)
 
     def parsePathology(self, name):
+        """Parse a pathology report file name."""
         return self._parse(name, self.pathology_re)
 
     def parseAperio(self, name):
+        """Parse an annotation file name."""
         return self._parse(name, self.aperio_re)
 
     def importDocument(self, doc, **kwargs):
+        """Promote a Girder core document to a TCGA model."""
         self.setTCGA(doc)
         self.save(doc)
         return doc
