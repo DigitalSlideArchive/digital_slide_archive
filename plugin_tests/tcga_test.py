@@ -74,7 +74,7 @@ class BaseTest(object):
         self.model('setting').set(
             'tcga.tcga_collection_id', self.tcgaCollection['_id'])
 
-        self.TCGAModel = self.model('cancer', 'digital_slide_archive')
+        self.TCGAModel = self.model('cohort', 'digital_slide_archive')
 
 
 # test tcga models
@@ -175,45 +175,45 @@ class TCGAModelTest(BaseTest, base.TestCase):
             self.publicFolder['_id']
         )
 
-    def testCancerModel(self):
+    def testcohortModel(self):
         folderModel = self.model('folder')
-        cancerModel = self.model('cancer', 'digital_slide_archive')
+        cohortModel = self.model('cohort', 'digital_slide_archive')
         doc = folderModel.createFolder(
             self.tcgaCollection, 'ucec', parentType='collection',
             public=True, creator=self.admin
         )
-        cancerModel.importDocument(doc, user=self.admin)
-        self.assertEqual(cancerModel.getTCGAType(doc), 'cancer')
+        cohortModel.importDocument(doc, user=self.admin)
+        self.assertEqual(cohortModel.getTCGAType(doc), 'cohort')
 
         with self.assertRaises(ValidationException):
-            cancerModel.importDocument(self.publicFolder, user=self.admin)
+            cohortModel.importDocument(self.publicFolder, user=self.admin)
 
-        cancerModel.removeTCGA(doc)
-        self.assertEquals(cancerModel.findOne({}), None)
+        cohortModel.removeTCGA(doc)
+        self.assertEquals(cohortModel.findOne({}), None)
 
         folderModel.createFolder(
             doc, 'subfolder', public=True, creator=self.admin
         )
-        cancerModel.importDocument(
+        cohortModel.importDocument(
             doc, user=self.admin, recurse=True
         )
-        self.assertEquals(cancerModel.findOne({}).get('_id'), doc['_id'])
+        self.assertEquals(cohortModel.findOne({}).get('_id'), doc['_id'])
 
     def testCaseModel(self):
         folderModel = self.model('folder')
-        cancerModel = self.model('cancer', 'digital_slide_archive')
+        cohortModel = self.model('cohort', 'digital_slide_archive')
         caseModel = self.model('case', 'digital_slide_archive')
 
-        cancer = folderModel.createFolder(
+        cohort = folderModel.createFolder(
             self.tcgaCollection, 'ucec', parentType='collection',
             public=True, creator=self.admin
         )
         invaliddoc = folderModel.createFolder(
-            cancer, 'invalid name', parentType='folder',
+            cohort, 'invalid name', parentType='folder',
             public=True, creator=self.admin
         )
         doc = folderModel.createFolder(
-            cancer, 'TCGA-W5-AA2O', parentType='folder',
+            cohort, 'TCGA-W5-AA2O', parentType='folder',
             public=True, creator=self.admin
         )
         folderModel.createFolder(
@@ -226,7 +226,7 @@ class TCGAModelTest(BaseTest, base.TestCase):
         with self.assertRaises(ValidationException):
             caseModel.importDocument(doc, user=self.admin)
 
-        cancerModel.importDocument(cancer, user=self.admin, recurse=True)
+        cohortModel.importDocument(cohort, user=self.admin, recurse=True)
         self.assertEqual(
             caseModel.findOne({'_id': doc['_id']}).get('_id'),
             doc['_id']
@@ -237,15 +237,15 @@ class TCGAModelTest(BaseTest, base.TestCase):
 
     def testSlideModel(self):
         folderModel = self.model('folder')
-        cancerModel = self.model('cancer', 'digital_slide_archive')
+        cohortModel = self.model('cohort', 'digital_slide_archive')
         slideModel = self.model('slide', 'digital_slide_archive')
 
-        cancer = folderModel.createFolder(
+        cohort = folderModel.createFolder(
             self.tcgaCollection, 'ucec', parentType='collection',
             public=True, creator=self.admin
         )
         case = folderModel.createFolder(
-            cancer, 'TCGA-W5-AA2O', parentType='folder',
+            cohort, 'TCGA-W5-AA2O', parentType='folder',
             public=True, creator=self.admin
         )
         doc = folderModel.createFolder(
@@ -259,7 +259,7 @@ class TCGAModelTest(BaseTest, base.TestCase):
         with self.assertRaises(ValidationException):
             slideModel.importDocument(doc, user=self.admin)
 
-        cancerModel.importDocument(cancer, user=self.admin, recurse=True)
+        cohortModel.importDocument(cohort, user=self.admin, recurse=True)
         self.assertEqual(
             slideModel.findOne({'_id': doc['_id']}).get('_id'),
             doc['_id']
@@ -269,15 +269,15 @@ class TCGAModelTest(BaseTest, base.TestCase):
         folderModel = self.model('folder')
         itemModel = self.model('item')
         fileModel = self.model('file')
-        cancerModel = self.model('cancer', 'digital_slide_archive')
+        cohortModel = self.model('cohort', 'digital_slide_archive')
         imageModel = self.model('image', 'digital_slide_archive')
 
-        cancer = folderModel.createFolder(
+        cohort = folderModel.createFolder(
             self.tcgaCollection, 'ucec', parentType='collection',
             public=True, creator=self.admin
         )
         case = folderModel.createFolder(
-            cancer, 'TCGA-W5-AA2O', parentType='folder',
+            cohort, 'TCGA-W5-AA2O', parentType='folder',
             public=True, creator=self.admin
         )
         slide = folderModel.createFolder(
@@ -305,7 +305,7 @@ class TCGAModelTest(BaseTest, base.TestCase):
         with self.assertRaises(ValidationException):
             imageModel.importDocument(doc, user=self.admin)
 
-        cancerModel.importDocument(cancer, user=self.admin, recurse=True)
+        cohortModel.importDocument(cohort, user=self.admin, recurse=True)
 
         ifile = fileModel.createFile(
             self.admin, invalid, doc['name'],
@@ -329,17 +329,17 @@ class TCGAModelTest(BaseTest, base.TestCase):
 class TCGARestTest(BaseTest, base.TestCase):
     def setUp(self):
         super(TCGARestTest, self).setUp()
-        self.cancer = self.model('folder').createFolder(
+        self.cohort = self.model('folder').createFolder(
             self.tcgaCollection, 'acc',
             parentType='collection', public=True, creator=self.admin
         )
 
         self.case1 = self.model('folder').createFolder(
-            self.cancer, 'TCGA-OR-A5J1', parentType='folder',
+            self.cohort, 'TCGA-OR-A5J1', parentType='folder',
             public=True, creator=self.user
         )
         self.case2 = self.model('folder').createFolder(
-            self.cancer, 'TCGA-OR-A5J2', parentType='folder',
+            self.cohort, 'TCGA-OR-A5J2', parentType='folder',
             public=True, creator=self.user
         )
 
@@ -471,43 +471,43 @@ class TCGARestTest(BaseTest, base.TestCase):
         images = list(self.model('image', 'digital_slide_archive').find({}))
         self.assertEqual(len(images), 3)
 
-    def testCancerEndpoints(self):
+    def testcohortEndpoints(self):
         resp = self.request(
-            path='/tcga/cancer'
+            path='/tcga/cohort'
         )
         self.assertStatusOk(resp)
         self.assertEqual(resp.json, [])
 
         resp = self.request(
-            path='/tcga/cancer',
-            params={'folderId': self.cancer['_id']},
+            path='/tcga/cohort',
+            params={'folderId': self.cohort['_id']},
             method='POST'
         )
         self.assertStatus(resp, 401)
 
         resp = self.request(
-            path='/tcga/cancer',
-            params={'folderId': self.cancer['_id']},
+            path='/tcga/cohort',
+            params={'folderId': self.cohort['_id']},
             method='POST',
             user=self.admin
         )
         self.assertStatusOk(resp)
 
         resp = self.request(
-            path='/tcga/cancer/' + str(self.cancer['_id'])
+            path='/tcga/cohort/' + str(self.cohort['_id'])
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.json['name'], self.cancer['name'])
+        self.assertEqual(resp.json['name'], self.cohort['name'])
 
         resp = self.request(
-            path='/tcga/cancer/' + str(self.cancer['_id']),
+            path='/tcga/cohort/' + str(self.cohort['_id']),
             method='DELETE',
             user=self.admin
         )
         self.assertStatusOk(resp)
 
         resp = self.request(
-            path='/tcga/cancer'
+            path='/tcga/cohort'
         )
         self.assertStatusOk(resp)
         self.assertEqual(resp.json, [])
@@ -522,7 +522,7 @@ class TCGARestTest(BaseTest, base.TestCase):
 
         resp = self.request(
             path='/tcga/case',
-            params={'cancer': str(self.cancer['_id'])}
+            params={'cohort': str(self.cohort['_id'])}
         )
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 2)
@@ -542,7 +542,7 @@ class TCGARestTest(BaseTest, base.TestCase):
 
         resp = self.request(
             path='/tcga/case',
-            params={'cancer': str(self.cancer['_id'])}
+            params={'cohort': str(self.cohort['_id'])}
         )
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 1)

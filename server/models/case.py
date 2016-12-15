@@ -17,11 +17,11 @@ class Case(TCGAModel, Folder):
                 'A Case model must be a child of a folder'
             )
         super(Case, self).validate(doc, **kwargs)
-        cancer = self.model('cancer', 'digital_slide_archive').load(
+        cohort = self.model('cohort', 'digital_slide_archive').load(
             doc['parentId'], force=True)
-        if not cancer or self.getTCGAType(cancer) != 'cancer':
+        if not cohort or self.getTCGAType(cohort) != 'cohort':
             raise ValidationException(
-                'A Case model must be a child of a cancer'
+                'A Case model must be a child of a cohort'
             )
         if not self.case_re.match(self.getTCGA(doc).get('label', '')):
             raise ValidationException(

@@ -42,10 +42,10 @@ class TCGAResource(Resource):
         self.route('POST', ('import',), self.importCollection)
         self.route('DELETE', (), self.deleteCollection)
 
-        self.route('GET', ('cancer',), self.findCancer)
-        self.route('GET', ('cancer', ':id'), self.getCancer)
-        self.route('POST', ('cancer',), self.importCancer)
-        self.route('DELETE', ('cancer', ':id'), self.deleteCancer)
+        self.route('GET', ('cohort',), self.findcohort)
+        self.route('GET', ('cohort', ':id'), self.getcohort)
+        self.route('POST', ('cohort',), self.importcohort)
+        self.route('DELETE', ('cohort', ':id'), self.deletecohort)
 
         self.route('GET', ('case',), self.findCase)
         self.route('GET', ('case', ':id'), self.getCase)
@@ -127,7 +127,7 @@ class TCGAResource(Resource):
         token = self.getCurrentToken()
         tcga = self.getTCGACollection(level=AccessType.WRITE)
 
-        childModel = self.model('cancer', 'digital_slide_archive')
+        childModel = self.model('cohort', 'digital_slide_archive')
         children = self.model('folder').childFolders(
             tcga, 'collection', user=user
         )
@@ -146,39 +146,39 @@ class TCGAResource(Resource):
     def deleteCollection(self, params):
         return self.model('setting').unset(TCGACollectionSettingKey)
 
-    # Cancer endpoints
+    # cohort endpoints
     #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
-        Description('List cancers in the TCGA dataset')
+        Description('List cohorts in the TCGA dataset')
         .pagingParams(defaultSort='name')
     )
-    def findCancer(self, params):
+    def findcohort(self, params):
         user = self.getCurrentUser()
         tcga = self.getTCGACollection()
         limit, offset, sort = self.getPagingParameters(params, 'name')
 
-        return list(self.model('cancer', 'digital_slide_archive').childFolders(
+        return list(self.model('cohort', 'digital_slide_archive').childFolders(
             parentType='collection', parent=tcga,
             user=user, offset=offset, limit=limit, sort=sort
         ))
 
     @access.public(scope=TokenScope.DATA_READ)
-    @loadmodel(model='cancer', plugin='digital_slide_archive',
+    @loadmodel(model='cohort', plugin='digital_slide_archive',
                level=AccessType.READ)
     @describeRoute(
-        Description('Get a cancer document from an id')
-        .param('id', 'The id of the cancer', paramType='path')
+        Description('Get a cohort document from an id')
+        .param('id', 'The id of the cohort', paramType='path')
     )
-    def getCancer(self, cancer, params):
-        return cancer
+    def getcohort(self, cohort, params):
+        return cohort
 
     @access.admin
     @describeRoute(
-        Description('Import a folder as a TCGA cancer type')
+        Description('Import a folder as a TCGA cohort type')
         .param('folderId', 'The id of the folder to import')
     )
-    def importCancer(self, params):
+    def importcohort(self, params):
         user = self.getCurrentUser()
         token = self.getCurrentToken()
         self.requireParams('folderId', params)
@@ -188,40 +188,40 @@ class TCGAResource(Resource):
             level=AccessType.WRITE, exc=True
         )
 
-        cancer = self.model('cancer', 'digital_slide_archive').importDocument(
+        cohort = self.model('cohort', 'digital_slide_archive').importDocument(
             folder, user=user, token=token
         )
-        return cancer
+        return cohort
 
     @access.admin
-    @loadmodel(model='cancer', plugin='digital_slide_archive',
+    @loadmodel(model='cohort', plugin='digital_slide_archive',
                level=AccessType.WRITE)
     @describeRoute(
-        Description('Remove a cancer type')
-        .param('id', 'The id of the cancer', paramType='path')
+        Description('Remove a cohort type')
+        .param('id', 'The id of the cohort', paramType='path')
     )
-    def deleteCancer(self, cancer, params):
-        return self.model('cancer', 'digital_slide_archive').removeTCGA(
-            cancer)
+    def deletecohort(self, cohort, params):
+        return self.model('cohort', 'digital_slide_archive').removeTCGA(
+            cohort)
 
     # Case endpoints
     #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
         Description('List cases in the TCGA dataset')
-        .param('cancer', 'The id of the cancer document', required=True)
+        .param('cohort', 'The id of the cohort document', required=True)
         .pagingParams(defaultSort='name')
     )
     def findCase(self, params):
         user = self.getCurrentUser()
         limit, offset, sort = self.getPagingParameters(params, 'name')
-        cancer = self.model('cancer', 'digital_slide_archive').load(
-            id=params['cancer'], user=user, level=AccessType.READ,
+        cohort = self.model('cohort', 'digital_slide_archive').load(
+            id=params['cohort'], user=user, level=AccessType.READ,
             exc=True
         )
 
         return list(self.model('case', 'digital_slide_archive').childFolders(
-            parentType='folder', parent=cancer,
+            parentType='folder', parent=cohort,
             user=user, offset=offset, limit=limit, sort=sort
         ))
 

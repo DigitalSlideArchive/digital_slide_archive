@@ -4,21 +4,21 @@ from girder.models.model_base import ValidationException
 from .meta import TCGAModel
 
 
-class Cancer(TCGAModel, Folder):
+class Cohort(TCGAModel, Folder):
 
-    TCGAType = 'cancer'
+    TCGAType = 'cohort'
 
     def validate(self, doc, **kwargs):
-        super(Cancer, self).validate(doc, **kwargs)
+        super(Cohort, self).validate(doc, **kwargs)
         if doc['parentCollection'] != 'collection':
             raise ValidationException(
-                'A Cancer model must be a child of a collection'
+                'A Cohort model must be a child of a collection'
             )
         return doc
 
     def importDocument(self, doc, **kwargs):
         recurse = kwargs.get('recurse', False)
-        doc = super(Cancer, self).importDocument(
+        doc = super(Cohort, self).importDocument(
             doc, **kwargs)
         if not recurse:
             return doc
