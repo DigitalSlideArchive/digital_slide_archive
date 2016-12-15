@@ -7,6 +7,9 @@ from .meta import TCGAModel
 class Case(TCGAModel, Folder):
 
     TCGAType = 'case'
+    TCGAIndices = [
+        'tcga.label'
+    ]
 
     def validate(self, doc, **kwargs):
         if doc.get('parentCollection') != 'folder':

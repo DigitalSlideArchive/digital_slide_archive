@@ -44,6 +44,9 @@ class TCGAModel(object):
     This is analogous to the `meta` field in Girder core items and folders.
     """
 
+    #: Additional indices to add to the collection
+    TCGAIndices = []
+
     #: Matches valid case names
     case_re = re.compile('tcga-[a-z0-9]{2}-[a-z0-9]{4}', flags=re.I)
 
@@ -85,6 +88,7 @@ class TCGAModel(object):
     def initialize(self, **kwargs):
         """Expose the tcga key as public metadata."""
         self.exposeFields(AccessType.READ, fields='tcga')
+        self.ensureIndices(['tcga.type'] + list(self.TCGAIndices))
         super(TCGAModel, self).initialize(**kwargs)
 
     def save(self, doc, baseModel=False, **kwargs):
