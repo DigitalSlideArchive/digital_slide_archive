@@ -46,6 +46,7 @@ class TCGAResource(Resource):
         self.route('GET', ('cohort', ':id'), self.getcohort)
         self.route('POST', ('cohort',), self.importcohort)
         self.route('DELETE', ('cohort', ':id'), self.deletecohort)
+        self.route('GET', ('cohort', ':id', 'slides'), self.cohortListSlides)
 
         self.route('GET', ('case',), self.findCase)
         self.route('GET', ('case', ':id'), self.getCase)
@@ -203,6 +204,20 @@ class TCGAResource(Resource):
     def deletecohort(self, cohort, params):
         return self.model('cohort', 'digital_slide_archive').removeTCGA(
             cohort)
+
+    @access.public
+    @loadmodel(model='cohort', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('List slides in a cohort')
+        .param('id', 'The id of the cohort', paramType='path')
+        .pagingParams(defaultSort='name')
+    )
+    def cohortListSlides(self, cohort, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        return list(self.model('slide', 'digital_slide_archive').find({
+            'tcga.cohort': cohort['name']
+        }, limit=limit, offset=offset, sort=sort))
 
     # Case endpoints
     #####################

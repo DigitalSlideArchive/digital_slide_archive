@@ -175,7 +175,7 @@ class TCGAModelTest(BaseTest, base.TestCase):
             self.publicFolder['_id']
         )
 
-    def testcohortModel(self):
+    def testCohortModel(self):
         folderModel = self.model('folder')
         cohortModel = self.model('cohort', 'digital_slide_archive')
         doc = folderModel.createFolder(
@@ -334,12 +334,21 @@ class TCGARestTest(BaseTest, base.TestCase):
             parentType='collection', public=True, creator=self.admin
         )
 
+        self.cohort2 = self.model('folder').createFolder(
+            self.tcgaCollection, 'other',
+            parentType='collection', public=True, creator=self.admin
+        )
+
         self.case1 = self.model('folder').createFolder(
             self.cohort, 'TCGA-OR-A5J1', parentType='folder',
             public=True, creator=self.user
         )
         self.case2 = self.model('folder').createFolder(
             self.cohort, 'TCGA-OR-A5J2', parentType='folder',
+            public=True, creator=self.user
+        )
+        self.case3 = self.model('folder').createFolder(
+            self.cohort2, 'TCGA-OR-A5J3', parentType='folder',
             public=True, creator=self.user
         )
 
@@ -353,6 +362,10 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.slide3 = self.model('folder').createFolder(
             self.case2, 'TCGA-OR-A5J2-01A-01-TS1', parentType='folder',
+            public=True, creator=self.user
+        )
+        self.slide4 = self.model('folder').createFolder(
+            self.case3, 'TCGA-OR-A5J3-01A-01-TS2', parentType='folder',
             public=True, creator=self.user
         )
 
@@ -471,7 +484,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         images = list(self.model('image', 'digital_slide_archive').find({}))
         self.assertEqual(len(images), 3)
 
-    def testcohortEndpoints(self):
+    def testCohortEndpoints(self):
         resp = self.request(
             path='/tcga/cohort'
         )
@@ -511,6 +524,25 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatusOk(resp)
         self.assertEqual(resp.json, [])
+
+        # import recursively and test searching for slides
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+        resp = self.request(
+            path='/tcga/cohort/' + str(self.cohort['_id']) + '/slides'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 3)
+
+        resp = self.request(
+            path='/tcga/cohort/' + str(self.cohort2['_id']) + '/slides'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
 
     def testCaseEndpoints(self):
         resp = self.request(

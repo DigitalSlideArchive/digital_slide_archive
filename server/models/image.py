@@ -67,6 +67,14 @@ class Image(TCGAModel, Item):
         self._setLargeImage(doc, fileId, user, token)
 
         name = doc['name']
-        tcga = self.parseImage(name)
+        parent = self.model('slide', 'digital_slide_archive').load(
+            doc.get('folderId'), force=True
+        )
+        if not parent:
+            raise ValidationException(
+                'Invalid item document'
+            )
+        tcga = self.getTCGA(parent)
+        tcga.update(self.parseImage(name))
         self.setTCGA(doc, **tcga)
         return super(Image, self).importDocument(doc, **kwargs)

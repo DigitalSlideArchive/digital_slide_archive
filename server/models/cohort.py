@@ -18,6 +18,7 @@ class Cohort(TCGAModel, Folder):
 
     def importDocument(self, doc, **kwargs):
         recurse = kwargs.get('recurse', False)
+        self.setTCGA(doc, cohort=doc['name'])
         doc = super(Cohort, self).importDocument(
             doc, **kwargs)
         if not recurse:

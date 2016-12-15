@@ -24,6 +24,16 @@ class Slide(TCGAModel, Folder):
 
     def importDocument(self, doc, **kwargs):
         recurse = kwargs.get('recurse', False)
+        parent = self.model('case', 'digital_slide_archive').load(
+            doc.get('parentId'), force=True
+        )
+        if not parent:
+            raise ValidationException(
+                'Invalid folder document'
+            )
+        tcga = self.getTCGA(parent)
+        tcga.pop('meta', None)
+        self.setTCGA(doc, **tcga)
         doc = super(Slide, self).importDocument(doc, **kwargs)
         if not recurse:
             return doc
