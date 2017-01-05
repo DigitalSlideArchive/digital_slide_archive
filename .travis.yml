@@ -14,8 +14,8 @@ compiler:
     - gcc
 
 before_install:
-    - GIRDER_VERSION="v1.7.0"
-    - LARGE_IMAGE_VERSION=master
+    - GIRDER_VERSION=master
+    - LARGE_IMAGE_VERSION=girder-2
     - main_path=$PWD
     - build_path=$PWD/build
     - mkdir -p $build_path
@@ -56,6 +56,7 @@ install:
     - pip install -U -r $large_image_path/requirements.txt
     - npm prune
     - npm install
+    - girder-install web --plugins=digital_slide_archive,large_image,worker,jobs --dev
 
 script:
     - mkdir -p $build_path/girder_testing_build
