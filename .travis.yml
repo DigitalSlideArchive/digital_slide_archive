@@ -44,6 +44,7 @@ before_install:
 
     - mkdir -p $HOME/.cache/node_modules || true
     - ln -sf $HOME/.cache/node_modules .
+    - nvm install v5
     - npm install -g npm
     - npm --version
     # - npm prune
