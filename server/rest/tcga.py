@@ -3,13 +3,14 @@
 Endpoints providing a simplified interface for handling TCGA datasets.
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
 
 import re
+import six
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
-from girder.api.rest import Resource, RestException, loadmodel
+from girder.api.rest import Resource, RestException, loadmodel, setResponseHeader
 from girder.constants import TokenScope, AccessType
 from girder.utility import setting_utilities
 from girder.models.model_base import ValidationException
@@ -17,6 +18,20 @@ from girder.models.model_base import ValidationException
 from ..constants import TCGACollectionSettingKey
 
 invalid_key_re = re.compile('[.$]')
+
+
+def pagedResponse(cursor, limit, offset, sort):
+    """Add paging headers to a paged query."""
+    total = cursor.count()
+    pages = (total - 1) // limit + 1
+    index = offset // limit
+
+    setResponseHeader('TCGA-PAGED-OFFSET', offset)
+    setResponseHeader('TCGA-PAGED-LIMIT', limit)
+    setResponseHeader('TCGA-PAGED-TOTAL', total)
+    setResponseHeader('TCGA-PAGED-INDEX', index)
+    setResponseHeader('TCGA-PAGED-PAGES', pages)
+    return list(cursor)
 
 
 class TCGAResource(Resource):
@@ -130,7 +145,7 @@ class TCGAResource(Resource):
 
         childModel = self.model('cohort', 'digital_slide_archive')
         children = self.model('folder').childFolders(
-            tcga, 'collection', user=user
+            tcga, 'collection', user=user, cursor=True
         )
         for child in children:
             try:
@@ -159,10 +174,11 @@ class TCGAResource(Resource):
         tcga = self.getTCGACollection()
         limit, offset, sort = self.getPagingParameters(params, 'name')
 
-        return list(self.model('cohort', 'digital_slide_archive').childFolders(
-            parentType='collection', parent=tcga,
+        cursor = self.model('cohort', 'digital_slide_archive').childFolders(
+            parentType='collection', parent=tcga, cursor=True,
             user=user, offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='cohort', plugin='digital_slide_archive',
@@ -235,10 +251,11 @@ class TCGAResource(Resource):
             exc=True
         )
 
-        return list(self.model('case', 'digital_slide_archive').childFolders(
-            parentType='folder', parent=cohort,
+        cursor = self.model('case', 'digital_slide_archive').childFolders(
+            parentType='folder', parent=cohort, cursor=True,
             user=user, offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='case', plugin='digital_slide_archive',
@@ -344,9 +361,10 @@ class TCGAResource(Resource):
                 'tcga.meta.' + table + '.' + key: value
             }
 
-        return list(self.model('case', 'digital_slide_archive').find(
+        cursor = self.model('case', 'digital_slide_archive').find(
             query, user=user, offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='case', plugin='digital_slide_archive',
@@ -449,10 +467,11 @@ class TCGAResource(Resource):
             id=params['case'], user=user, level=AccessType.READ,
             exc=True
         )
-        return list(self.model('slide', 'digital_slide_archive').childFolders(
-            parentType='folder', parent=case, user=user,
+        cursor = self.model('slide', 'digital_slide_archive').childFolders(
+            parentType='folder', parent=case, user=user, cursor=True,
             offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='slide', plugin='digital_slide_archive',
@@ -509,10 +528,11 @@ class TCGAResource(Resource):
             id=params['slide'], user=user, level=AccessType.READ,
             exc=True
         )
-        return list(self.model('image', 'digital_slide_archive').find(
+        cursor = self.model('image', 'digital_slide_archive').find(
             {'folderId': slide['_id']},
             offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='image', plugin='digital_slide_archive',
@@ -569,10 +589,11 @@ class TCGAResource(Resource):
             id=params['case'], user=user, level=AccessType.READ,
             exc=True
         )
-        return list(self.model('pathology', 'digital_slide_archive').find(
+        cursor = self.model('pathology', 'digital_slide_archive').find(
             {'tcga.case': case['tcga']['label']},
             offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='pathology', plugin='digital_slide_archive',
@@ -631,10 +652,11 @@ class TCGAResource(Resource):
             id=params['case'], user=user, level=AccessType.READ,
             exc=True
         )
-        return list(self.model('aperio', 'digital_slide_archive').find(
+        cursor = self.model('aperio', 'digital_slide_archive').find(
             {'tcga.case': case['tcga']['label']},
             offset=offset, limit=limit, sort=sort
-        ))
+        )
+        return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='aperio', plugin='digital_slide_archive',

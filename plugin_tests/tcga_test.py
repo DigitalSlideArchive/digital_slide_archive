@@ -351,6 +351,10 @@ class TCGARestTest(BaseTest, base.TestCase):
             self.cohort2, 'TCGA-OR-A5J3', parentType='folder',
             public=True, creator=self.user
         )
+        self.case4 = self.model('folder').createFolder(
+            self.cohort, 'TCGA-OR-A5J4', parentType='folder',
+            public=True, creator=self.user
+        )
 
         self.slide1 = self.model('folder').createFolder(
             self.case1, 'TCGA-OR-A5J1-01A-01-TS1', parentType='folder',
@@ -557,7 +561,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'cohort': str(self.cohort['_id'])}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 2)
+        self.assertEqual(len(resp.json), 3)
 
         resp = self.request(
             path='/tcga/case/' + str(self.case1['_id']),
@@ -577,7 +581,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'cohort': str(self.cohort['_id'])}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(len(resp.json), 2)
 
         resp = self.request(
             path='/tcga/case',
@@ -1022,3 +1026,45 @@ class TCGARestTest(BaseTest, base.TestCase):
             path='/tcga/aperio/' + str(self.aperio2['_id'])
         )
         self.assertStatusOk(resp)
+
+    def testPagingHeaders(self):
+        cohort1 = str(self.cohort['_id'])
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin,
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/tcga/case',
+            params={'cohort': cohort1, 'limit': 2, 'offset': 0}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.headers['TCGA-PAGED-OFFSET'], 0)
+        self.assertEqual(resp.headers['TCGA-PAGED-LIMIT'], 2)
+        self.assertEqual(resp.headers['TCGA-PAGED-TOTAL'], 3)
+        self.assertEqual(resp.headers['TCGA-PAGED-INDEX'], 0)
+        self.assertEqual(resp.headers['TCGA-PAGED-PAGES'], 2)
+
+        resp = self.request(
+            path='/tcga/case',
+            params={'cohort': cohort1, 'limit': 2, 'offset': 2}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.headers['TCGA-PAGED-OFFSET'], 2)
+        self.assertEqual(resp.headers['TCGA-PAGED-LIMIT'], 2)
+        self.assertEqual(resp.headers['TCGA-PAGED-TOTAL'], 3)
+        self.assertEqual(resp.headers['TCGA-PAGED-INDEX'], 1)
+        self.assertEqual(resp.headers['TCGA-PAGED-PAGES'], 2)
+
+        resp = self.request(
+            path='/tcga/case',
+            params={'cohort': cohort1, 'limit': 2, 'offset': 1}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.headers['TCGA-PAGED-OFFSET'], 1)
+        self.assertEqual(resp.headers['TCGA-PAGED-LIMIT'], 2)
+        self.assertEqual(resp.headers['TCGA-PAGED-TOTAL'], 3)
+        self.assertEqual(resp.headers['TCGA-PAGED-INDEX'], 0)
+        self.assertEqual(resp.headers['TCGA-PAGED-PAGES'], 2)

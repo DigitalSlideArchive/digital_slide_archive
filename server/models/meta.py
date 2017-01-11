@@ -220,3 +220,24 @@ class TCGAModel(object):
         for child in folder.find({'parentId': doc['_id']}):
             for subchild in self.iterateItems(child, **kwargs):
                 yield subchild
+
+    def childFolders(self, parent, parentType, cursor=False, filters=None,
+                     limit=0, offset=0, sort=None, **kwargs):
+        """Add a ``cursor`` option to the standard childFolders method.
+
+        The cursor option will ensure the response is a mongo cursor rather
+        than a generic generator.  The resulting cursor will *not* be
+        filtered by access control.  This option exists to allow efficient
+        paging for resources that don't require fine grained permissions.
+        """
+        if not cursor:
+            return super(TCGAModel, self).childFolders(
+                parent, parentType, limit=limit, offset=offset, sort=sort, **kwargs)
+
+        parentType = parentType.lower()
+        q = {
+            'parentId': parent['_id'],
+            'parentCollection': parentType
+        }
+        q.update(filters or {})
+        return self.find(q, sort=sort, limit=limit, offset=offset)
