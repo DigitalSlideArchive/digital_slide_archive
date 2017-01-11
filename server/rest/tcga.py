@@ -42,10 +42,10 @@ class TCGAResource(Resource):
         self.route('POST', ('import',), self.importCollection)
         self.route('DELETE', (), self.deleteCollection)
 
-        self.route('GET', ('cohort',), self.findcohort)
-        self.route('GET', ('cohort', ':id'), self.getcohort)
-        self.route('POST', ('cohort',), self.importcohort)
-        self.route('DELETE', ('cohort', ':id'), self.deletecohort)
+        self.route('GET', ('cohort',), self.findCohort)
+        self.route('GET', ('cohort', ':id'), self.getCohort)
+        self.route('POST', ('cohort',), self.importCohort)
+        self.route('DELETE', ('cohort', ':id'), self.deleteCohort)
         self.route('GET', ('cohort', ':id', 'slides'), self.cohortListSlides)
 
         self.route('GET', ('case',), self.findCase)
@@ -154,7 +154,7 @@ class TCGAResource(Resource):
         Description('List cohorts in the TCGA dataset')
         .pagingParams(defaultSort='name')
     )
-    def findcohort(self, params):
+    def findCohort(self, params):
         user = self.getCurrentUser()
         tcga = self.getTCGACollection()
         limit, offset, sort = self.getPagingParameters(params, 'name')
@@ -171,7 +171,7 @@ class TCGAResource(Resource):
         Description('Get a cohort document from an id')
         .param('id', 'The id of the cohort', paramType='path')
     )
-    def getcohort(self, cohort, params):
+    def getCohort(self, cohort, params):
         return cohort
 
     @access.admin
@@ -179,7 +179,7 @@ class TCGAResource(Resource):
         Description('Import a folder as a TCGA cohort type')
         .param('folderId', 'The id of the folder to import')
     )
-    def importcohort(self, params):
+    def importCohort(self, params):
         user = self.getCurrentUser()
         token = self.getCurrentToken()
         self.requireParams('folderId', params)
@@ -201,7 +201,7 @@ class TCGAResource(Resource):
         Description('Remove a cohort type')
         .param('id', 'The id of the cohort', paramType='path')
     )
-    def deletecohort(self, cohort, params):
+    def deleteCohort(self, cohort, params):
         return self.model('cohort', 'digital_slide_archive').removeTCGA(
             cohort)
 
