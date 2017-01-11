@@ -6,7 +6,6 @@ Endpoints providing a simplified interface for handling TCGA datasets.
 from __future__ import print_function, division
 
 import re
-import six
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
