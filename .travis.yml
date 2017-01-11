@@ -15,7 +15,7 @@ compiler:
 
 before_install:
     - GIRDER_VERSION=master
-    - LARGE_IMAGE_VERSION=girder-2
+    - LARGE_IMAGE_VERSION=master
     - main_path=$PWD
     - build_path=$PWD/build
     - mkdir -p $build_path
