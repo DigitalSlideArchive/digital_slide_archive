@@ -493,7 +493,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             path='/tcga/cohort'
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.json, [])
+        self.assertEqual(resp.json['data'], [])
 
         resp = self.request(
             path='/tcga/cohort',
@@ -527,7 +527,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             path='/tcga/cohort'
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.json, [])
+        self.assertEqual(resp.json['data'], [])
 
         # import recursively and test searching for slides
         resp = self.request(
@@ -561,7 +561,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'cohort': str(self.cohort['_id'])}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 3)
+        self.assertEqual(len(resp.json['data']), 3)
 
         resp = self.request(
             path='/tcga/case/' + str(self.case1['_id']),
@@ -581,7 +581,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'cohort': str(self.cohort['_id'])}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 2)
+        self.assertEqual(len(resp.json['data']), 2)
 
         resp = self.request(
             path='/tcga/case',
@@ -687,22 +687,22 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'table': 'table1'}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 2)
+        self.assertEqual(len(resp.json['data']), 2)
 
         resp = self.request(
             path='/tcga/case/search',
             params={'table': 'table1', 'key': 'key1'}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
-        self.assertEqual(resp.json[0]['_id'], id2)
+        self.assertEqual(len(resp.json['data']), 1)
+        self.assertEqual(resp.json['data'][0]['_id'], id2)
 
         resp = self.request(
             path='/tcga/case/search',
             params={'table': 'table1', 'key': 'key1', 'value': 'value2'}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 0)
+        self.assertEqual(len(resp.json['data']), 0)
 
         resp = self.request(
             path='/tcga/case/' + id2 + '/metadata/table1',
@@ -732,7 +732,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'case': case1}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 2)
+        self.assertEqual(len(resp.json['data']), 2)
 
         resp = self.request(
             path='/tcga/slide/' + slide1
@@ -795,7 +795,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'slide': slide1}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(len(resp.json['data']), 1)
 
         resp = self.request(
             path='/tcga/image/' + image1
@@ -874,7 +874,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'case': case1}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(len(resp.json['data']), 1)
 
         resp = self.request(
             path='/tcga/pathology/' + pathology1
@@ -966,7 +966,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'case': case1}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(len(resp.json['data']), 1)
 
         resp = self.request(
             path='/tcga/aperio/' + aperio1
@@ -1027,7 +1027,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatusOk(resp)
 
-    def testPagingHeaders(self):
+    def testPagingParams(self):
         cohort1 = str(self.cohort['_id'])
         resp = self.request(
             path='/tcga/import',
@@ -1041,30 +1041,36 @@ class TCGARestTest(BaseTest, base.TestCase):
             params={'cohort': cohort1, 'limit': 2, 'offset': 0}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.headers['TCGA-PAGED-OFFSET'], 0)
-        self.assertEqual(resp.headers['TCGA-PAGED-LIMIT'], 2)
-        self.assertEqual(resp.headers['TCGA-PAGED-TOTAL'], 3)
-        self.assertEqual(resp.headers['TCGA-PAGED-INDEX'], 0)
-        self.assertEqual(resp.headers['TCGA-PAGED-PAGES'], 2)
+        data = resp.json
+
+        self.assertEqual(data['pos'], 0)
+        self.assertEqual(data['limit'], 2)
+        self.assertEqual(data['total_count'], 3)
+        self.assertEqual(data['current_page'], 0)
+        self.assertEqual(data['total_pages'], 2)
 
         resp = self.request(
             path='/tcga/case',
             params={'cohort': cohort1, 'limit': 2, 'offset': 2}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.headers['TCGA-PAGED-OFFSET'], 2)
-        self.assertEqual(resp.headers['TCGA-PAGED-LIMIT'], 2)
-        self.assertEqual(resp.headers['TCGA-PAGED-TOTAL'], 3)
-        self.assertEqual(resp.headers['TCGA-PAGED-INDEX'], 1)
-        self.assertEqual(resp.headers['TCGA-PAGED-PAGES'], 2)
+        data = resp.json
+
+        self.assertEqual(data['pos'], 2)
+        self.assertEqual(data['limit'], 2)
+        self.assertEqual(data['total_count'], 3)
+        self.assertEqual(data['current_page'], 1)
+        self.assertEqual(data['total_pages'], 2)
 
         resp = self.request(
             path='/tcga/case',
             params={'cohort': cohort1, 'limit': 2, 'offset': 1}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.headers['TCGA-PAGED-OFFSET'], 1)
-        self.assertEqual(resp.headers['TCGA-PAGED-LIMIT'], 2)
-        self.assertEqual(resp.headers['TCGA-PAGED-TOTAL'], 3)
-        self.assertEqual(resp.headers['TCGA-PAGED-INDEX'], 0)
-        self.assertEqual(resp.headers['TCGA-PAGED-PAGES'], 2)
+        data = resp.json
+
+        self.assertEqual(data['pos'], 1)
+        self.assertEqual(data['limit'], 2)
+        self.assertEqual(data['total_count'], 3)
+        self.assertEqual(data['current_page'], 0)
+        self.assertEqual(data['total_pages'], 2)

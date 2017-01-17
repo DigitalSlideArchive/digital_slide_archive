@@ -9,7 +9,7 @@ import re
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
-from girder.api.rest import Resource, RestException, loadmodel, setResponseHeader
+from girder.api.rest import Resource, RestException, loadmodel
 from girder.constants import TokenScope, AccessType
 from girder.utility import setting_utilities
 from girder.models.model_base import ValidationException
@@ -25,12 +25,14 @@ def pagedResponse(cursor, limit, offset, sort):
     pages = (total - 1) // limit + 1
     index = offset // limit
 
-    setResponseHeader('TCGA-PAGED-OFFSET', offset)
-    setResponseHeader('TCGA-PAGED-LIMIT', limit)
-    setResponseHeader('TCGA-PAGED-TOTAL', total)
-    setResponseHeader('TCGA-PAGED-INDEX', index)
-    setResponseHeader('TCGA-PAGED-PAGES', pages)
-    return list(cursor)
+    return {
+        'total_count': total,
+        'pos': offset,
+        'limit': limit,
+        'total_pages': pages,
+        'current_page': index,
+        'data': list(cursor)
+    }
 
 
 class TCGAResource(Resource):
