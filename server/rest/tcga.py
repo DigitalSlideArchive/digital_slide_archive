@@ -232,9 +232,10 @@ class TCGAResource(Resource):
     )
     def cohortListSlides(self, cohort, params):
         limit, offset, sort = self.getPagingParameters(params, 'name')
-        return list(self.model('slide', 'digital_slide_archive').find({
+        cursor = self.model('slide', 'digital_slide_archive').find({
             'tcga.cohort': cohort['name']
-        }, limit=limit, offset=offset, sort=sort))
+        }, cursor=True, limit=limit, offset=offset, sort=sort)
+        return pagedResponse(cursor, limit, offset, sort)
 
     # Case endpoints
     #####################

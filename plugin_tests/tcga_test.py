@@ -540,13 +540,13 @@ class TCGARestTest(BaseTest, base.TestCase):
             path='/tcga/cohort/' + str(self.cohort['_id']) + '/slides'
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 3)
+        self.assertEqual(len(resp.json['data']), 3)
 
         resp = self.request(
             path='/tcga/cohort/' + str(self.cohort2['_id']) + '/slides'
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(len(resp.json['data']), 1)
 
     def testCaseEndpoints(self):
         resp = self.request(
