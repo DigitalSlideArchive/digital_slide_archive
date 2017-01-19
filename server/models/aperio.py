@@ -28,7 +28,7 @@ class Aperio(Item):
         meta = doc.setdefault('aperio', {})
         imageId = meta.get('image')
         try:
-            self.model('image_item', 'large_image').load(
+            self.model('item').load(
                 imageId, force=True
             )
         except Exception:
