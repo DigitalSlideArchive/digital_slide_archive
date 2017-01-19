@@ -78,13 +78,6 @@ class TCGAModel(object):
         flags=re.I
     )
 
-    #: Parses tcga Aperio annotation file names
-    aperio_re = re.compile(
-        '^(?P<barcode>(?P<case>' +
-        case_re.pattern + ')[0-9a-z-]*)\.xml',
-        flags=re.I
-    )
-
     def initialize(self, **kwargs):
         """Expose the tcga key as public metadata."""
         self.exposeFields(AccessType.READ, fields='tcga')
@@ -184,10 +177,6 @@ class TCGAModel(object):
     def parsePathology(self, name):
         """Parse a pathology report file name."""
         return self._parse(name, self.pathology_re)
-
-    def parseAperio(self, name):
-        """Parse an annotation file name."""
-        return self._parse(name, self.aperio_re)
 
     def importDocument(self, doc, **kwargs):
         """Promote a Girder core document to a TCGA model."""

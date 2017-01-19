@@ -936,8 +936,9 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertStatusOk(resp)
 
     def testAperioEndpoints(self):
-        case1 = str(self.case1['_id'])
         aperio1 = str(self.aperio1['_id'])
+        aperio2 = str(self.aperio2['_id'])
+        image = str(self.image2['_id'])
         resp = self.request(
             path='/tcga/import',
             method='POST',
@@ -945,6 +946,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatusOk(resp)
 
+        # test access control
         resp = self.request(
             path='/tcga/aperio',
             params={'id': aperio1},
@@ -953,6 +955,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatus(resp, 403)
 
+        # test automatic import of tcga items
         resp = self.request(
             path='/tcga/aperio',
             params={'id': aperio1},
@@ -962,70 +965,66 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertStatusOk(resp)
 
         resp = self.request(
-            path='/tcga/aperio',
-            params={'case': case1}
+            path='/item/' + image + '/aperio'
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json['data']), 1)
+        self.assertEqual(len(resp.json), 1)
 
+        # test filtering by tag
         resp = self.request(
-            path='/tcga/aperio/' + aperio1
+            path='/item/' + image + '/aperio',
+            params={'tag': 'foo'}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.json['name'], self.aperio1['name'])
+        self.assertEqual(len(resp.json), 0)
+
+        # test writing a new tag
+        resp = self.request(
+            path='/item/' + aperio1 + '/aperio',
+            params={'tag': 'foo'},
+            method='PUT',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
 
         resp = self.request(
-            path='/tcga/aperio/' + aperio1,
+            path='/item/' + image + '/aperio',
+            params={'tag': 'foo'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+
+        # test importing an annotation manually
+        resp = self.request(
+            path='/item/' + aperio2 + '/aperio',
+            params={'tag': 'bar', 'imageId': image},
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        resp = self.request(
+            path='/item/' + image + '/aperio',
+            params={'tag': 'bar'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(resp.json[0]['_id'], aperio2)
+
+        # test deleting an annotation
+        resp = self.request(
+            path='/item/' + aperio2 + '/aperio',
             method='DELETE',
-            user=self.user
-        )
-        self.assertStatus(resp, 403)
-
-        resp = self.request(
-            path='/tcga/aperio/' + aperio1,
-            method='DELETE',
             user=self.admin
         )
         self.assertStatusOk(resp)
 
         resp = self.request(
-            path='/tcga/aperio/' + aperio1
-        )
-        self.assertStatus(resp, 400)
-
-        resp = self.request(
-            path='/tcga/aperio',
-            params={'id': aperio1},
-            method='POST',
-            user=self.user
-        )
-        self.assertStatus(resp, 403)
-
-        resp = self.request(
-            path='/tcga/aperio',
-            params={'id': aperio1},
-            method='POST',
-            user=self.admin
+            path='/item/' + image + '/aperio',
+            params={'tag': 'bar'}
         )
         self.assertStatusOk(resp)
-
-        resp = self.request(
-            path='/tcga/aperio/' + aperio1
-        )
-        self.assertStatusOk(resp)
-
-        resp = self.request(
-            path='/tcga/aperio',
-            params={'id': str(self.aperioFolder['_id']), 'recursive': True},
-            method='POST',
-            user=self.admin
-        )
-        self.assertStatusOk(resp)
-
-        resp = self.request(
-            path='/tcga/aperio/' + str(self.aperio2['_id'])
-        )
-        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 0)
 
     def testPagingParams(self):
         cohort1 = str(self.cohort['_id'])

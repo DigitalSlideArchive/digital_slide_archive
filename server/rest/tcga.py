@@ -91,11 +91,6 @@ class TCGAResource(Resource):
         self.route('POST', ('pathology',), self.importPathology)
         self.route('DELETE', ('pathology', ':id'), self.deletePathology)
 
-        self.route('GET', ('aperio',), self.findAperio)
-        self.route('GET', ('aperio', ':id'), self.getAperio)
-        self.route('POST', ('aperio',), self.importAperio)
-        self.route('DELETE', ('aperio', ':id'), self.deleteAperio)
-
     def getTCGACollection(self, level=AccessType.READ):
         tcga = self.model('setting').get(
             TCGACollectionSettingKey

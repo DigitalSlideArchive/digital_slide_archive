@@ -19,6 +19,7 @@
 
 from . import dsa
 from . import tcga
+from . import aperio
 from . import system
 
 
@@ -31,3 +32,5 @@ def addEndpoints(apiRoot):
     system.addSystemEndpoints(apiRoot)
     apiRoot.dsa_endpoints = dsa.DSAEndpointsResource()
     apiRoot.tcga = tcga.TCGAResource()
+    aperio.addItemEndpoints(apiRoot.item)
+    aperio.addTcgaEndpoints(apiRoot.tcga)
