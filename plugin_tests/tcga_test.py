@@ -569,6 +569,20 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertStatusOk(resp)
         self.assertEqual(resp.json['name'], self.case1['name'])
 
+        # search for images under a case 1
+        resp = self.request(
+            path='/tcga/case/' + str(self.case1['_id']) + '/images'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json['data']), 2)
+
+        # search for images under a case 2
+        resp = self.request(
+            path='/tcga/case/' + str(self.case2['_id']) + '/images'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json['data']), 1)
+
         resp = self.request(
             path='/tcga/case/' + str(self.case1['_id']),
             method='DELETE',

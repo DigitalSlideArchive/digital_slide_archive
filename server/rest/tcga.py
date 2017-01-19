@@ -75,6 +75,7 @@ class TCGAResource(Resource):
         self.route('POST', ('case', ':id', 'metadata', ':table'), self.setCaseMetadata)
         self.route('PUT', ('case', ':id', 'metadata', ':table'), self.updateCaseMetadata)
         self.route('DELETE', ('case', ':id', 'metadata', ':table'), self.deleteCaseMetadata)
+        self.route('GET', ('case', ':id', 'images'), self.listCaseImages)
 
         self.route('GET', ('slide',), self.findSlide)
         self.route('GET', ('slide', ':id'), self.getSlide)
@@ -448,6 +449,22 @@ class TCGAResource(Resource):
         meta = caseModel.getTCGAMeta(case)
         del meta[table]
         caseModel.save(case)
+
+    @access.public
+    @loadmodel(model='case', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('List images under a case')
+        .param('id', 'The id of the case', paramType='path')
+        .pagingParams(defaultSort='name')
+    )
+    @access.public(scope=TokenScope.DATA_READ)
+    def listCaseImages(self, case, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        cursor = self.model('image', 'digital_slide_archive').find({
+            'tcga.label': case['name']
+        }, cursor=True, limit=limit, offset=offset, sort=sort)
+        return pagedResponse(cursor, limit, offset, sort)
 
     # Slide endpoints
     #####################
