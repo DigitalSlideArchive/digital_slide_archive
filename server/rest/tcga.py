@@ -63,6 +63,7 @@ class TCGAResource(Resource):
         self.route('POST', ('cohort',), self.importCohort)
         self.route('DELETE', ('cohort', ':id'), self.deleteCohort)
         self.route('GET', ('cohort', ':id', 'slides'), self.cohortListSlides)
+        self.route('GET', ('cohort', ':id', 'images'), self.cohortListImages)
 
         self.route('GET', ('case',), self.findCase)
         self.route('GET', ('case', ':id'), self.getCase)
@@ -229,6 +230,21 @@ class TCGAResource(Resource):
     def cohortListSlides(self, cohort, params):
         limit, offset, sort = self.getPagingParameters(params, 'name')
         cursor = self.model('slide', 'digital_slide_archive').find({
+            'tcga.cohort': cohort['name']
+        }, cursor=True, limit=limit, offset=offset, sort=sort)
+        return pagedResponse(cursor, limit, offset, sort)
+
+    @access.public
+    @loadmodel(model='cohort', plugin='digital_slide_archive',
+               level=AccessType.READ)
+    @describeRoute(
+        Description('List slide images in a cohort')
+        .param('id', 'The id of the cohort', paramType='path')
+        .pagingParams(defaultSort='name')
+    )
+    def cohortListImages(self, cohort, params):
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+        cursor = self.model('image', 'digital_slide_archive').find({
             'tcga.cohort': cohort['name']
         }, cursor=True, limit=limit, offset=offset, sort=sort)
         return pagedResponse(cursor, limit, offset, sort)

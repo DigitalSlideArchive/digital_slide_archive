@@ -548,6 +548,13 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json['data']), 1)
 
+        resp = self.request(
+            path='/tcga/cohort/' + str(self.cohort['_id']) + '/images'
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json['data']), 3)
+        self.assertEqual(resp.json['data'][0]['tcga']['type'], 'image')
+
     def testCaseEndpoints(self):
         resp = self.request(
             path='/tcga/import',
