@@ -35,6 +35,13 @@ class Aperio(Item):
             raise ValidationException(
                 'The item is not associated with a valid image.'
             )
+
+        files = self.model('item').childFiles(doc)
+        if files.count() != 1:
+            raise ValidationException(
+                'The annotation item must have exactly one file.'
+            )
+
         meta.setdefault('tag', None)
         return doc
 

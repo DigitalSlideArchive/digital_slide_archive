@@ -81,10 +81,17 @@ def findAperio(self, item, params):
     user = self.getCurrentUser()
     tag = params.get('tag')
     aperio = self.model('aperio', 'digital_slide_archive')
-    return list(aperio.findAperio(
+    docs = list(aperio.findAperio(
         item, tag=tag,
         user=user, level=AccessType.READ
     ))
+
+    for doc in docs:
+        files = aperio.childFiles(doc, limit=1)
+        if files:
+            doc['file'] = files[0]
+
+    return docs
 
 
 @describeRoute(

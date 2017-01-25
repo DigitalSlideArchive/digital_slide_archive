@@ -405,25 +405,35 @@ class TCGARestTest(BaseTest, base.TestCase):
             self.publicFolder, 'annotations',
             public=True, creator=self.user
         )
-        self.aperio1 = self.model('item').createItem(
+        self.aperio1, self.aperio_file1 = self.createFileItem(
             'TCGA-OR-A5J1-01Z-00-DX1.xml',
             self.user,
             self.aperioFolder
         )
-        self.aperio2 = self.model('item').createItem(
+        self.aperio2, self.aperio_file2 = self.createFileItem(
             'TCGA-OR-A5J2-01Z-00-DX1.xml',
             self.user,
             self.aperioFolder
         )
+        self.aperio_invalid = self.model('item').createItem(
+            'TCGA-OR-A5J1-01Z-00-DX1.xml',
+            self.user,
+            self.aperioFolder
+        )
 
-    def createImageItem(self, name, slide):
+    def createFileItem(self, name, creator, parent):
         doc = self.model('item').createItem(
-            name, self.admin, slide
+            name, creator, parent
         )
         file = self.model('file').createFile(
-            self.admin, doc, doc['name'],
+            creator, doc, doc['name'],
             0, {'_id': ''}
         )
+        self.model('item').save(doc)
+        return doc, file
+
+    def createImageItem(self, name, slide):
+        doc, file = self.createFileItem(name, self.admin, slide)
         doc['largeImage'] = {
             'fileId': file['_id'],
             'sourceName': 'svs'
@@ -990,6 +1000,14 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 1)
+        self.assertEqual(
+            str(resp.json[0]['_id']),
+            str(self.aperio1['_id'])
+        )
+        self.assertEqual(
+            str(resp.json[0]['file']['_id']),
+            str(self.aperio_file1['_id'])
+        )
 
         # test filtering by tag
         resp = self.request(
