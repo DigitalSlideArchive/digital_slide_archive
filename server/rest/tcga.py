@@ -619,11 +619,19 @@ class TCGAResource(Resource):
             id=params['case'], user=user, level=AccessType.READ,
             exc=True
         )
-        cursor = self.model('pathology', 'digital_slide_archive').find(
+        model = self.model('pathology', 'digital_slide_archive')
+        cursor = model.find(
             {'tcga.case': case['tcga']['label']},
             offset=offset, limit=limit, sort=sort
         )
-        return pagedResponse(cursor, limit, offset, sort)
+
+        # Inject file information into the returned documents
+        response = pagedResponse(cursor, limit, offset, sort)
+        for doc in response.get('data', []):
+            files = model.childFiles(doc, limit=1)
+            if files.count():
+                doc['file'] = files[0]
+        return response
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='pathology', plugin='digital_slide_archive',

@@ -910,6 +910,10 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json['data']), 1)
+        self.assertEqual(
+            str(resp.json['data'][0]['file']['_id']),
+            str(self.pathology_file1['_id'])
+        )
 
         resp = self.request(
             path='/tcga/pathology/' + pathology1
