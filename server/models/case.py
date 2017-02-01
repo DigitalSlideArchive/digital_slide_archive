@@ -40,6 +40,7 @@ class Case(TCGAModel, Folder):
             )
         tcga = self.getTCGA(parent)
         tcga['label'] = doc['name']
+        tcga['caseId'] = doc['_id']
         self.setTCGA(doc, **tcga)
         doc = super(Case, self).importDocument(doc, **kwargs)
         if not recurse:
