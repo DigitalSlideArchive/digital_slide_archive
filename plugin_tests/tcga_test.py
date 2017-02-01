@@ -390,7 +390,7 @@ class TCGARestTest(BaseTest, base.TestCase):
             self.publicFolder, 'pathologies',
             public=True, creator=self.user
         )
-        self.pathology1 = self.model('item').createItem(
+        self.pathology1, self.pathology_file1 = self.createFileItem(
             'TCGA-OR-A5J1.1130D2F4-FABF-4F97-B6A0-23390E196305.pdf',
             self.user,
             self.pathologyFolder
@@ -916,6 +916,10 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
         self.assertStatusOk(resp)
         self.assertEqual(resp.json['name'], self.pathology1['name'])
+        self.assertEqual(
+            str(resp.json['file']['_id']),
+            str(self.pathology_file1['_id'])
+        )
 
         resp = self.request(
             path='/tcga/pathology/' + pathology1,

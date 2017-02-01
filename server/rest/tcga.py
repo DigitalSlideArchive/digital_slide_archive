@@ -633,6 +633,11 @@ class TCGAResource(Resource):
         .param('id', 'The id of the pathology', paramType='path')
     )
     def getPathology(self, pathology, params):
+        files = self.model('pathology', 'digital_slide_archive').childFiles(
+            pathology, limit=1
+        )
+        if files.count():
+            pathology['file'] = files[0]
         return pathology
 
     @access.admin

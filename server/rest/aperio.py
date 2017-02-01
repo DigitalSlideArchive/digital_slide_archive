@@ -88,7 +88,7 @@ def findAperio(self, item, params):
 
     for doc in docs:
         files = aperio.childFiles(doc, limit=1)
-        if files:
+        if files.count():
             doc['file'] = files[0]
 
     return docs
