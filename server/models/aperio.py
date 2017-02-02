@@ -57,6 +57,11 @@ class Aperio(Item):
         meta = doc.setdefault('aperio', {})
         meta['image'] = image['_id']
         self.setTag(doc, tag)
+        fileModel = self.model('file')
+        files = self.model('item').childFiles(doc)
+        for file in files:
+            if TCGAModel.setMimeType(file):
+                fileModel.save(file)
         return doc
 
     def importTCGADocument(self, doc, **kwargs):

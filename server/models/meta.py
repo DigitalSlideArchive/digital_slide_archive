@@ -1,3 +1,4 @@
+import mimetypes
 import re
 
 import six
@@ -178,10 +179,26 @@ class TCGAModel(object):
         """Parse a pathology report file name."""
         return self._parse(name, self.pathology_re)
 
+    @classmethod
+    def setMimeType(cls, doc):
+        """Set the mime type of a file document."""
+        if doc.get('mimeType') is None:
+            doc['mimeType'] = mimetypes.guess_type(
+                doc.get('name', '')
+            )[0]
+            return True
+        return False
+
     def importDocument(self, doc, **kwargs):
         """Promote a Girder core document to a TCGA model."""
         self.setTCGA(doc)
         self.save(doc)
+        if doc.get('_modelType') == 'item':
+            fileModel = self.model('file')
+            files = self.model('item').childFiles(doc)
+            for file in files:
+                if self.setMimeType(file):
+                    fileModel.save(file)
         return doc
 
     def loadDocument(self, id, **kwargs):

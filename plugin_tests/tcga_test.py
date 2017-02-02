@@ -914,6 +914,10 @@ class TCGARestTest(BaseTest, base.TestCase):
             str(resp.json['data'][0]['file']['_id']),
             str(self.pathology_file1['_id'])
         )
+        self.assertEqual(
+            str(resp.json['data'][0]['file']['mimeType']),
+            'application/pdf'
+        )
 
         resp = self.request(
             path='/tcga/pathology/' + pathology1
@@ -1019,6 +1023,10 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertEqual(
             str(resp.json[0]['file']['_id']),
             str(self.aperio_file1['_id'])
+        )
+        self.assertEqual(
+            str(resp.json[0]['file']['mimeType']),
+            'application/xml'
         )
 
         # test filtering by tag
