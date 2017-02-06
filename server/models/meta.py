@@ -182,12 +182,10 @@ class TCGAModel(object):
     @classmethod
     def setMimeType(cls, doc):
         """Set the mime type of a file document."""
-        if doc.get('mimeType') is None:
-            doc['mimeType'] = mimetypes.guess_type(
-                doc.get('name', '')
-            )[0]
-            return True
-        return False
+        doc['mimeType'] = mimetypes.guess_type(
+            doc.get('name', '')
+        )[0]
+        return True
 
     def importDocument(self, doc, **kwargs):
         """Promote a Girder core document to a TCGA model."""
