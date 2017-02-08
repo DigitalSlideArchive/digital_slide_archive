@@ -1,10 +1,21 @@
-/* globals girder */
+import _ from 'underscore';
+
+import View from 'girder/views/View';
+import events from 'girder/events';
+import router from 'girder/router';
+import { restartServer } from 'girder/server';
+import { confirm } from 'girder/dialog';
+import { restRequest } from 'girder/rest';
+import { exposePluginConfig } from 'girder/utilities/PluginUtils';
+import PluginConfigBreadcrumbWidget from 'girder/views/widgets/PluginConfigBreadcrumbWidget';
+
+import dsaConfigTemplate from './templates/digitalSlideArchiveConfig.pug';
 
 /**
  * Show the Digital Slide Archive config settings.  This includes the TCGA
  * Ingest settings (which is really an ingest control).
  */
-girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
+var ConfigView = View.extend({
     events: {
         'submit #g-dsa-form': function (event) {
             event.preventDefault();
@@ -19,9 +30,9 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
                 text: 'Are you sure you want to restart the server?  This ' +
                       'will interrupt all running tasks for all users.',
                 yesText: 'Restart',
-                confirmCallback: girder.restartServer
+                confirmCallback: restartServer
             };
-            girder.confirm(params);
+            confirm(params);
         },
         'submit #g-tcga-ingest-form': function (event) {
             event.preventDefault();
@@ -38,7 +49,7 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
                 });
             }, this);
             if (limit === 'all') {
-                girder.confirm({
+                confirm({
                     text: 'Ingesting all data will use a massive amount of space.  Are you sure you want to do this?',
                     confirmCallback: callback
                 });
@@ -49,7 +60,7 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
     },
 
     initialize: function () {
-        girder.restRequest({
+        restRequest({
             type: 'GET',
             path: 'system/setting',
             data: {
@@ -62,11 +73,11 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
     },
 
     render: function () {
-        this.$el.html(girder.templates.digitalSlideArchiveConfig({
+        this.$el.html(dsaConfigTemplate({
             brand_name: this.settings['digital_slide_archive.brand_name'] || ''
         }));
         if (!this.breadcrumb) {
-            this.breadcrumb = new girder.views.PluginConfigBreadcrumbWidget({
+            this.breadcrumb = new PluginConfigBreadcrumbWidget({
                 pluginName: 'Digital Slide Archive',
                 el: this.$('.g-config-breadcrumb-container'),
                 parentView: this
@@ -77,7 +88,7 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
     },
 
     _saveSettings: function (settings) {
-        girder.restRequest({
+        restRequest({
             type: 'PUT',
             path: 'system/setting',
             data: {
@@ -85,13 +96,12 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
             },
             error: null
         }).done(_.bind(function () {
-            girder.events.trigger('g:alert', {
+            events.trigger('g:alert', {
                 icon: 'ok',
                 text: 'Settings saved.',
                 type: 'success',
                 timeout: 4000
             });
-            girder.pluginsChanged = true;
             $('.g-plugin-restart').addClass('g-plugin-restart-show');
         }, this)).error(_.bind(function (resp) {
             this.$('#g-dsa-error-message').text(
@@ -101,13 +111,13 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
     },
 
     _ingest: function (params) {
-        girder.restRequest({
+        restRequest({
             type: 'POST',
             path: 'system/ingest',
             data: params,
             error: null
         }).done(_.bind(function () {
-            girder.events.trigger('g:alert', {
+            events.trigger('g:alert', {
                 icon: 'ok',
                 text: 'Ingest started.',
                 type: 'success',
@@ -121,12 +131,13 @@ girder.views.digitalSlideArchive_ConfigView = girder.View.extend({
     }
 });
 
-girder.router.route(
+router.route(
     'plugins/digital_slide_archive/config', 'digitalSlideArchiveConfig',
     function () {
-        girder.events.trigger('g:navigateTo',
-                              girder.views.digitalSlideArchive_ConfigView);
+        events.trigger('g:navigateTo', ConfigView);
     });
 
-girder.exposePluginConfig(
+exposePluginConfig(
     'digital_slide_archive', 'plugins/digital_slide_archive/config');
+
+export default ConfigView;

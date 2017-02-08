@@ -14,7 +14,7 @@ compiler:
     - gcc
 
 before_install:
-    - GIRDER_VERSION="v1.7.0"
+    - GIRDER_VERSION=master
     - LARGE_IMAGE_VERSION=master
     - main_path=$PWD
     - build_path=$PWD/build
@@ -44,6 +44,7 @@ before_install:
 
     - mkdir -p $HOME/.cache/node_modules || true
     - ln -sf $HOME/.cache/node_modules .
+    - nvm install v5
     - npm install -g npm
     - npm --version
     # - npm prune
@@ -56,6 +57,7 @@ install:
     - pip install -U -r $large_image_path/requirements.txt
     - npm prune
     - npm install
+    - girder-install web --plugins=digital_slide_archive,large_image,worker,jobs --dev
 
 script:
     - mkdir -p $build_path/girder_testing_build
