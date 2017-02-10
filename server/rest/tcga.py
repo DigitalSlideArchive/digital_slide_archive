@@ -7,16 +7,82 @@ from __future__ import print_function, division
 
 import re
 
+from girder import logger
 from girder.api import access
 from girder.api.describe import describeRoute, Description
 from girder.api.rest import Resource, RestException, loadmodel
 from girder.constants import TokenScope, AccessType
-from girder.utility import setting_utilities
 from girder.models.model_base import ValidationException
+from girder.plugins.jobs.constants import JobStatus
+from girder.utility import setting_utilities
+from girder.utility.model_importer import ModelImporter
 
 from ..constants import TCGACollectionSettingKey
 
 invalid_key_re = re.compile('[.$]')
+
+
+def import_recursive(job):
+    try:
+        root = job['kwargs']['root']
+        token = job['kwargs']['token']
+
+        jobModel = ModelImporter.model('job', 'jobs')
+        userModel = ModelImporter.model('user')
+
+        user = userModel.load(job['userId'], force=True)
+
+        childModel = ModelImporter.model('cohort', 'digital_slide_archive')
+        children = list(ModelImporter.model('folder').childFolders(
+            root, 'collection', user=user
+        ))
+        count = len(children)
+        progress = 0
+
+        job = jobModel.updateJob(
+            job, log='Started TCGA import\n',
+            status=JobStatus.RUNNING,
+            progressCurrent=progress,
+            progressTotal=count
+        )
+        logger.info('Starting recursive TCGA import')
+
+        for child in children:
+            progress += 1
+            try:
+                msg = 'Importing "%s"' % child.get('name', '')
+                job = jobModel.updateJob(
+                    job, log=msg, progressMessage=msg + '\n',
+                    progressCurrent=progress
+                )
+                logger.debug(msg)
+                childModel.importDocument(
+                    child, recurse=True, user=user, token=token, job=job
+                )
+                job = jobModel.load(id=job['_id'], force=True)
+
+                # handle any request to stop execution
+                if (not job or job['status'] in (
+                        JobStatus.CANCELED, JobStatus.ERROR)):
+                    logger.info('TCGA import job halted with')
+                    return
+
+            except ValidationException:
+                logger.warning('Failed to import %s' % child.get('name', ''))
+
+        logger.info('Starting recursive TCGA import')
+        job = jobModel.updateJob(
+            job, log='Finished TCGA import\n',
+            status=JobStatus.SUCCESS,
+            progressCurrent=count,
+            progressMessage='Finished TCGA import'
+        )
+    except Exception as e:
+        logger.exception('Importing TCGA failed with %s' % str(e))
+        job = jobModel.updateJob(
+            job, log='Import failed with %s\n' % str(e),
+            status=JobStatus.ERROR
+        )
 
 
 def pagedResponse(cursor, limit, offset, sort):
@@ -135,23 +201,27 @@ class TCGAResource(Resource):
     @access.admin
     @describeRoute(
         Description('Recursively import the TCGA collection')
+        .notes('This will run as a local job that will execute '
+               'asynchronously.')
     )
     def importCollection(self, params):
         user = self.getCurrentUser()
         token = self.getCurrentToken()
         tcga = self.getTCGACollection(level=AccessType.WRITE)
 
-        childModel = self.model('cohort', 'digital_slide_archive')
-        children = self.model('folder').childFolders(
-            tcga, 'collection', user=user, cursor=True
+        jobModel = self.model('job', 'jobs')
+        job = jobModel.createLocalJob(
+            module='girder.plugins.digital_slide_archive.rest.tcga',
+            function='import_recursive',
+            kwargs={'root': tcga, 'token': token},
+            title='Import TCGA items',
+            user=user,
+            type='tcga_import_recursive',
+            public=False,
+            async=True
         )
-        for child in children:
-            try:
-                childModel.importDocument(
-                    child, recurse=True, user=user, token=token
-                )
-            except ValidationException:
-                pass
+        jobModel.scheduleJob(job)
+        return job
 
     @access.admin
     @describeRoute(

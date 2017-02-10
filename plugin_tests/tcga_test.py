@@ -18,6 +18,7 @@
 #############################################################################
 import os
 import json
+import time
 
 from girder import config
 from girder.models.model_base import ValidationException
@@ -441,6 +442,37 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.model('item').save(doc)
         return doc
 
+    def runRecursiveImport(self):
+        from girder.plugins.jobs.constants import JobStatus
+
+        # generate the async import task
+        resp = self.request(
+            path='/tcga/import',
+            method='POST',
+            user=self.admin
+        )
+        self.assertStatusOk(resp)
+
+        job = resp.json
+
+        # loop until it is done
+        for i in xrange(100):
+            time.sleep(0.1)
+
+            resp = self.request(
+                path='/job/' + job['_id'],
+                user=self.admin
+            )
+            self.assertStatusOk(resp)
+
+            status = resp.json['status']
+            if status == JobStatus.SUCCESS:
+                return
+            elif status in (JobStatus.ERROR, JobStatus.CANCELED):
+                raise Exception('TCGA import failed')
+
+        raise Exception('TCGA import did not finish in time')
+
     def testTCGACollection(self):
         resp = self.request(
             path='/tcga'
@@ -489,12 +521,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertEqual(resp.json['_id'], str(self.tcgaCollection['_id']))
 
     def testRecursiveImport(self):
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
         images = list(self.model('image', 'digital_slide_archive').find({}))
         self.assertEqual(len(images), 3)
 
@@ -540,12 +567,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertEqual(resp.json['data'], [])
 
         # import recursively and test searching for slides
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
         resp = self.request(
             path='/tcga/cohort/' + str(self.cohort['_id']) + '/slides'
         )
@@ -566,12 +588,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertEqual(resp.json['data'][0]['tcga']['type'], 'image')
 
     def testCaseEndpoints(self):
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         resp = self.request(
             path='/tcga/case',
@@ -637,12 +654,7 @@ class TCGARestTest(BaseTest, base.TestCase):
     def testCaseMetadata(self):
         id1 = str(self.case1['_id'])
         id2 = str(self.case2['_id'])
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         resp = self.request(
             path='/tcga/case/' + id1 + '/metadata/tables'
@@ -751,12 +763,7 @@ class TCGARestTest(BaseTest, base.TestCase):
     def testSlideEndpoints(self):
         case1 = str(self.case1['_id'])
         slide1 = str(self.slide1['_id'])
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         resp = self.request(
             path='/tcga/slide',
@@ -814,12 +821,7 @@ class TCGARestTest(BaseTest, base.TestCase):
     def testImageEndpoints(self):
         slide1 = str(self.slide1['_id'])
         image1 = str(self.image1['_id'])
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         resp = self.request(
             path='/tcga/image',
@@ -881,12 +883,7 @@ class TCGARestTest(BaseTest, base.TestCase):
     def testPathologyEndpoints(self):
         case1 = str(self.case1['_id'])
         pathology1 = str(self.pathology1['_id'])
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         resp = self.request(
             path='/tcga/pathology',
@@ -986,12 +983,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         aperio1 = str(self.aperio1['_id'])
         aperio2 = str(self.aperio2['_id'])
         image = str(self.image2['_id'])
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         # test access control
         resp = self.request(
@@ -1087,12 +1079,7 @@ class TCGARestTest(BaseTest, base.TestCase):
 
     def testPagingParams(self):
         cohort1 = str(self.cohort['_id'])
-        resp = self.request(
-            path='/tcga/import',
-            method='POST',
-            user=self.admin,
-        )
-        self.assertStatusOk(resp)
+        self.runRecursiveImport()
 
         resp = self.request(
             path='/tcga/case',

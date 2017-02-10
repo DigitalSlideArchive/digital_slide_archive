@@ -5,6 +5,7 @@ import six
 
 from girder.constants import AccessType
 from girder.models.model_base import ValidationException
+from girder.utility.model_importer import ModelImporter
 
 from ..constants import TCGACollectionSettingKey
 
@@ -186,6 +187,21 @@ class TCGAModel(object):
             doc.get('name', '')
         )[0]
         return True
+
+    @classmethod
+    def setJobStatus(cls, msg, status=None, logger=None, job=None, **kwargs):
+        """Update a job document with the given message and status."""
+        if job:
+            if status is None:
+                status = job['status']
+            jobModel = ModelImporter.model('job')
+            jobModel.updateJob(
+                job, log=msg,
+                status=status
+            )
+        if logger:
+            logger(msg)
+        return job
 
     def importDocument(self, doc, **kwargs):
         """Promote a Girder core document to a TCGA model."""
