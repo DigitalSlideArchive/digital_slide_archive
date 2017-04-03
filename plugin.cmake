@@ -23,15 +23,11 @@ add_python_style_test(
   "${CMAKE_CURRENT_LIST_DIR}/plugin_tests"
 )
 
-# add_eslint_test(
-#   js_static_analysis_digital_slide_archive_gruntfile
-#   "${CMAKE_CURRENT_LIST_DIR}/Gruntfile.js"
-#   ESLINT_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/.eslintrc"
-# )
 add_eslint_test(
   js_static_analysis_digital_slide_archive_source
   "${CMAKE_CURRENT_LIST_DIR}/web_client"
 )
+
 add_eslint_test(
   js_static_analysis_digital_slide_archive_tests
   "${CMAKE_CURRENT_LIST_DIR}/plugin_tests/client"
@@ -39,4 +35,7 @@ add_eslint_test(
 )
 
 add_python_test(rest PLUGIN digital_slide_archive BIND_SERVER)
-add_python_test(tcga PLUGIN digital_slide_archive BIND_SERVER)
+
+add_puglint_test(
+  digital_slide_archive
+  "${CMAKE_CURRENT_LIST_DIR}/web_client/templates")

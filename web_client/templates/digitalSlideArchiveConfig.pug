@@ -1,6 +1,6 @@
 .g-config-breadcrumb-container
 
-div.g-plugin-restart
+.g-plugin-restart
   button.g-plugin-restart-button.btn.btn-danger
     i.icon-cw
     | Restart Server
@@ -13,7 +13,7 @@ form#g-dsa-form(role="form")
   .form-group
     label(for="g-dsa-brand_name") Brand Name
     input.form-control.input-sm#g-dsa-brand_name(
-      type="text" value="#{brand_name}" placeholder="Digital Slide Archive")
+      type="text", value=brand_name, placeholder="Digital Slide Archive")
   p#g-dsa-error-message.g-validation-failed-message
   input.btn.btn-sm.btn-primary(type="submit", value="Save")
 
@@ -29,13 +29,11 @@ form#g-tcga-ingest-form(role="form")
   .form-group(title="You must ingest TCGA files to a filesystem assetstore.")
     label(for="g-tcga-ingest-assetstore-id") Assetstore ID
     input.form-control.input-sm#g-tcga-ingest-assetstore-id(
-      type="text"
-      placeholder="Optional assetstore ID where ingested items will be stored")
+      type="text", placeholder="Optional assetstore ID where ingested items will be stored")
   .form-group
     label(for="g-tcga-ingest-amount") Number of Items to Ingest
     input.form-control.input-sm#g-tcga-ingest-amount(
-      type="text" value="10"
-      placeholder="Use the word 'all' to ingest all items, otherwise a subset of items will be ingested")
+      type="text", value="10", placeholder="Use the word 'all' to ingest all items, otherwise a subset of items will be ingested")
   #g-tcga-ingest-error-message
   button.g-submit-tcga-ingest.btn.btn-success(type="submit")
     i.icon-link-ext
