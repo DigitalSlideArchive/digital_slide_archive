@@ -43,7 +43,7 @@ class Image(TCGAModel, Item):
         try:
             return self.model('image_item', 'large_image').createImageItem(
                 doc, file,
-                user=user, token=token
+                user=user, token=token, createJob=False
             )
         except Exception:
             raise ValidationException(
