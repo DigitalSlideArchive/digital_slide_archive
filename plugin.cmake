@@ -35,6 +35,7 @@ add_eslint_test(
 )
 
 add_python_test(rest PLUGIN digital_slide_archive BIND_SERVER)
+add_python_test(tcga PLUGIN digital_slide_archive BIND_SERVER)
 
 add_puglint_test(
   digital_slide_archive
