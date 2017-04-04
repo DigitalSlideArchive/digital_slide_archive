@@ -99,5 +99,5 @@ class Aperio(Item):
         """Remove Aperio metadata from an item."""
         if 'aperio' in doc:
             del doc['aperio']
-        self.model('item').save(doc)
+            self.model('item').save(doc)
         return doc
