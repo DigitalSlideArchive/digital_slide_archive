@@ -241,8 +241,8 @@ class TCGAModel(object):
             for subchild in self.iterateItems(child, **kwargs):
                 yield subchild
 
-    def childFolders(self, parent, parentType, cursor=False, filters=None,
-                     limit=0, offset=0, sort=None, **kwargs):
+    def childFolders(self, parent, parentType, user=None, limit=0, offset=0,
+                     sort=None, filters=None, cursor=False, **kwargs):
         """Add a ``cursor`` option to the standard childFolders method.
 
         The cursor option will ensure the response is a mongo cursor rather
