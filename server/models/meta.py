@@ -184,10 +184,12 @@ class TCGAModel(object):
     @classmethod
     def setMimeType(cls, doc):
         """Set the mime type of a file document."""
-        doc['mimeType'] = mimetypes.guess_type(
+        oldType = doc.get('mimeType')
+        newType = mimetypes.guess_type(
             doc.get('name', '')
         )[0]
-        return True
+        doc['mimeType'] = newType
+        return newType != oldType
 
     @classmethod
     def setJobStatus(cls, msg, status=None, logger=None, job=None, **kwargs):
