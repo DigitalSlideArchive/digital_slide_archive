@@ -133,8 +133,9 @@ class TCGAModel(object):
         opposite of the import methods that promote Girder models
         to TCGA types.
         """
-        del doc['tcga']
-        self.save(doc, baseModel=True, validate=False)
+        if 'tcga' in doc:
+            del doc['tcga']
+            self.save(doc, baseModel=True, validate=False)
         return doc
 
     def getTCGAType(self, doc):
