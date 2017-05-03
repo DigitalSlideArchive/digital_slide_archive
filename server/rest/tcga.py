@@ -407,6 +407,9 @@ class TCGAResource(Resource):
                required=False)
         .param('value', 'The value associated with the given key',
                required=False)
+        .param('substring', 'Find values containing this substring',
+               required=False)
+        .notes('Only one of "value" or "substring" may be provided.')
         .pagingParams(defaultSort='name')
     )
     def searchCase(self, params):
@@ -417,11 +420,18 @@ class TCGAResource(Resource):
         table = params.get('table')
         key = params.get('key')
         value = params.get('value')
+        substring = params.get('substring')
 
-        if value and not key:
+        if value and substring:
+            raise RestException(
+                'Cannot search by both value and substring'
+            )
+
+        if (value or substring) and not key:
             raise RestException(
                 'A key must be provided to search by value'
             )
+
         if key and invalid_key_re.search(key):
             raise RestException(
                 'Invalid key parameter'
@@ -434,15 +444,19 @@ class TCGAResource(Resource):
                     '$exists': True
                 }
             }
-        elif not value:
+        elif not value and not substring:
             query = {
                 'tcga.meta.' + table + '.' + key: {
                     '$exists': True
                 }
             }
-        else:
+        elif value:
             query = {
                 'tcga.meta.' + table + '.' + key: value
+            }
+        else:
+            query = {
+                'tcga.meta.' + table + '.' + key: re.compile(re.escape(substring))
             }
 
         cursor = self.model('case', 'digital_slide_archive').find(

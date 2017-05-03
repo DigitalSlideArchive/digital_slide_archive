@@ -748,6 +748,33 @@ class TCGARestTest(BaseTest, base.TestCase):
         self.assertEqual(len(resp.json['data']), 0)
 
         resp = self.request(
+            path='/tcga/case/search',
+            params={'table': 'table1', 'key': 'key1', 'substring': 'alue'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json['data']), 1)
+
+        # special characters should be escaped
+        resp = self.request(
+            path='/tcga/case/search',
+            params={'table': 'table1', 'key': 'key1', 'substring': '.*'}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json['data']), 0)
+
+        # querying by substring and value should fail
+        resp = self.request(
+            path='/tcga/case/search',
+            params={
+                'table': 'table1',
+                'key': 'key1',
+                'substring': 'value1',
+                'value': 'value1'
+            }
+        )
+        self.assertStatus(resp, 400)
+
+        resp = self.request(
             path='/tcga/case/' + id2 + '/metadata/table1',
             method='DELETE',
             user=self.user
