@@ -17,25 +17,8 @@
 #  limitations under the License.
 ###############################################################################
 
-from girder.models.model_base import ValidationException
-from girder.constants import SettingDefault
-import six
-
-
-class PluginSettings(object):
-    BRAND_NAME = 'digital_slide_archive.brand_name'
-
-
-def validateSettings(event):
-    key, val = event.info['key'], event.info['value']
-
-    if key == PluginSettings.BRAND_NAME:
-        if not isinstance(val, six.string_types):
-            raise ValidationException(
-                'Brand name must be provided as a string.', 'value')
-        event.preventDefault().stopPropagation()
-
-
-SettingDefault.defaults[PluginSettings.BRAND_NAME] = 'Digital Slide Archive'
+from girder.constants import SettingDefault, SettingKey
 
 TCGACollectionSettingKey = 'tcga.tcga_collection_id'
+
+SettingDefault.defaults[SettingKey.BRAND_NAME] = 'Digital Slide Archive'

@@ -17,36 +17,13 @@
 #  limitations under the License.
 ###############################################################################
 
-from girder import events
+from girder.constants import SettingKey
 from girder.utility.model_importer import ModelImporter
-from girder.utility import webroot
 
-from . import constants
 from . import rest
 
 
-def setBranding(info):
-    brandName = ModelImporter.model('setting').get(
-        constants.PluginSettings.BRAND_NAME)
-    if brandName is None or brandName.strip() == '':
-        brandName = ModelImporter.model('setting').getDefault(
-            constants.PluginSettings.BRAND_NAME)
-
-    info['serverRoot'].updateHtmlVars({'title': brandName})
-
-    oldinit = webroot.Webroot.__init__
-
-    def newinit(self, templatePath=None):
-        oldinit(self, templatePath)
-        self.vars['title'] = brandName
-
-    webroot.Webroot.__init__ = newinit
-
-
 def load(info):
-    events.bind('model.setting.validate',
-                'digital_slide_archive', constants.validateSettings)
-
-    setBranding(info)
-
     rest.addEndpoints(info['apiRoot'])
+    info['serverRoot'].updateHtmlVars({
+        'brandName': ModelImporter.model('setting').get(SettingKey.BRAND_NAME)})

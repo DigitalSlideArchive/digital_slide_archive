@@ -3,7 +3,6 @@ import _ from 'underscore';
 import View from 'girder/views/View';
 import events from 'girder/events';
 import router from 'girder/router';
-import { restartServer } from 'girder/server';
 import { confirm } from 'girder/dialog';
 import { restRequest } from 'girder/rest';
 import { exposePluginConfig } from 'girder/utilities/PluginUtils';
@@ -17,23 +16,6 @@ import dsaConfigTemplate from './templates/digitalSlideArchiveConfig.pug';
  */
 var ConfigView = View.extend({
     events: {
-        'submit #g-dsa-form': function (event) {
-            event.preventDefault();
-            this.$('#g-dsa-error-message').empty();
-            this._saveSettings([{
-                key: 'digital_slide_archive.brand_name',
-                value: this.$('#g-dsa-brand_name').val()
-            }]);
-        },
-        'click .g-plugin-restart-button': function () {
-            var params = {
-                text: 'Are you sure you want to restart the server?  This ' +
-                      'will interrupt all running tasks for all users.',
-                yesText: 'Restart',
-                confirmCallback: restartServer
-            };
-            confirm(params);
-        },
         'submit #g-tcga-ingest-form': function (event) {
             event.preventDefault();
 
@@ -60,22 +42,11 @@ var ConfigView = View.extend({
     },
 
     initialize: function () {
-        restRequest({
-            type: 'GET',
-            path: 'system/setting',
-            data: {
-                list: JSON.stringify(['digital_slide_archive.brand_name'])
-            }
-        }).done(_.bind(function (resp) {
-            this.settings = resp;
-            this.render();
-        }, this));
+        this.render();
     },
 
     render: function () {
-        this.$el.html(dsaConfigTemplate({
-            brand_name: this.settings['digital_slide_archive.brand_name'] || ''
-        }));
+        this.$el.html(dsaConfigTemplate({}));
         if (!this.breadcrumb) {
             this.breadcrumb = new PluginConfigBreadcrumbWidget({
                 pluginName: 'Digital Slide Archive',
@@ -85,29 +56,6 @@ var ConfigView = View.extend({
         }
 
         return this;
-    },
-
-    _saveSettings: function (settings) {
-        restRequest({
-            type: 'PUT',
-            path: 'system/setting',
-            data: {
-                list: JSON.stringify(settings)
-            },
-            error: null
-        }).done(_.bind(function () {
-            events.trigger('g:alert', {
-                icon: 'ok',
-                text: 'Settings saved.',
-                type: 'success',
-                timeout: 4000
-            });
-            $('.g-plugin-restart').addClass('g-plugin-restart-show');
-        }, this)).error(_.bind(function (resp) {
-            this.$('#g-dsa-error-message').text(
-                resp.responseJSON.message
-            );
-        }, this));
     },
 
     _ingest: function (params) {
