@@ -14,7 +14,7 @@ compiler:
     - gcc
 
 before_install:
-    - GIRDER_VERSION=master
+    - GIRDER_VERSION=2.x-maintenance
     - LARGE_IMAGE_VERSION=master
     - main_path=$PWD
     - build_path=$PWD/build
