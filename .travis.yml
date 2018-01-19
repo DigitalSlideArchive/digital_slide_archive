@@ -55,7 +55,7 @@ before_install:
 install:
     - cd $girder_path
     - pip install -r requirements-dev.txt -r $main_path/requirements.txt -e .[plugins]
-    - pip install -U -r $large_image_path/requirements.txt
+    - pip install -U -e $large_image_path
     - npm prune
     - npm install
     - girder-install web --plugins=digital_slide_archive,large_image,worker,jobs --dev
