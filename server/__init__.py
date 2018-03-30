@@ -17,13 +17,32 @@
 #  limitations under the License.
 ###############################################################################
 
+from girder import events
+from girder.api import access
+from girder.api.rest import boundHandler
 from girder.constants import SettingKey
-from girder.utility.model_importer import ModelImporter
+from girder.models.setting import Setting
 
 from . import rest
+
+
+@access.public
+@boundHandler
+def _virtualChildItems(self, event):
+    params = event.info['params']
+
+    if params['type'] != 'folder':
+        return  # This can't be a virtual folder
+    try:
+        import girder.plugins.virtual_folders
+    except ImportError:
+        return  # If virtual folders aren't enabled, do nothing
+    params['folderId'] = event.info['id']
+    return girder.plugins.virtual_folders._virtualChildItems(event)
 
 
 def load(info):
     rest.addEndpoints(info['apiRoot'])
     info['serverRoot'].updateHtmlVars({
-        'brandName': ModelImporter.model('setting').get(SettingKey.BRAND_NAME)})
+        'brandName': Setting().get(SettingKey.BRAND_NAME)})
+    events.bind('rest.get.resource/:id/items.before', info['name'], _virtualChildItems)

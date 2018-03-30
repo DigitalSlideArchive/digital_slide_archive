@@ -14,29 +14,18 @@
 #  limitations under the License.
 ###############################################################################
 
-add_python_style_test(
-  python_static_analysis_digital_slide_archive
-  "${CMAKE_CURRENT_LIST_DIR}/server"
-)
+add_standard_plugin_tests(NO_SERVER_TESTS)
+
 add_python_style_test(
   python_static_analysis_digital_slide_archive_tests
   "${CMAKE_CURRENT_LIST_DIR}/plugin_tests"
 )
 
-add_eslint_test(
-  js_static_analysis_digital_slide_archive_source
-  "${CMAKE_CURRENT_LIST_DIR}/web_client"
-)
-
-add_eslint_test(
-  js_static_analysis_digital_slide_archive_tests
-  "${CMAKE_CURRENT_LIST_DIR}/plugin_tests/client"
-#  ESLINT_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/plugin_tests/client/.eslintrc"
-)
+# add_eslint_test(
+#   js_static_analysis_digital_slide_archive_tests
+#   "${CMAKE_CURRENT_LIST_DIR}/plugin_tests/client"
+# #  ESLINT_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/plugin_tests/client/.eslintrc"
+# )
 
 add_python_test(rest PLUGIN digital_slide_archive BIND_SERVER)
 add_python_test(tcga PLUGIN digital_slide_archive BIND_SERVER)
-
-add_puglint_test(
-  digital_slide_archive
-  "${CMAKE_CURRENT_LIST_DIR}/web_client/templates")
