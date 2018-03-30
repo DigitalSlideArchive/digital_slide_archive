@@ -19,7 +19,7 @@
 
 from girder import events
 from girder.api import access
-from girder.api import rest as restUtil
+from girder.api.rest import boundHandler
 from girder.constants import SettingKey
 from girder.models.setting import Setting
 
@@ -27,7 +27,7 @@ from . import rest
 
 
 @access.public
-@restUtil.boundHandler
+@boundHandler
 def _virtualChildItems(self, event):
     params = event.info['params']
 
