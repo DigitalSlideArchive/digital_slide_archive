@@ -631,21 +631,31 @@ class TCGAResource(Resource):
     #####################
     @access.public(scope=TokenScope.DATA_READ)
     @describeRoute(
-        Description('Find images for a slide')
-        .param('slide', 'The id of slide document', required=True)
+        Description('Find images')
+        .param('slide', 'The id of slide document', required=False)
+        .param('caseName', 'The name of the case', required=False)
         .pagingParams(defaultSort='name')
     )
     def findImage(self, params):
         limit, offset, sort = self.getPagingParameters(params, 'name')
         user = self.getCurrentUser()
-        slide = self.model('slide', 'digital_slide_archive').load(
-            id=params['slide'], user=user, level=AccessType.READ,
-            exc=True
-        )
-        cursor = self.model('image', 'digital_slide_archive').find(
-            {'folderId': slide['_id']},
-            offset=offset, limit=limit, sort=sort
-        )
+        if params.get('slide'):
+            slide = self.model('slide', 'digital_slide_archive').load(
+                id=params['slide'], user=user, level=AccessType.READ,
+                exc=True
+            )
+            cursor = self.model('image', 'digital_slide_archive').find(
+                {'folderId': slide['_id']},
+                offset=offset, limit=limit, sort=sort
+            )
+
+        elif params.get('caseName'):
+            cursor = self.model('image', 'digital_slide_archive').find({
+                'tcga.label': params['caseName']
+            }, cursor=True, limit=limit, offset=offset, sort=sort)
+
+        else:
+            raise RestException('You must provide a slide id or case name')
         return pagedResponse(cursor, limit, offset, sort)
 
     @access.public(scope=TokenScope.DATA_READ)

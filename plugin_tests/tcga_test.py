@@ -862,6 +862,13 @@ class TCGARestTest(BaseTest, base.TestCase):
         )
 
         resp = self.request(
+            path='/tcga/image',
+            params={'caseName': self.case1['name']}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json['data']), 2)
+
+        resp = self.request(
             path='/tcga/image/' + image1
         )
         self.assertStatusOk(resp)
