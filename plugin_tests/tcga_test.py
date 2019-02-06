@@ -456,7 +456,7 @@ class TCGARestTest(BaseTest, base.TestCase):
         job = resp.json
 
         # loop until it is done
-        for i in xrange(100):
+        for i in range(100):
             time.sleep(0.1)
 
             resp = self.request(

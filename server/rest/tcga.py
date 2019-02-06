@@ -19,7 +19,7 @@ from girder.utility.model_importer import ModelImporter
 
 from ..constants import TCGACollectionSettingKey
 
-invalid_key_re = re.compile('[.$]')
+invalid_key_re = re.compile(r'[.$]')
 
 
 def import_recursive(job):
@@ -472,8 +472,8 @@ class TCGAResource(Resource):
         .param('id', 'The id of the case', paramType='path')
     )
     def listCaseTables(self, case, params):
-        return self.model('case', 'digital_slide_archive').getTCGAMeta(
-            case).keys()
+        return list(self.model('case', 'digital_slide_archive').getTCGAMeta(
+            case).keys())
 
     @access.public(scope=TokenScope.DATA_READ)
     @loadmodel(model='case', plugin='digital_slide_archive',

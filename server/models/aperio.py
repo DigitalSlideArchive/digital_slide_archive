@@ -11,8 +11,8 @@ class Aperio(Item):
 
     #: Parses tcga Aperio annotation file names as tcga types
     aperio_re = re.compile(
-        '^(?P<barcode>(?P<case>' +
-        TCGAModel.case_re.pattern + ')[0-9a-z-]*)\.xml',
+        r'^(?P<barcode>(?P<case>' +
+        TCGAModel.case_re.pattern + r')[0-9a-z-]*)\.xml',
         flags=re.I
     )
 
