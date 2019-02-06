@@ -2,7 +2,8 @@ language: python
 
 python:
     - "2.7"
-    # - "3.4"
+    - "3.5"
+    - "3.6"
 
 cache:
     directories:
@@ -14,13 +15,17 @@ compiler:
     - gcc
 
 before_install:
+    # Fix a travis/boto issue.  See
+    # https://github.com/travis-ci/travis-ci/issues/7940
+    - sudo rm -f /etc/boto.cfg
+
     - GIRDER_VERSION=2.x-maintenance
     - LARGE_IMAGE_VERSION=master
     - main_path=$PWD
-    - build_path=$PWD/build
+    - build_path=$HOME/build
     - mkdir -p $build_path
 
-    - girder_path=$build_path/girder
+    - girder_path=$HOME/girder
     - rm -fr $girder_path
     - git clone https://github.com/girder/girder.git $girder_path && git -C $girder_path checkout $GIRDER_VERSION
     - ln -sf $main_path $girder_path/plugins/
@@ -28,9 +33,6 @@ before_install:
 
     - large_image_path=$girder_path/plugins/large_image
     - git clone https://github.com/DigitalSlideArchive/large_image.git $large_image_path && git -C $large_image_path checkout $LARGE_IMAGE_VERSION
-
-    # From python core, not sure if strictly necessary.
-    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
 
     - export MONGO_VERSION=3.2.8
     - export PY_COVG="ON"
@@ -54,18 +56,21 @@ before_install:
 
 install:
     - cd $girder_path
-    - pip install -r requirements-dev.txt -r $main_path/requirements.txt -e .[plugins]
+    - pip install -U --upgrade-strategy eager -r requirements-dev.txt
+    - pip install -U --upgrade-strategy eager -e .[plugins]
     - cd $large_image_path
     - pip install -U .
+    - cd $main_path
+    - pip install -r requirements.txt
     - cd $girder_path
     - npm prune
     - npm install
-    - girder-install web --plugins=digital_slide_archive,large_image,worker,jobs --dev
+    - girder-install web --plugins=digital_slide_archive,large_image,worker,jobs,homepage --dev
 
 script:
     - mkdir -p $build_path/girder_testing_build
     - cd $build_path/girder_testing_build
-    - cmake -DRUN_CORE_TESTS:BOOL=OFF -DBUILD_JAVASCRIPT_TESTS:BOOL=OFF -DTEST_PLUGINS:STRING=digital_slide_archive -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} $girder_path
+    - cmake -DRUN_CORE_TESTS:BOOL=OFF -DBUILD_JAVASCRIPT_TESTS:BOOL=OFF -DTEST_PLUGINS:STRING=digital_slide_archive -DPYTHON_EXECUTABLE:FILEPATH="`which python`" -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} $girder_path
     - make
 
     - JASMINE_TIMEOUT=15000 ctest -VV

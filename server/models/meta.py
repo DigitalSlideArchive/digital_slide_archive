@@ -50,33 +50,33 @@ class TCGAModel(object):
     TCGAIndices = []
 
     #: Matches valid case names
-    case_re = re.compile('tcga-[a-z0-9]{2}-[a-z0-9]{4}', flags=re.I)
+    case_re = re.compile(r'tcga-[a-z0-9]{2}-[a-z0-9]{4}', flags=re.I)
 
     #: Matches valid uuid's
     uuid_re = re.compile(
-        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+        r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
         flags=re.I
     )
 
     #: Matches valid tcga barcodes
     barcode_re = re.compile(
-        case_re.pattern + '[0-9a-z-]*',
+        case_re.pattern + r'[0-9a-z-]*',
         flags=re.I
     )
 
     #: Parses tcga slide image file names
     image_re = re.compile(
-        '^(?P<barcode>(?P<case>' +
-        case_re.pattern + ')[0-9a-z-]*)\.' +
-        '(?P<uuid>' + uuid_re.pattern + ')\.svs$',
+        r'^(?P<barcode>(?P<case>' +
+        case_re.pattern + r')[0-9a-z-]*)\.' +
+        r'(?P<uuid>' + uuid_re.pattern + r')\.svs$',
         flags=re.I
     )
 
     #: Parses tcga pathology report file names
     pathology_re = re.compile(
-        '^(?P<case>' + case_re.pattern +
-        ')\.(?P<uuid>' + uuid_re.pattern +
-        ')\.pdf$',
+        r'^(?P<case>' + case_re.pattern +
+        r')\.(?P<uuid>' + uuid_re.pattern +
+        r')\.pdf$',
         flags=re.I
     )
 
