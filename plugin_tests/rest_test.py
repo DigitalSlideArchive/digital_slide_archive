@@ -17,9 +17,11 @@
 #  limitations under the License.
 #############################################################################
 
+import json
 import os
 
 from girder import config
+from girder.models.item import Item
 from tests import base
 
 
@@ -159,3 +161,42 @@ class DigitalSlideArchiveRestTest(base.TestCase):
             user=self.admin, params={'type': 'collection'})
         self.assertStatus(resp, 400)
         self.assertIn('Resource not found', resp.json['message'])
+
+    def testItemQuery(self):
+        itemMeta = [
+            {'key1': 'value1'},
+            {'key1': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ]
+        for idx, meta in enumerate(itemMeta):
+            item = self.model('item').createItem('item %d' % idx, self.admin, self.privateFolder)
+            item['meta'] = meta
+            item = Item().save(item)
+        resp = self.request(
+            path='/item/query', user=self.admin, params={'query': json.dumps({
+                'meta.key1': {'$exists': True}
+            })})
+        self.assertStatusOk(resp)
+        items = resp.json
+        self.assertEqual(len(items), 3)
+        resp = self.request(
+            path='/item/query', user=self.user, params={'query': json.dumps({
+                'meta.key1': {'$exists': True}
+            })})
+        self.assertStatusOk(resp)
+        items = resp.json
+        self.assertEqual(len(items), 0)
+        resp = self.request(
+            path='/item/query', user=self.admin, params={'query': json.dumps({
+                'meta.key1': 'value1'
+            })})
+        self.assertStatusOk(resp)
+        items = resp.json
+        self.assertEqual(len(items), 2)
+        resp = self.request(
+            path='/item/query', user=self.admin, params={'query': json.dumps({
+                'meta': {'key1': 'value1'}
+            })})
+        self.assertStatusOk(resp)
+        items = resp.json
+        self.assertEqual(len(items), 1)

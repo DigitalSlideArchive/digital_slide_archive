@@ -20,9 +20,10 @@
 import os
 
 from girder.api import access
-from girder.api.describe import Description, describeRoute
-from girder.api.rest import boundHandler, RestException
-from girder.constants import AccessType
+from girder.api.describe import Description, describeRoute, autoDescribeRoute
+from girder.api.rest import boundHandler, RestException, filtermodel
+from girder.constants import AccessType, TokenScope
+from girder.models.item import Item
 from girder.utility.model_importer import ModelImporter
 
 
@@ -32,6 +33,8 @@ def addSystemEndpoints(apiRoot):
 
     :param apiRoot: Girder api root class.
     """
+    # Added to the item route
+    apiRoot.item.route('GET', ('query',), getItemsByQuery)
     # Added to the resource route
     apiRoot.resource.route('GET', (':id', 'items'), getResourceItems)
     # Added to the system route
@@ -226,3 +229,19 @@ def getResourceItems(self, id, params):
     return list(allChildItems(
         parentType=modelType, parent=doc, user=user,
         limit=limit, offset=offset, sort=sort))
+
+
+@access.public(scope=TokenScope.DATA_READ)
+@filtermodel(model=Item)
+@autoDescribeRoute(
+    Description('List items that match a query.')
+    .responseClass('Item', array=True)
+    .jsonParam('query', 'Find items that match this Mongo query.',
+               required=True, requireObject=True)
+    .pagingParams(defaultSort='_id')
+    .errorResponse()
+)
+@boundHandler()
+def getItemsByQuery(self, query, limit, offset, sort):
+    user = self.getCurrentUser()
+    return Item().findWithPermissions(query, offset=offset, limit=limit, sort=sort, user=user)
