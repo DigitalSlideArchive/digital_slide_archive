@@ -18,10 +18,12 @@
 ###############################################################################
 
 import os
+import six
 
 from girder.api import access
 from girder.api.describe import Description, describeRoute, autoDescribeRoute
 from girder.api.rest import boundHandler, RestException, filtermodel
+from girder.api.v1.resource import Resource as ResourceResource
 from girder.constants import AccessType, TokenScope
 from girder.models.item import Item
 from girder.utility.model_importer import ModelImporter
@@ -37,6 +39,7 @@ def addSystemEndpoints(apiRoot):
     apiRoot.item.route('GET', ('query',), getItemsByQuery)
     # Added to the resource route
     apiRoot.resource.route('GET', (':id', 'items'), getResourceItems)
+    DSAResourceResource(apiRoot)
     # Added to the system route
     apiRoot.system.route('POST', ('ingest',), ingest)
 
@@ -245,3 +248,75 @@ def getResourceItems(self, id, params):
 def getItemsByQuery(self, query, limit, offset, sort):
     user = self.getCurrentUser()
     return Item().findWithPermissions(query, offset=offset, limit=limit, sort=sort, user=user)
+
+
+class DSAResourceResource(ResourceResource):
+    def __init__(self, apiRoot):
+        super(ResourceResource, self).__init__()
+        # Added to the resource route
+        apiRoot.resource.route('GET', (':id', 'items'), self.getResourceItems)
+        apiRoot.resource.route('PUT', ('metadata',), self.putResourceMetadata)
+
+    @describeRoute(
+        Description('Get all of the items that are children of a resource.')
+        .param('id', 'The ID of the resource.', paramType='path')
+        .param('type', 'The type of the resource (folder, collection, or '
+               'user).')
+        .pagingParams(defaultSort='_id')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Access was denied for the resource.', 403)
+    )
+    @access.public
+    def getResourceItems(self, id, params):
+        user = self.getCurrentUser()
+        modelType = params['type']
+        model = self.model(modelType)
+        doc = model.load(id=id, user=user, level=AccessType.READ)
+        if not doc:
+            raise RestException('Resource not found.')
+        limit, offset, sort = self.getPagingParameters(params, '_id')
+        return list(allChildItems(
+            parentType=modelType, parent=doc, user=user,
+            limit=limit, offset=offset, sort=sort))
+
+    @autoDescribeRoute(
+        Description('Set metadata on multiple resources at once.')
+        .jsonParam('resources', 'A JSON-encoded set of resources to modify.  '
+                   'Each type is a list of ids. For example: {"item": [(item '
+                   'id 1), (item id 2)], "folder": [(folder id 1)]}.',
+                   requireObject=True)
+        .jsonParam('metadata', 'A JSON object containing the metadata keys to '
+                   'add', paramType='body', requireObject=True)
+        .param('allowNull', 'Whether "null" is allowed as a metadata value.',
+               required=False, dataType='boolean', default=False)
+        .errorResponse('Unsupported or unknown resource type.')
+        .errorResponse('Invalid resources format.')
+        .errorResponse('No resources specified.')
+        .errorResponse('Resource not found.')
+        .errorResponse('Write access was denied for a resource.', 403)
+    )
+    @access.public
+    def putResourceMetadata(self, resources, metadata, allowNull):
+        user = self.getCurrentUser()
+        self._validateResourceSet(resources)
+        # Validate that we have write permission for all resources; if any
+        # fail, no item will be changed.
+        for kind in resources:
+            model = self._getResourceModel(kind, 'setMetadata')
+            for id in resources[kind]:
+                model.load(id=id, user=user, level=AccessType.WRITE)
+        metaUpdate = {}
+        for key, value in six.iteritems(metadata):
+            if value is None and not allowNull:
+                metaUpdate.setdefault('$unset', {})['meta.' + key] = ''
+            else:
+                metaUpdate.setdefault('$set', {})['meta.' + key] = value
+        modified = 0
+        for kind in resources:
+            model = self._getResourceModel(kind, 'setMetadata')
+            for id in resources[kind]:
+                resource = model.load(id=id, user=user, level=AccessType.WRITE)
+                # We aren't using model.setMetadata, since it is more
+                # restrictive than we want.
+                modified += model.update({'_id': resource['_id']}, metaUpdate).modified_count
+        return modified
