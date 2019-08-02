@@ -30,7 +30,10 @@ def addEndpoints(apiRoot):
     :param apiRoot: Girder api root class.
     """
     system.addSystemEndpoints(apiRoot)
-    apiRoot.dsa_endpoints = dsa.DSAEndpointsResource()
     apiRoot.tcga = tcga.TCGAResource()
     aperio.addItemEndpoints(apiRoot.item)
     aperio.addTcgaEndpoints(apiRoot.tcga)
+
+    # Attach endpoints defined in `dsa.py` to the api.  This should be
+    # an instance derived from Resource:  https://goo.gl/QwJgP2
+    apiRoot.dsa_endpoints = dsa.DSAEndpointsResource()
