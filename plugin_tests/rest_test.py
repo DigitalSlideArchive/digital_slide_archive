@@ -21,7 +21,10 @@ import json
 import os
 
 from girder import config
+from girder.models.collection import Collection
+from girder.models.folder import Folder
 from girder.models.item import Item
+from girder.models.user import User
 from tests import base
 
 
@@ -52,7 +55,7 @@ class DigitalSlideArchiveRestTest(base.TestCase):
             'password': 'adminpassword',
             'admin': True
         }
-        self.admin = self.model('user').createUser(**admin)
+        self.admin = User().createUser(**admin)
         user = {
             'email': 'user@email.com',
             'login': 'userlogin',
@@ -60,8 +63,8 @@ class DigitalSlideArchiveRestTest(base.TestCase):
             'lastName': 'User',
             'password': 'userpassword'
         }
-        self.user = self.model('user').createUser(**user)
-        folders = self.model('folder').childFolders(
+        self.user = User().createUser(**user)
+        folders = Folder().childFolders(
             self.admin, 'user', user=self.admin)
         for folder in folders:
             if folder['name'] == 'Public':
@@ -71,37 +74,37 @@ class DigitalSlideArchiveRestTest(base.TestCase):
 
     def testResourceItems(self):
         # Create some resources to use in the tests
-        self.collection = self.model('collection').createCollection(
+        self.collection = Collection().createCollection(
             'collection A', self.admin)
-        self.colFolderA = self.model('folder').createFolder(
+        self.colFolderA = Folder().createFolder(
             self.collection, 'folder A', parentType='collection',
             creator=self.admin)
-        self.colFolderB = self.model('folder').createFolder(
+        self.colFolderB = Folder().createFolder(
             self.collection, 'folder B', parentType='collection',
             creator=self.admin)
-        self.colFolderC = self.model('folder').createFolder(
+        self.colFolderC = Folder().createFolder(
             self.colFolderA, 'folder C', creator=self.admin)
-        self.colItemA1 = self.model('item').createItem(
+        self.colItemA1 = Item().createItem(
             'item A1', self.admin, self.colFolderA)
-        self.colItemB1 = self.model('item').createItem(
+        self.colItemB1 = Item().createItem(
             'item B1', self.admin, self.colFolderB)
-        self.colItemB2 = self.model('item').createItem(
+        self.colItemB2 = Item().createItem(
             'item B2', self.admin, self.colFolderB)
-        self.colItemC1 = self.model('item').createItem(
+        self.colItemC1 = Item().createItem(
             'item C1', self.admin, self.colFolderC)
-        self.colItemC2 = self.model('item').createItem(
+        self.colItemC2 = Item().createItem(
             'item C2', self.admin, self.colFolderC)
-        self.colItemC3 = self.model('item').createItem(
+        self.colItemC3 = Item().createItem(
             'item C3', self.admin, self.colFolderC)
-        self.itemPub1 = self.model('item').createItem(
+        self.itemPub1 = Item().createItem(
             'item Public 1', self.admin, self.publicFolder)
-        self.itemPriv1 = self.model('item').createItem(
+        self.itemPriv1 = Item().createItem(
             'item Private 1', self.admin, self.privateFolder)
-        self.folderD = self.model('folder').createFolder(
+        self.folderD = Folder().createFolder(
             self.publicFolder, 'folder D', creator=self.admin)
-        self.itemD1 = self.model('item').createItem(
+        self.itemD1 = Item().createItem(
             'item D1', self.admin, self.folderD)
-        self.itemD2 = self.model('item').createItem(
+        self.itemD2 = Item().createItem(
             'item D2', self.admin, self.folderD)
         # Now test that we get the items we expect
         # From a user
@@ -200,3 +203,70 @@ class DigitalSlideArchiveRestTest(base.TestCase):
         self.assertStatusOk(resp)
         items = resp.json
         self.assertEqual(len(items), 1)
+
+    def testResourceMetadata(self):
+        # Create some resources to use in the tests
+        self.collection = Collection().createCollection(
+            'collection A', self.admin)
+        self.colFolderA = Folder().createFolder(
+            self.collection, 'folder A', parentType='collection',
+            creator=self.admin)
+        self.colItemA1 = Item().createItem(
+            'item A1', self.admin, self.colFolderA)
+        self.colItemB1 = Item().createItem(
+            'item B1', self.admin, self.colFolderA)
+
+        resp = self.request(
+            method='PUT', path='/resource/metadata', params={
+                'resources': json.dumps({'item': [str(self.colItemA1['_id'])]}),
+                'metadata': json.dumps({
+                    'keya': 'valuea',
+                    'keyb.keyc': 'valuec'
+                })})
+        self.assertStatus(resp, 401)
+        resp = self.request(
+            method='PUT', path='/resource/metadata', user=self.admin, params={
+                'resources': json.dumps({'item': [str(self.colItemA1['_id'])]}),
+                'metadata': json.dumps({
+                    'keya': 'valuea',
+                    'keyb.keyc': 'valuec'
+                })})
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, 1)
+        meta = Item().load(self.colItemA1['_id'], user=self.admin)['meta']
+        self.assertEqual(meta['keya'], 'valuea')
+        self.assertEqual(meta['keyb']['keyc'], 'valuec')
+        resp = self.request(
+            method='PUT', path='/resource/metadata', user=self.admin, params={
+                'resources': json.dumps({'item': [
+                    str(self.colItemA1['_id']),
+                    str(self.colItemB1['_id'])
+                ], 'folder': [str(self.colFolderA['_id'])]}),
+                'metadata': json.dumps({
+                    'keya': 'valuea',
+                    'keyb.keyc': None,
+                    'keyb.keyd': 'valued',
+                })})
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, 3)
+        meta = Item().load(self.colItemA1['_id'], user=self.admin)['meta']
+        self.assertEqual(meta['keya'], 'valuea')
+        self.assertNotIn('keyc', meta['keyb'])
+        self.assertEqual(meta['keyb']['keyd'], 'valued')
+        resp = self.request(
+            method='PUT', path='/resource/metadata', user=self.admin, params={
+                'resources': json.dumps({'item': [
+                    str(self.colItemA1['_id']),
+                ], 'folder': [str(self.colFolderA['_id'])]}),
+                'metadata': json.dumps({
+                    'keya': 'valuea',
+                    'keyb.keyc': None,
+                    'keyb.keyd': 'valued',
+                }),
+                'allowNull': True})
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, 2)
+        meta = Item().load(self.colItemA1['_id'], user=self.admin)['meta']
+        self.assertEqual(meta['keya'], 'valuea')
+        self.assertIsNone(meta['keyb']['keyc'])
+        self.assertEqual(meta['keyb']['keyd'], 'valued')
