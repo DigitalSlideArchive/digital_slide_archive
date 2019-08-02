@@ -34,7 +34,7 @@ before_install:
     - large_image_path=$girder_path/plugins/large_image
     - git clone https://github.com/DigitalSlideArchive/large_image.git $large_image_path && git -C $large_image_path checkout $LARGE_IMAGE_VERSION
 
-    - export MONGO_VERSION=3.2.8
+    - export MONGO_VERSION=3.4.19
     - export PY_COVG="ON"
     - CACHE=$HOME/.cache source $girder_path/scripts/install_mongo.sh
     - mkdir /tmp/db
