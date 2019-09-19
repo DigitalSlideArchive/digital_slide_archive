@@ -37,8 +37,6 @@ def addSystemEndpoints(apiRoot):
     """
     # Added to the item route
     apiRoot.item.route('GET', ('query',), getItemsByQuery)
-    # Added to the resource route
-    apiRoot.resource.route('GET', (':id', 'items'), getResourceItems)
     DSAResourceResource(apiRoot)
     # Added to the system route
     apiRoot.system.route('POST', ('ingest',), ingest)
@@ -187,6 +185,9 @@ def allChildItems(parent, parentType, user, limit=0, offset=0,
         }
     model = ModelImporter.model(parentType)
     if hasattr(model, 'childItems'):
+        if parentType == 'folder':
+            kwargs = kwargs.copy()
+            kwargs['includeVirtual'] = True
         for item in model.childItems(
                 parent, user=user,
                 limit=_internal['limit'] + _internal['offset'],
@@ -208,30 +209,6 @@ def allChildItems(parent, parentType, user, limit=0, offset=0,
         for item in allChildItems(folder, 'folder', user, sort=sort,
                                   _internal=_internal, **kwargs):
             yield item
-
-
-@describeRoute(
-    Description('Get all of the items that are children of a resource.')
-    .param('id', 'The ID of the resource.', paramType='path')
-    .param('type', 'The type of the resource (folder, collection, or '
-           'user).')
-    .pagingParams(defaultSort='_id')
-    .errorResponse('ID was invalid.')
-    .errorResponse('Access was denied for the resource.', 403)
-)
-@access.public
-@boundHandler()
-def getResourceItems(self, id, params):
-    user = self.getCurrentUser()
-    modelType = params['type']
-    model = self.model(modelType)
-    doc = model.load(id=id, user=user, level=AccessType.READ)
-    if not doc:
-        raise RestException('Resource not found.')
-    limit, offset, sort = self.getPagingParameters(params, '_id')
-    return list(allChildItems(
-        parentType=modelType, parent=doc, user=user,
-        limit=limit, offset=offset, sort=sort))
 
 
 @access.public(scope=TokenScope.DATA_READ)
