@@ -20,7 +20,7 @@ before_install:
     - sudo rm -f /etc/boto.cfg
 
     - GIRDER_VERSION=2.x-maintenance
-    - LARGE_IMAGE_VERSION=master
+    - LARGE_IMAGE_VERSION=2.x-maintenance
     - main_path=$PWD
     - build_path=$HOME/build
     - mkdir -p $build_path

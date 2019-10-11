@@ -17,32 +17,37 @@
 #  limitations under the License.
 ###############################################################################
 
-from girder import events
-from girder.api import access
-from girder.api.rest import boundHandler
+from bson import json_util
+import json
+
 from girder.constants import SettingKey
+from girder.models.folder import Folder
+from girder.models.item import Item
 from girder.models.setting import Setting
 
 from . import rest
 
 
-@access.public
-@boundHandler
-def _virtualChildItems(self, event):
-    params = event.info['params']
+originalChildItems = None
 
-    if params['type'] != 'folder':
-        return  # This can't be a virtual folder
-    try:
-        import girder.plugins.virtual_folders
-    except ImportError:
-        return  # If virtual folders aren't enabled, do nothing
-    params['folderId'] = event.info['id']
-    return girder.plugins.virtual_folders._virtualChildItems(event)
+
+def childItems(self, folder, limit=0, offset=0, sort=None, filters=None,
+               includeVirtual=False, **kwargs):
+    if not includeVirtual or not folder.get('isVirtual') or 'virtualItemsQuery' not in folder:
+        return originalChildItems(self, folder, limit=limit, offset=offset,
+                                  sort=sort, filters=filters, **kwargs)
+    q = json_util.loads(folder['virtualItemsQuery'])
+    if 'virtualItemsSort' in folder and sort is None:
+        sort = json.loads(folder['virtualItemsSort'])
+    q.update(filters or {})
+    return Item().find(q, limit=limit, offset=offset, sort=sort, **kwargs)
 
 
 def load(info):
     rest.addEndpoints(info['apiRoot'])
     info['serverRoot'].updateHtmlVars({
         'brandName': Setting().get(SettingKey.BRAND_NAME)})
-    events.bind('rest.get.resource/:id/items.before', info['name'], _virtualChildItems)
+    global originalChildItems
+    if Folder.childItems != childItems:
+        originalChildItems = Folder.childItems
+        Folder.childItems = childItems
