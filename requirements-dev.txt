@@ -1,0 +1,9 @@
+# Top level dependencies
+girder>=3.0.4
+girder-jobs>=3.0.3
+# External dependencies
+pip>=9
+tox
+twine
+virtualenv
+

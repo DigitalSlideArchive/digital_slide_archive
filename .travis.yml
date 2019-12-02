@@ -1,76 +1,25 @@
-language: python
-
-python:
-    - "2.7"
-    - "3.5"
-    - "3.6"
-
-cache:
-    directories:
-        - $HOME/.cache
-
 sudo: false
-
-compiler:
-    - gcc
-
-before_install:
-    # Fix a travis/boto issue.  See
-    # https://github.com/travis-ci/travis-ci/issues/7940
-    - sudo rm -f /etc/boto.cfg
-
-    - GIRDER_VERSION=2.x-maintenance
-    - LARGE_IMAGE_VERSION=2.x-maintenance
-    - main_path=$PWD
-    - build_path=$HOME/build
-    - mkdir -p $build_path
-
-    - girder_path=$HOME/girder
-    - rm -fr $girder_path
-    - git clone https://github.com/girder/girder.git $girder_path && git -C $girder_path checkout $GIRDER_VERSION
-    - ln -sf $main_path $girder_path/plugins/
-    - ls -l $girder_path/plugins
-
-    - large_image_path=$girder_path/plugins/large_image
-    - git clone https://github.com/DigitalSlideArchive/large_image.git $large_image_path && git -C $large_image_path checkout $LARGE_IMAGE_VERSION
-
-    - export MONGO_VERSION=3.4.19
-    - export PY_COVG="ON"
-    - CACHE=$HOME/.cache source $girder_path/scripts/install_mongo.sh
-    - mkdir /tmp/db
-    - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
-    - mongod --version
-
-    - mkdir -p $HOME/.cache/node_modules || true
-    - ln -sf $HOME/.cache/node_modules .
-    - unset PREFIX
-    - nvm install v6
-    - npm install -g npm
-    - npm --version
-    # - npm prune
-
-    - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $girder_path/scripts/install_cmake.sh
-    - cmake --version
-
-    - pip install -U pip virtualenv
-
+dist: xenial
+language: python
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+services:
+  - mongodb
 install:
-    - cd $girder_path
-    - pip install -U --upgrade-strategy eager -r requirements-dev.txt
-    - pip install -U --upgrade-strategy eager -e .[plugins]
-    - cd $large_image_path
-    - pip install -U .
-    - cd $main_path
-    - pip install -r requirements.txt
-    - cd $girder_path
-    - npm prune
-    - npm install
-    - girder-install web --plugins=digital_slide_archive,large_image,worker,jobs,homepage --dev
-
+  - pip install --upgrade pip
+  - pip install --upgrade virtualenv
+  - pip install tox-travis
 script:
-    - mkdir -p $build_path/girder_testing_build
-    - cd $build_path/girder_testing_build
-    - cmake -DRUN_CORE_TESTS:BOOL=OFF -DBUILD_JAVASCRIPT_TESTS:BOOL=OFF -DTEST_PLUGINS:STRING=digital_slide_archive -DPYTHON_EXECUTABLE:FILEPATH="`which python`" -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} $girder_path
-    - make
-
-    - JASMINE_TIMEOUT=15000 ctest -VV
+  # Piping through cat does less buffering of the output but can consume the
+  # exit code
+  #   Deselect the test_conversion tests, as the virtualenv travis uses fails
+  # to import pyvips with an error
+  # "OSError: dlopen: cannot load any more object with static TLS"
+  - tox | cat; test ${PIPESTATUS[0]} -eq 0
+after_success:
+  - pip install codecov
+  - codecov --disable search pycov gcov --file .tox/coverage/py_coverage.xml
+  # .tox/coverage/cobertura-coverage.xml
