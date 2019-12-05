@@ -5,15 +5,26 @@
 import json
 import pytest
 
+from girder.exceptions import ValidationException
 from girder.models.collection import Collection
 from girder.models.folder import Folder
+from girder.models.group import Group
 from girder.models.item import Item
+from girder.models.setting import Setting
+from girder.models.user import User
+from girder.utility import config
+
+from digital_slide_archive.constants import PluginSettings
 
 from . import girder_utilities as utilities
 
 
+# This probably should be moved into a fixture
+config.getConfig()['digital_slide_archive'] = {'restrict_downloads': True}
+
+
 @pytest.mark.plugin('digital_slide_archive')
-class TestDigitalSlideArchiveRest(object):
+class TestDSAResourceAndItem(object):
     def makeResources(self, admin):
         self.publicFolder = utilities.namedFolder(admin, 'Public')
         self.privateFolder = utilities.namedFolder(admin, 'Private')
@@ -194,3 +205,204 @@ class TestDigitalSlideArchiveRest(object):
         assert meta['keya'] == 'valuea'
         assert meta['keyb']['keyc'] is None
         assert meta['keyb']['keyd'] == 'valued'
+
+
+@pytest.mark.plugin('digital_slide_archive')
+class TestDSAEndpoints(object):
+    def makeResources(self, admin):
+        self.user2 = User().createUser(
+            email='user2@email.com', login='user2', firstName='user2',
+            lastName='user2', password='password', admin=False)
+        self.group = self.group = Group().createGroup('test group', creator=self.user2)
+        Group().addUser(self.group, self.user2)
+
+    def testDSASettings(self, server):
+        key = PluginSettings.DSA_DEFAULT_DRAW_STYLES
+
+        resp = server.request(path='/digital_slide_archive/settings')
+        assert utilities.respStatus(resp) == 200
+        settings = resp.json
+        assert settings[key] is None
+
+        Setting().set(key, '')
+        assert Setting().get(key) is None
+        with pytest.raises(ValidationException, match='must be a JSON'):
+            Setting().set(key, 'not valid')
+        with pytest.raises(ValidationException, match='must be a JSON'):
+            Setting().set(key, json.dumps({'not': 'a list'}))
+        value = [{'lineWidth': 8, 'id': 'Group 8'}]
+        Setting().set(key, json.dumps(value))
+        assert json.loads(Setting().get(key)) == value
+        Setting().set(key, value)
+        assert json.loads(Setting().get(key)) == value
+
+        resp = server.request(path='/digital_slide_archive/settings')
+        assert utilities.respStatus(resp) == 200
+        settings = resp.json
+        assert json.loads(settings[key]) == value
+
+    def testGeneralSettings(self, server, admin, user):
+        self.makeResources(admin)
+        settings = [{
+            'key': PluginSettings.DSA_WEBROOT_PATH,
+            'initial': 'dsa',
+            'bad': {
+                'girder': 'not be "girder"',
+                '': 'not be empty'
+            },
+            'good': {'alternate1': 'alternate1'},
+        }, {
+            'key': PluginSettings.DSA_BRAND_NAME,
+            'initial': 'Digital Slide Archive',
+            'bad': {'': 'not be empty'},
+            'good': {'Alternate': 'Alternate'},
+        }, {
+            'key': PluginSettings.DSA_BRAND_COLOR,
+            'initial': '#777777',
+            'bad': {
+                '': 'not be empty',
+                'white': 'be a hex color',
+                '#777': 'be a hex color'
+            },
+            'good': {'#000000': '#000000'},
+        }, {
+            'key': PluginSettings.DSA_BANNER_COLOR,
+            'initial': '#f8f8f8',
+            'bad': {
+                '': 'not be empty',
+                'white': 'be a hex color',
+                '#777': 'be a hex color'
+            },
+            'good': {'#000000': '#000000'},
+        }]
+        for setting in settings:
+            key = setting['key']
+            assert Setting().get(key) == setting['initial']
+            for badval in setting.get('bad', {}):
+                with pytest.raises(ValidationException, match=setting['bad'][badval]):
+                    Setting().set(key, badval)
+            for badval in setting.get('badjson', []):
+                with pytest.raises(ValidationException, match=badval['return']):
+                    Setting().set(key, badval['value'])
+            for goodval in setting.get('good', {}):
+                assert Setting().set(key, goodval)['value'] == setting['good'][goodval]
+            for goodval in setting.get('goodjson', []):
+                assert Setting().set(key, goodval['value'])['value'] == goodval['return']
+
+    def testGetWebroot(self, server):
+        resp = server.request(path='/dsa', method='GET', isJson=False, prefix='')
+        assert utilities.respStatus(resp) == 200
+        body = utilities.getBody(resp)
+        assert '<title>Digital Slide Archive</title>' in body
+        resp = server.request(path='/alternate2', method='GET', isJson=False, prefix='')
+        assert utilities.respStatus(resp) == 404
+        Setting().set(PluginSettings.DSA_WEBROOT_PATH, 'alternate2')
+        Setting().set(PluginSettings.DSA_BRAND_NAME, 'Alternate')
+        resp = server.request(path='/dsa', method='GET', isJson=False, prefix='')
+        assert utilities.respStatus(resp) == 200
+        body = utilities.getBody(resp)
+        assert '<title>Alternate</title>' in body
+        resp = server.request(path='/alternate2', method='GET', isJson=False, prefix='')
+        assert utilities.respStatus(resp) == 200
+        body = utilities.getBody(resp)
+        assert '<title>Alternate</title>' in body
+
+    def testRestrictDownloads(self, server, fsAssetstore, admin, user):
+        self.makeResources(admin)
+        file = utilities.uploadExternalFile(
+            'data/Easy1.png.sha512', user, fsAssetstore)
+        resp = server.request(
+            path='/item/%s/download' % file['itemId'], user=self.user2, isJson=False)
+        assert utilities.respStatus(resp) == 200
+        resp = server.request(
+            path='/item/%s/download' % file['itemId'], user=None)
+        assert utilities.respStatus(resp) == 401
+        resp = server.request(
+            path='/item/%s/tiles/images/noimage' % file['itemId'], user=self.user2)
+        assert utilities.respStatus(resp) == 400
+        resp = server.request(
+            path='/item/%s/tiles/images/noimage' % file['itemId'], user=None)
+        assert utilities.respStatus(resp) == 401
+
+    def testQuarantine(self, server, admin, user):
+        publicFolder = Folder().childFolders(
+            user, 'user', filters={'name': 'Public'}
+        ).next()
+        adminFolder = Folder().childFolders(
+            admin, 'user', filters={'name': 'Public'}
+        ).next()
+        privateFolder = Folder().childFolders(
+            admin, 'user', filters={'name': 'Private'}, user=admin
+        ).next()
+        items = [Item().createItem(name, creator, folder) for name, creator, folder in [
+            ('userPublic1', user, publicFolder),
+            ('userPublic2', user, publicFolder),
+            ('adminPublic1', admin, adminFolder),
+            ('adminPublic2', admin, adminFolder),
+            ('adminPrivate1', admin, privateFolder),
+            ('adminPrivate2', admin, privateFolder),
+        ]]
+        resp = server.request(
+            method='PUT',
+            path='/digital_slide_archive/quarantine/%s' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 401
+        assert 'Write access denied' in resp.json['message']
+        resp = server.request(
+            method='PUT', user=user,
+            path='/digital_slide_archive/quarantine/%s' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 400
+        assert 'The quarantine folder is not configure' in resp.json['message']
+        key = PluginSettings.DSA_QUARANTINE_FOLDER
+        Setting().set(key, str(privateFolder['_id']))
+        resp = server.request(
+            method='PUT', user=user,
+            path='/digital_slide_archive/quarantine/%s' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 200
+        resp = server.request(
+            method='PUT', user=user,
+            path='/digital_slide_archive/quarantine/%s' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 403
+        assert 'Write access denied' in resp.json['message']
+        resp = server.request(
+            method='PUT', user=user,
+            path='/digital_slide_archive/quarantine/%s' % str(items[2]['_id']))
+        assert utilities.respStatus(resp) == 403
+        assert 'Write access denied' in resp.json['message']
+        resp = server.request(
+            method='PUT', user=admin,
+            path='/digital_slide_archive/quarantine/%s' % str(items[2]['_id']))
+        assert utilities.respStatus(resp) == 200
+        resp = server.request(
+            method='PUT', user=admin,
+            path='/digital_slide_archive/quarantine/%s' % str(items[4]['_id']))
+        assert utilities.respStatus(resp) == 400
+        assert 'already in the quarantine' in resp.json['message']
+        # Restore
+        resp = server.request(
+            method='PUT', user=admin,
+            path='/digital_slide_archive/quarantine/%s/restore' % str(items[1]['_id']))
+        assert utilities.respStatus(resp) == 400
+        assert 'no quarantine record' in resp.json['message']
+        resp = server.request(
+            method='PUT',
+            path='/digital_slide_archive/quarantine/%s/restore' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 401
+        assert 'Write access denied' in resp.json['message']
+        resp = server.request(
+            method='PUT', user=user,
+            path='/digital_slide_archive/quarantine/%s/restore' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 403
+        assert 'Write access denied' in resp.json['message']
+        resp = server.request(
+            method='PUT', user=admin,
+            path='/digital_slide_archive/quarantine/%s/restore' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 200
+        resp = server.request(
+            method='PUT', user=admin,
+            path='/digital_slide_archive/quarantine/%s/restore' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 400
+        assert 'no quarantine record' in resp.json['message']
+        resp = server.request(
+            method='PUT', user=user,
+            path='/digital_slide_archive/quarantine/%s' % str(items[0]['_id']))
+        assert utilities.respStatus(resp) == 200
