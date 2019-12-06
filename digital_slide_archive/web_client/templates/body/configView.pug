@@ -1,0 +1,54 @@
+.g-config-breadcrumb-container
+p.g-dsa-description
+  | Provides a toolkit for analyzing histology images.
+form#g-dsa-form(role="form")
+  .form-group
+    label(for="g-dsa-webroot-path") Root Path
+    input#g-dsa-webroot-path.form-control.input-sm(
+        type="text", value=settings['digital_slide_archive.webroot_path'] || '',
+        placeholder=`Default: ${defaults['digital_slide_archive.webroot_path'] || 'digital_slide_archive'}`,
+        title="The relative URL of the application.")
+  .form-group
+    label(for="g-dsa-brand-name") Brand Name
+    input#g-dsa-brand-name.form-control.input-sm(
+        type="text", value=settings['digital_slide_archive.brand_name'] || '',
+        placeholder=`Default: ${defaults['digital_slide_archive.brand_name'] || 'none'}`,
+        title="The brand name of the application.")
+  .form-group
+    label(for="g-dsa-brand-color") Brand Color
+    #g-dsa-brand-color-container
+      input#g-dsa-brand-color.form-control.input-sm(
+          type="color", value=settings['digital_slide_archive.brand_color'] || defaults['digital_slide_archive.brand_color'],
+          title="The color of the application brand text.")
+      button#g-dsa-brand-default-color.form-control.input-sm(
+          type="button", title="Default color") default
+  .form-group
+    label(for="g-dsa-banner-color") Banner Color
+    #g-dsa-banner-color-container
+      input#g-dsa-banner-color.form-control.input-sm(
+          type="color", value=settings['digital_slide_archive.banner_color'] || defaults['digital_slide_archive.banner_color'],
+          title="The banner color of the application.")
+      button#g-dsa-banner-default-color.form-control.input-sm(
+          type="button", title="Default color") default
+  .form-group
+    label
+      | Default styles for drawing annotations
+    input#g-dsa-default-draw-styles.input-sm.form-control(
+        type="text", value=settings['digital_slide_archive.default_draw_styles'],
+        placeholder='A JSON object listing default annotation drawing styles.',
+        title='A dictionary of drawing styles')
+  .form-group
+    label(for="g-dsa-quarantine-folder") Quarantine Folder
+    p.g-dsa-description
+      | If a quarantine folder is specified, users with write access will see a Quarantine button next to items.  When clicked, this moves that item to the quarantine folder and adds metadata to record where it was originally.  The quarantine folder should have restricted visibility.
+    .input-group.input-group-sm
+      input#g-dsa-quarantine-folder.form-control.input-sm(
+          type="text", value=settings['digital_slide_archive.quarantine_folder'] || '',
+          title="A folder to store quarantined items.")
+      .input-group-btn
+        button.g-open-browser.btn.btn-default(type="button")
+          i.icon-folder-open
+  p#g-dsa-error-message.g-validation-failed-message
+.g-dsa-buttons
+  button#g-dsa-save.btn.btn-sm.btn-primary Save
+  button#g-dsa-cancel.btn.btn-sm.btn-default Cancel

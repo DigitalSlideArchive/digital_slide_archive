@@ -1,6 +1,9 @@
 # Top level dependencies
 girder>=3.0.4
 girder-jobs>=3.0.3
+# We install only the tile sources we need for testing; using [al]] is probably
+# better for development.
+large-image[pil]>=1.0.2.dev2
 # External dependencies
 pip>=9
 tox

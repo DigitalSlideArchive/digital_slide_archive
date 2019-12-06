@@ -325,13 +325,13 @@ class TestDSAEndpoints(object):
         assert utilities.respStatus(resp) == 401
 
     def testQuarantine(self, server, admin, user):
-        publicFolder = Folder().childFolders(
+        publicFolder = Folder().childFolders(  # noqa: B305
             user, 'user', filters={'name': 'Public'}
         ).next()
-        adminFolder = Folder().childFolders(
+        adminFolder = Folder().childFolders(  # noqa: B305
             admin, 'user', filters={'name': 'Public'}
         ).next()
-        privateFolder = Folder().childFolders(
+        privateFolder = Folder().childFolders(  # noqa: B305
             admin, 'user', filters={'name': 'Private'}, user=admin
         ).next()
         items = [Item().createItem(name, creator, folder) for name, creator, folder in [

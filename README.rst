@@ -32,7 +32,7 @@ girder serve
 To use Girder Worker:
 
 ```
-pip install slicer_cli_web[worker]
+pip install girder_slicer_cli_web[worker]
 GW_DIRECT_PATHS=true girder_worker -l info -Ofair --prefetch-multiplier=1
 ```
 

@@ -4,16 +4,32 @@
     "private": true,
     "description": "Organize, visualize, and analyze histology images.",
     "homepage": "https://github.com/DigitalSlideArchive/digital_slide_archive",
+    "bugs": {
+        "url": "https://github.com/DigitalSlideArchive/digital_slide_archive/issues"
+    },
     "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DigitalSlideArchive/digital_slide_archive.git"
+    },
     "peerDependencies": {
         "@girder/core": "*"
     },
+    "main": "./index.js",
     "girderPlugin": {
         "name": "digital_slide_archive",
-        "main": "./main.js"
+        "main": "./main.js",
+        "dependencies": [
+            "large_image_annotation"
+        ]
     },
     "scripts": {
         "lint": "eslint . && pug-lint . && stylint"
+    },
+    "dependencies": {
+        "backbone.localstorage": "^2.0.2",
+        "bootstrap-submenu": "^2.0.4",
+        "tinycolor2": "^1.4.1"
     },
     "devDependencies": {
         "@girder/eslint-config": "*",
@@ -32,6 +48,21 @@
     },
     "eslintConfig": {
         "extends": "@girder",
+        "rules": {
+            "for-direction": "error",
+            "getter-return": "error",
+            "multiline-ternary": [
+                "error",
+                "always-multiline"
+            ],
+            "no-alert": "error",
+            "switch-colon-spacing": "error",
+            "object-curly-spacing": "off",
+            "import/exports-last": "error",
+            "promise/no-native": "error",
+            "promise/no-return-in-finally": "error",
+            "promise/no-return-wrap": "error"
+        },        
         "root": true
     },
     "pugLintConfig": {

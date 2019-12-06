@@ -140,9 +140,8 @@ def _saveJob(event):
     job = event.info
     try:
         jobkwargs = json_util.loads(job['kwargs'])
-        if ('docker_run_args' not in jobkwargs['task'] and
-                'scheduler' in jobkwargs['inputs']):
-            jobkwargs['task']['docker_run_args'] = {'ports': {'8787': None}}
+        if '--scheduler' in jobkwargs['container_args']:
+            jobkwargs['ports'] = {'8787': None}
             job['kwargs'] = json_util.dumps(jobkwargs)
     except Exception:
         pass

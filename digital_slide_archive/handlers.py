@@ -28,7 +28,7 @@ def process_annotations(event):
             return
 
         userId = reference['userId']
-        imageId = reference['itemId']
+        imageId = reference['fileId']
 
         # load models from the database
         user = User().load(userId, force=True)
