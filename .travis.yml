@@ -21,5 +21,4 @@ script:
   - tox | cat; test ${PIPESTATUS[0]} -eq 0
 after_success:
   - pip install codecov
-  - codecov --disable search pycov gcov --file .tox/coverage/py_coverage.xml
-  # .tox/coverage/cobertura-coverage.xml
+  - codecov --disable search pycov gcov --file .tox/coverage/py_coverage.xml build/test/coverage/cobertura-coverage.xml

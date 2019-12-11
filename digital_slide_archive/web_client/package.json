@@ -20,7 +20,8 @@
         "name": "digital_slide_archive",
         "main": "./main.js",
         "dependencies": [
-            "large_image_annotation"
+            "large_image_annotation",
+            "slicer_cli_web"
         ]
     },
     "scripts": {

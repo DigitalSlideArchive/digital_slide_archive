@@ -23,7 +23,7 @@ def prerelease_local_scheme(version):
 
 
 setup(
-    name='digital_slide_archive',
+    name='digital-slide-archive',
     use_scm_version={'local_scheme': prerelease_local_scheme},
     setup_requires=['setuptools-scm'],
     description='Organize, visualize, and analyze histology images.',
