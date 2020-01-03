@@ -1,0 +1,119 @@
+FROM ubuntu:18.04
+LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
+
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get --yes --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade && \
+    apt-get install -y --no-install-recommends \
+    # Primary tools \
+    sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
+    # Python 3.6 \
+    python3.6-dev \
+    # Python 3.7 \
+    python3.7-dev python3.7-distutils \
+    # Editors \
+    vim nano \
+    # Git \
+    git \
+    # Fuse \
+    fuse \
+    # Packages for other girder plugins \
+    libldap-dev \
+    libsasl2-dev \
+    # Install packages for routing to mongodb \
+    iptables dnsutils \
+    # Install some additional packages for convenience when testing with bash
+    iputils-ping telnet-ssl tmux less \
+    && \
+    apt-get remove -y python3-apt && \
+    apt-get install -y python3-apt && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/*
+RUN locale-gen en_US.UTF-8
+# Make Python 3.6 the default
+RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
+    ln -s "$(which python3.6)" /usr/local/bin/python3 && \
+    ln -s "$(which python3.6)" /usr/local/bin/python3m
+    # && \
+    # Ansible explicitly uses /usr/bin/python for many subcommands (e.g., pip) \
+    # This means that /usr/bin/python MUST be the same version as we want to \
+    # use, which is unfortunate. \
+    # rm -f /usr/bin/python && \
+    # ln -s "$(which python3.7)" /usr/bin/python
+RUN curl https://bootstrap.pypa.io/get-pip.py -O && \
+    python3.7 get-pip.py && \
+    python3.6 get-pip.py && \
+    rm get-pip.py && \
+    which pip && \
+    which python && \
+    pip --version && \
+    python --version && \
+    ls -al /usr/bin/python* /usr/bin/pip* /usr/local/bin/python* /usr/local/bin/pip* || true
+RUN pip install ansible
+RUN adduser --disabled-password --gecos '' ubuntu && \
+    adduser ubuntu sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER ubuntu
+ENV LANG en_US.UTF-8
+WORKDIR /home/ubuntu
+RUN git clone --depth=1 --no-checkout https://github.com/DigitalSlideArchive/digital_slide_archive && \
+    cd digital_slide_archive && \
+    # remove mkdir and enable checkout once this branch is merged \
+    mkdir ansible && \
+    # git checkout master -- ansible/ && \
+    rm -rf .git
+WORKDIR /home/ubuntu/digital_slide_archive
+ENV GIRDER_EXEC_USER ubuntu
+COPY . /home/ubuntu/digital_slide_archive/ansible/.
+RUN sudo chown -R ubuntu:ubuntu /home/ubuntu/digital_slide_archive/ansible
+WORKDIR /home/ubuntu/digital_slide_archive/ansible
+
+RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
+    sudo apt-get install -y --no-install-recommends nodejs && \
+    nodejs --version && \
+    npm --version && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/*
+
+RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/
+RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars=docker=histomicstk && \
+    sudo py3clean /opt/digital_slide_archive/girder && \
+    sudo py3clean /usr/local/lib/python3.7/dist-packages && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/* \
+                /home/ubuntu/.cache \
+                /home/ubuntu/.ansible* \
+                /home/ubuntu/.wget-hsts \
+                /root/.cache/pip \
+                /var/tmp/* /home/ubuntu/.npm \
+                /home/ubuntu/.cache \
+                /home/ubuntu/.ansible* \
+                /home/ubuntu/.wget-hsts \
+                /root/.npm
+#               \
+#               /opt/histomicstk/logs/*.log \
+#               /opt/histomicstk/girder/node_modules \
+#               /opt/histomicstk/HistomicsTK/_skbuild \
+#               /opt/histomicstk/large_image/build \
+#                /opt/histomicstk/HistomicsTK/.eggs \
+
+WORKDIR /opt/digital_slide_archive/girder
+EXPOSE 8080
+
+# RUN npm install && \
+#     sudo rm -rf /home/ubuntu/.npm \
+#                 /root/.npm \
+#                 /opt/digital_slide_archive/girder/node_modules \
+#                 /tmp/*
+
+# If the environment variable
+#   HOST_MONGO=true
+# is set, mongodb is added to the /etc/hosts as mapping to the docker host ip
+# address
+CMD sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
+    sudo -E sysctl -w net.ipv4.conf.eth0.route_localnet=1 && \
+    sudo -E iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017 && \
+    sudo -E iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE && \
+    sudo -E su ubuntu -c \
+    'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder mount /opt/digital_slide_archive/mount >/opt/logs/mount.log 2>&1' ; \
+    sudo -E su ubuntu -c \
+    'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder serve --dev >/opt/logs/girder.log 2>&1'

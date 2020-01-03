@@ -1,0 +1,186 @@
+---
+- name: Always use virtualenv when logging in
+  shell:
+    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bash.bashrc
+  become: true
+
+- name: Get the most recent version of pip
+  pip:
+    name: pip
+    extra_args: -U
+    virtualenv: "{{ girder_virtualenv }}"
+
+- name: Install other python modules needed by ansible for provisioning (not in the girder virtualenv)
+  become: true
+  pip:
+    name:
+      - requests
+      - girder_client
+    state: present
+
+- name: Clone girder
+  git:
+    repo: git://github.com/girder/girder.git
+    dest: "{{ girder_root }}"
+    accept_hostkey: yes
+    force: yes
+    version: "{{ girder_version }}"
+
+- name: Reinstall girder with some optional components
+  pip:
+    chdir: "{{ girder_root }}"
+    extra_args: "-e .[mount]"
+    name: "-v"
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Create a directory for the girder mount
+  file: state=directory path="{{ root_dir }}/mount"
+
+- name: Install girder-client from our source
+  pip:
+    chdir: "{{ girder_root }}/clients/python"
+    extra_args: "-e"
+    name: "."
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Set the girder configuration file
+  template:
+    src: girder.local.cfg.j2
+    dest: /home/ubuntu/.girder/girder.cfg
+    mode: '0666'
+
+- name: Clone girder_worker_utils
+  git:
+    repo: git://github.com/girder/girder_worker_utils.git
+    dest: /opt/girder_worker_utils
+    accept_hostkey: yes
+    version: "{{ girder_worker_utils_version }}"
+
+- name: Install girder_worker_utils
+  pip:
+    name: "-v"
+    extra_args: "-e /opt/girder_worker_utils"
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Clone girder_worker
+  git:
+    repo: git://github.com/girder/girder_worker.git
+    dest: /opt/girder_worker
+    accept_hostkey: yes
+    version: "{{ girder_worker_version }}"
+
+- name: Create local worker config file
+  template:
+    src: worker.local.cfg.j2
+    dest: /opt/girder_worker/girder_worker/worker.local.cfg
+    mode: 0644
+    owner: "{{ worker_exec_user }}"
+    group: "{{ worker_exec_group }}"
+
+- name: Install girder_worker
+  pip:
+    name: "-v"
+    extra_args: "-e /opt/girder_worker[girder] --find-links https://girder.github.io/large_image_wheels"
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Clone slicer_cli_web
+  git:
+    repo: git://github.com/girder/slicer_cli_web.git
+    dest: /opt/slicer_cli_web
+    accept_hostkey: yes
+    version: "{{ slicer_cli_web_version }}"
+
+- name: Install slicer_cli_web
+  pip:
+    name: "-v"
+    extra_args: "-e /opt/slicer_cli_web[girder] --find-links https://girder.github.io/large_image_wheels"
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Clone large_image
+  git:
+    repo: git://github.com/girder/large_image.git
+    dest: /opt/large_image
+    accept_hostkey: yes
+    version: "{{ large_image_version }}"
+
+- name: Install large_image
+  pip:
+    chdir: /opt/large_image
+    name: "-v"
+    extra_args: "-e /opt/large_image/.[memcached] -rrequirements-dev.txt --find-links https://girder.github.io/large_image_wheels"
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Clone HistomicsUI
+  git:
+    repo: git://github.com/DigitalSlideArchive/HistomicsUI.git
+    dest: /opt/HistomicsUI
+    accept_hostkey: yes
+    version: "{{ histomicsui_version }}"
+
+- name: Install HistomicsUI
+  pip:
+    name: "-v"
+    extra_args: "-e /opt/HistomicsUI"
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Install Girder plugins
+  pip:
+    name:
+      - girder-virtual-folders
+      - girder-resource-path-tools
+      - girder-homepage
+      - girder-ldap
+      - girder-dicom-viewer
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
+- name: Build girder
+  environment:
+    - LC_ALL: "C.UTF-8"
+    - LANG: "C.UTF-8"
+  command: "{{ girder_virtualenv }}/bin/girder build --dev"
+
+# Always have a build directory
+- name: Ensure build directory exists
+  file:
+    path: "{{ root_dir }}/build"
+    owner: "{{ girder_exec_user }}"
+    group: "{{ girder_exec_group }}"
+    mode: 0775
+    state: directory
+    recurse: no
+  become: true
+
+- name: Ensure files are owned by the right user and are public
+  file:
+    path: "{{ root_dir }}"
+    owner: "{{ girder_exec_user }}"
+    group: "{{ girder_exec_group }}"
+    mode: u=rwX,g=rX,o=rX
+    recurse: yes
+  become: true
+
+- name: Add a script to set hosts, ids, and other properties if necessary
+  copy:
+    src: ../../common/set_environment.py
+    dest: "{{ root_dir }}/set_environment.py"
+    mode: 0744
+    owner: root
+  become: true
+  when: docker is defined
+
+- name: Add a script to get CLIs and add them to HistomicsTK
+  copy:
+    src: utils/cli_test.py
+    dest: "{{ root_dir }}/cli_test.py"
+    mode: 0744
+    owner: "{{ girder_exec_user }}"
+    group: "{{ girder_exec_group }}"
+  become: true

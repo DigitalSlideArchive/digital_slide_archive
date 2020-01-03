@@ -1,0 +1,9 @@
+[celery]
+app_main=girder_worker
+broker=amqp://guest@{{ mq_private_ip }}/
+
+[girder_worker]
+
+[logging]
+level = debug
+format = [%%(asctime)s] %%(levelname)s: %%(message)s
