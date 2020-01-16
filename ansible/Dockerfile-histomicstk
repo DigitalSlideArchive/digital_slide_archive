@@ -88,22 +88,16 @@ RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars=docker=h
                 /home/ubuntu/.cache \
                 /home/ubuntu/.ansible* \
                 /home/ubuntu/.wget-hsts \
-                /root/.npm
-#               \
-#               /opt/histomicstk/logs/*.log \
-#               /opt/histomicstk/girder/node_modules \
-#               /opt/histomicstk/HistomicsTK/_skbuild \
-#               /opt/histomicstk/large_image/build \
-#                /opt/histomicstk/HistomicsTK/.eggs \
+                /home/ubuntu/.config \
+                /root/.npm && \
+    bash -c ' \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -and \( -perm -600 -not -perm -700 \) -exec chmod 666 {} \+ && \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -and -perm -700 -exec chmod 777 {} \+ && \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -exec chown root:root {} \+ && \
+    true'
 
 WORKDIR /opt/digital_slide_archive/girder
 EXPOSE 8080
-
-# RUN npm install && \
-#     sudo rm -rf /home/ubuntu/.npm \
-#                 /root/.npm \
-#                 /opt/digital_slide_archive/girder/node_modules \
-#                 /tmp/*
 
 # If the environment variable
 #   HOST_MONGO=true
