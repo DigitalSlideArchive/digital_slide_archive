@@ -13,6 +13,8 @@ RUN apt-get update && \
     python3.6-dev \
     # Python 3.7 \
     python3.7-dev python3.7-distutils \
+    # For full testing, add python 3.5 \
+    python3.5 \
     # Editors \
     vim nano \
     # Git \
@@ -24,6 +26,8 @@ RUN apt-get update && \
     libsasl2-dev \
     # Install packages for routing to mongodb \
     iptables dnsutils \
+    # For testing \
+    libfontconfig \
     # Install some additional packages for convenience when testing with bash
     iputils-ping telnet-ssl tmux less \
     && \
@@ -31,17 +35,12 @@ RUN apt-get update && \
     apt-get install -y python3-apt && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/*
 RUN locale-gen en_US.UTF-8
-# Make Python 3.6 the default
+# Make Python 3.6 the default to make ansible content
 RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
     ln -s "$(which python3.6)" /usr/local/bin/python3 && \
     ln -s "$(which python3.6)" /usr/local/bin/python3m
-    # && \
-    # Ansible explicitly uses /usr/bin/python for many subcommands (e.g., pip) \
-    # This means that /usr/bin/python MUST be the same version as we want to \
-    # use, which is unfortunate. \
-    # rm -f /usr/bin/python && \
-    # ln -s "$(which python3.7)" /usr/bin/python
 RUN curl https://bootstrap.pypa.io/get-pip.py -O && \
+    python3.5 get-pip.py && \
     python3.7 get-pip.py && \
     python3.6 get-pip.py && \
     rm get-pip.py && \
@@ -49,8 +48,15 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -O && \
     which python && \
     pip --version && \
     python --version && \
-    ls -al /usr/bin/python* /usr/bin/pip* /usr/local/bin/python* /usr/local/bin/pip* || true
-RUN pip install ansible
+    which pip3 && \
+    which python3 && \
+    pip3 --version && \
+    python3 --version && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN pip install ansible && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 RUN adduser --disabled-password --gecos '' ubuntu && \
     adduser ubuntu sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -69,14 +75,17 @@ COPY . /home/ubuntu/digital_slide_archive/ansible/.
 RUN sudo chown -R ubuntu:ubuntu /home/ubuntu/digital_slide_archive/ansible
 WORKDIR /home/ubuntu/digital_slide_archive/ansible
 
-RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/
+RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars="docker=girder_worker" && \
-    sudo py3clean /usr/local/lib/python3.7/dist-packages && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/* \
                 /home/ubuntu/.cache \
                 /home/ubuntu/.ansible* \
                 /home/ubuntu/.wget-hsts \
-                /root/.cache/pip
+                /root/.cache/pip && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 RUN echo 'task_reject_on_worker_lost = True' >> /opt/girder_worker/girder_worker/celeryconfig.py
 RUN echo 'task_acks_late = True' >> /opt/girder_worker/girder_worker/celeryconfig.py
