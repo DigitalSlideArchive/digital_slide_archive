@@ -1,7 +1,8 @@
 ---
 - name: Always use virtualenv when logging in
   shell:
-    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bash.bashrc
+    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bashrc
+    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/profile
   become: true
 
 - name: Get the most recent version of pip

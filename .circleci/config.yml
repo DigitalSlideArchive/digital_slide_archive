@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install ansible requests docker
+      - run:
+          name: Build the dockers
+          command: export TERM=xterm && python ansible/deploy_docker.py start --build --cli-test
+      - run:
+          name: Ensure that we can rebuild girder
+          command: docker exec histomicstk_histomicstk bash -lc 'girder build --dev'
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec histomicstk_histomicstk bash -lc 'tox'
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
