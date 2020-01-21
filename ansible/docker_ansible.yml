@@ -53,7 +53,7 @@
     girder_celery_user: worker-robot
     girder_celery_email: histomicstk.celery@kitware.com
     girder_celery_password: celery
-    girder_root: /opt/girder"
+    girder_root: /opt/girder
     worker_exec_user: ubuntu
     worker_exec_group: ubuntu
     mongo_private_ip: mongodb

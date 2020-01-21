@@ -148,15 +148,11 @@
     - LANG: "C.UTF-8"
   command: "{{ girder_virtualenv }}/bin/girder build --dev"
 
-# Always have a build directory
-- name: Ensure build directory exists
+- name: Link the root directory to an old location
   file:
-    path: "{{ root_dir }}/build"
-    owner: "{{ girder_exec_user }}"
-    group: "{{ girder_exec_group }}"
-    mode: 0775
-    state: directory
-    recurse: no
+    src: "{{ root_dir }}"
+    path: "/opt/histomicstk"
+    state: link
   become: true
 
 - name: Ensure files are owned by the right user and are public

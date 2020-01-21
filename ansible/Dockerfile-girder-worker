@@ -39,7 +39,7 @@ RUN locale-gen en_US.UTF-8
 RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
     ln -s "$(which python3.6)" /usr/local/bin/python3 && \
     ln -s "$(which python3.6)" /usr/local/bin/python3m
-RUN curl https://bootstrap.pypa.io/get-pip.py -O && \
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3.5 get-pip.py && \
     python3.7 get-pip.py && \
     python3.6 get-pip.py && \

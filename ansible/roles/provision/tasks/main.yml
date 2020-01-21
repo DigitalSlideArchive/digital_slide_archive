@@ -86,6 +86,7 @@
   when: docker is undefined
 
 - name: Restart girder by touching config file
+  become: true
   file:
     path: /home/ubuntu/.girder/girder.cfg
     state: touch
@@ -310,25 +311,42 @@
         value: "{{ slicer_cli_tasks_folder['gc_return']['_id'] }}"
   when: (vagrant is defined) or (docker is defined)
 
+- name: Update from version 2.x as needed
+  shell: >
+    mongo mongodb://mongodb/girder --quiet --eval 'db.item.updateMany({"largeImage.sourceName": "svs"}, {$set: {"largeImage.sourceName": "openslide"}})'
+  register: update_output
+
+- name: Show update from version 2.x results
+  debug: var=update_output.stdout_lines
+
 - name: Install CLI
-  command: "{{ girder_virtualenv }}/bin/python cli_test.py --username {{ girder_admin_user|quote }} --password {{ girder_admin_password|quote }} --apiurl {{ girder_socket_scheme|quote }}://127.0.0.1:{{ girder_socket_port }}/api/v1 {{ cli_image|quote }}"
+  shell: "{{ girder_virtualenv }}/bin/python cli_test.py --username {{ girder_admin_user|quote }} --password {{ girder_admin_password|quote }} --apiurl {{ girder_socket_scheme|quote }}://127.0.0.1:{{ girder_socket_port }}/api/v1 {{ cli_image|quote }}"
   args:
     chdir: "{{ root_dir }}"
+  register: test_output
   no_log: true
   when: docker is defined and cli_image is defined and cli_image_test is undefined
 
+- name: Show test CLI results (stdout)
+  debug: var=test_output.stdout_lines
+  when: docker is defined and cli_image is defined and cli_image_test is undefined
+
+- name: Show test CLI results (stderr)
+  debug: var=test_output.stderr_lines
+  when: docker is defined and cli_image is defined and cli_image_test is undefined
+
 - name: Install and test CLI
-  shell: "{{ girder_virtualenv }}/bin/python cli_test.py --username {{ girder_admin_user|quote }} --password {{ girder_admin_password|quote }} --apiurl {{ girder_socket_scheme|quote }}://127.0.0.1:{{ girder_socket_port }}/api/v1 --test {{ cli_image|quote }} >> /opt/logs/cli.log 2>&1"
+  shell: "{{ girder_virtualenv }}/bin/python cli_test.py --username {{ girder_admin_user|quote }} --password {{ girder_admin_password|quote }} --apiurl {{ girder_socket_scheme|quote }}://127.0.0.1:{{ girder_socket_port }}/api/v1 --test {{ cli_image|quote }}"
   args:
     chdir: "{{ root_dir }}"
   register: test_output
   no_log: true
   when: docker is defined and cli_image is defined and cli_image_test is defined
 
-- name: Show test CLI results
+- name: Show test CLI results (stdout)
   debug: var=test_output.stdout_lines
   when: docker is defined and cli_image is defined and cli_image_test is defined
 
-- name: Show test CLI results
+- name: Show test CLI results (stderr)
   debug: var=test_output.stderr_lines
   when: docker is defined and cli_image is defined and cli_image_test is defined

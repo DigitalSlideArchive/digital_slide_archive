@@ -30,6 +30,8 @@ RUN apt-get update && \
     libfontconfig \
     # Install some additional packages for convenience when testing with bash
     iputils-ping telnet-ssl tmux less \
+    # Convenience when updating from previous versions \
+    mongodb-clients \
     && \
     apt-get remove -y python3-apt && \
     apt-get install -y python3-apt && \
@@ -39,7 +41,7 @@ RUN locale-gen en_US.UTF-8
 RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
     ln -s "$(which python3.6)" /usr/local/bin/python3 && \
     ln -s "$(which python3.6)" /usr/local/bin/python3m
-RUN curl https://bootstrap.pypa.io/get-pip.py -O && \
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3.5 get-pip.py && \
     python3.7 get-pip.py && \
     python3.6 get-pip.py && \
@@ -114,6 +116,7 @@ RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars=docker=h
     sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -exec chown root:root {} \+ && \
     # girder's shared output folder must still be owned by a user, not root \
     sudo find /home/ubuntu/.virtualenvs/girder/share/girder -exec chown ubuntu:ubuntu {} \+ && \
+    sudo find /home/ubuntu/.girder -exec chown ubuntu:ubuntu {} \+ && \
     true'
 
 WORKDIR /opt/HistomicsUI
