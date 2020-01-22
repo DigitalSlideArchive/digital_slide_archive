@@ -1,8 +1,8 @@
-===================
-Install HistomicsTK
-===================
+=============================
+Install Digital Slide Archive
+=============================
 
-There are several ways to install HistomicsTK and the Digital Slide Archive.  If you intend to use the interface, use the Docker installation.  If you need to develop the source code, the Vagrant installation is the easiest method.  If you are using Ubuntu 16.04 or Ubuntu 18.04, you can install HistomicsTK on your local system.
+There are several ways to install the Digital Slide Archive and HistomicsUI.  If you intend to use the interface, use the Docker installation.  If you don't have docker installed, the Vagrant installation is the easiest method.  If you are using Ubuntu 18.04, you can install the Digital Slide Archive on your local system.
 
 .. __methods
 
@@ -29,39 +29,37 @@ Install the python docker module::
 
     sudo pip install docker
 
-Get the HistomicsTK repository::
+Get the Digital Slide Archive repository::
 
-    git clone https://github.com/DigitalSlideArchive/HistomicsTK
+    git clone https://github.com/DigitalSlideArchive/digital_slide_archive
 
 Deploy
 ######
 
 ::
 
-    cd HistomicsTK/ansible
+    cd digital_slide_archive/ansible
     python deploy_docker.py start
 
 There are many options that can be used along with the ``deploy_docker.py`` command, use ``deploy_docker.py --help`` to list them.
 
-By default, the deployment places all database, log, and assetstore files in the ``~/.histomicstk`` directory.  HistomicsTK is run on localhost at port 8080.
+By default, the deployment places all database, log, and assetstore files in the ``~/.histomicstk`` directory.  The Digital Slide Archive is run on localhost at port 8080.
 
 Update an installation
 ######################
 
 ::
 
-    cd HistomicsTK/ansible
+    cd digital_slide_archive/ansible
     # Make sure you have the latest version of the deploy_docker script
     git pull
-    # Make sure you have the latest docker images.  This uses the pinned
-    # versions of the docker images -- add --latest to use the latest built
-    # images.
+    # Make sure you have the latest docker images.
     python deploy_docker.py pull
-    # stop and remove the running docker containers for HistomicsTK
+    # stop and remove the running docker containers for the Digital Slide Archive
     python deploy_docker.py rm
     # Restart and provision the new docker containers.  Use the same
-    # command-line parameters as you originally used to start HistomicsTK the
-    # first time.
+    # command-line parameters as you originally used to start the Digital Slide
+    # Archive the first time.
     python deploy_docker.py start
 
 Installing via Vagrant
@@ -78,29 +76,29 @@ Install VirtualBox, Vagrant, and git:
 - Download and install virtual box - https://www.virtualbox.org/wiki/Downloads
 - Download and install vagrant - https://www.vagrantup.com/downloads.html
 
-Get the HistomicsTK repository::
+Get the Digital Slide Archive repository::
 
-    git clone https://github.com/DigitalSlideArchive/HistomicsTK
+    git clone https://github.com/DigitalSlideArchive/digital_slide_archive
 
 Deploy
 ######
 
 ::
 
-    cd HistomicsTK
+    cd digital_slide_archive
     vagrant up
 
 The Girder instance can then be accessed at http://localhost:8009. Any image
-placed in the sample_images subdirectory of the directory where HistomicsTK
-is cloned directory will be seen in the TCGA collection of Girder.
+placed in the sample_images subdirectory of the directory where 
+digital_slide_archive is cloned will be seen in the TCGA collection of Girder.
 
 The front-end UI that allows you to apply analysis modules in HistomicsTK's
 docker plugins on data stored in Girder can be accessed at
-http://localhost:8009/histomicstk.
+http://localhost:8009/histomicsui.
 
 You can also ssh into the vagrant virtual box using the command ``vagrant ssh``.
-HistomicsTK and its dependencies are installed at the location
-``/opt/histomicstk``.
+Digital Slide Archive and its dependencies are installed at the location
+``/opt/`` (e.g., ``/opt/digital_slide_archive``).
 
 Run tests
 #########
@@ -111,13 +109,13 @@ Log in to the vagrant box::
 
 Inside the vagrant box, tests can be run by typing::
 
-    cd /opt/histomicstk/build
-    ctest -VV
+    cd /opt/HistomicsUI
+    tox
 
-Local installation on Ubuntu 16.04 / 18.04
-------------------------------------------
+Local installation on Ubuntu 18.04
+----------------------------------
 
-Due to the library dependencies of OpenJPEG, libtiff, OpenSlide, and vips, local installation may be hard to get fully working.  The local deployment scripts assume a reasonably plain instance of Ubuntu 16.04 or Ubuntu 18.04.
+The local deployment scripts assume a reasonably plain instance of Ubuntu 18.04.
 
 Prerequisites
 #############
@@ -125,17 +123,17 @@ Prerequisites
 ::
 
     sudo apt-get update
-    sudo apt-get install -y --force-yes libssl-dev git python2.7-dev python-pip
+    sudo apt-get install -y --force-yes libssl-dev git python3-dev python3-distutils
     sudo pip install -U pip
     sudo pip install -U ansible
-    git clone https://github.com/DigitalSlideArchive/HistomicsTK
+    git clone https://github.com/DigitalSlideArchive/digital_slide_archive
 
 Deploy
 ######
 
 ::
 
-    cd HistomicsTK/ansible
+    cd digital_slide_archive/ansible
     ./deploy_local.sh
 
 Note that if there are network issues, this deployment script does not automatically retry installation.  It may be necessary to delete partial files and run it again.
