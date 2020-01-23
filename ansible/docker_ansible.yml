@@ -13,8 +13,9 @@
         - docker == "girder_worker"
     - role: girder.girder
       version: master
-      girder_development_mode: true
-      girder_version: "master"
+      # This no longer works due to a change in the Girder ansible role
+      # girder_development_mode: true
+      girder_version: "latest"
       girder_web: false
       girder_daemonize: false
       become: true

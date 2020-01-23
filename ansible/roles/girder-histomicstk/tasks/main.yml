@@ -1,8 +1,11 @@
 ---
 - name: Always use virtualenv when logging in
-  shell:
+  shell: |
+    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bash.bashrc
     echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bashrc
     echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/profile
+    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.bashrc"
+    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.profile"
   become: true
 
 - name: Get the most recent version of pip
@@ -78,8 +81,8 @@
     src: worker.local.cfg.j2
     dest: /opt/girder_worker/girder_worker/worker.local.cfg
     mode: 0644
-    owner: "{{ worker_exec_user }}"
-    group: "{{ worker_exec_group }}"
+    owner: "{{ girder_exec_user }}"
+    group: "{{ girder_exec_group }}"
 
 - name: Install girder_worker
   pip:
