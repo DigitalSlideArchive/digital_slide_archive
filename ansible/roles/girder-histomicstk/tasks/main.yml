@@ -30,8 +30,8 @@
 - name: Reinstall girder with some optional components
   pip:
     chdir: "{{ girder_root }}"
-    extra_args: "-e .[mount]"
-    name: "-v"
+    name: ".[mount]"
+    editable: true
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -41,8 +41,8 @@
 - name: Install girder-client from our source
   pip:
     chdir: "{{ girder_root }}/clients/python"
-    extra_args: "-e"
     name: "."
+    editable: true
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -61,8 +61,8 @@
 
 - name: Install girder_worker_utils
   pip:
-    name: "-v"
-    extra_args: "-e /opt/girder_worker_utils"
+    name: /opt/girder_worker_utils
+    editable: true
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -83,8 +83,9 @@
 
 - name: Install girder_worker
   pip:
-    name: "-v"
-    extra_args: "-e /opt/girder_worker[girder] --find-links https://girder.github.io/large_image_wheels"
+    name: "/opt/girder_worker[girder]"
+    editable: true
+    extra_args: "--find-links https://girder.github.io/large_image_wheels"
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -97,8 +98,9 @@
 
 - name: Install slicer_cli_web
   pip:
-    name: "-v"
-    extra_args: "-e /opt/slicer_cli_web[girder] --find-links https://girder.github.io/large_image_wheels"
+    name: "/opt/slicer_cli_web[girder]"
+    editable: true
+    extra_args: "--find-links https://girder.github.io/large_image_wheels"
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -112,8 +114,9 @@
 - name: Install large_image
   pip:
     chdir: /opt/large_image
-    name: "-v"
-    extra_args: "-e /opt/large_image/.[memcached] -rrequirements-dev.txt --find-links https://girder.github.io/large_image_wheels"
+    name: "/opt/large_image/.[memcached]"
+    extra_args: "-rrequirements-dev.txt --find-links https://girder.github.io/large_image_wheels"
+    editable: true
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -126,8 +129,8 @@
 
 - name: Install HistomicsUI
   pip:
-    name: "-v"
-    extra_args: "-e /opt/HistomicsUI"
+    name: /opt/HistomicsUI
+    editable: true
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
