@@ -2,9 +2,7 @@
 Install Digital Slide Archive
 =============================
 
-There are several ways to install the Digital Slide Archive and HistomicsUI.  If you intend to use the interface, use the Docker installation.  If you don't have docker installed, the Vagrant installation is the easiest method.  If you are using Ubuntu 18.04, you can install the Digital Slide Archive on your local system.
-
-.. __methods
+There are several ways to install the Digital Slide Archive and HistomicsUI.  If you intend to use the interface, use the Docker installation.  If you don't have docker installed, the Vagrant installation is the easiest method. 
 
 Installing via Docker
 ---------------------
@@ -112,28 +110,3 @@ Inside the vagrant box, tests can be run by typing::
     cd /opt/HistomicsUI
     tox
 
-Local installation on Ubuntu 18.04
-----------------------------------
-
-The local deployment scripts assume a reasonably plain instance of Ubuntu 18.04.
-
-Prerequisites
-#############
-
-::
-
-    sudo apt-get update
-    sudo apt-get install -y --force-yes libssl-dev git python3-dev python3-distutils
-    sudo pip install -U pip
-    sudo pip install -U ansible
-    git clone https://github.com/DigitalSlideArchive/digital_slide_archive
-
-Deploy
-######
-
-::
-
-    cd digital_slide_archive/ansible
-    ./deploy_local.sh
-
-Note that if there are network issues, this deployment script does not automatically retry installation.  It may be necessary to delete partial files and run it again.
