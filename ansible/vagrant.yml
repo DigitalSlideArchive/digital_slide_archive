@@ -2,11 +2,12 @@
 - hosts: all
   roles:
     - role: girder.mongodb
+      version: master
     - common
     - mq
     - worker
     - role: girder.girder
-      girder_path: "{{ root_dir }}/girder"
+      version: master
       # girder_development_mode: true
       girder_version: "latest"
       # Setting girder_web to true installs nodejs
@@ -39,7 +40,7 @@
         bash -lc "girder build --dev >/tmp/test_build.txt 2>&1"
       become: true
       become_user: "{{ girder_exec_user }}"
-    
+
     - name: Test HistomicsUI
       shell: >-
         bash -lc "tox -e py36,flake8,lintclient >/tmp/test_test.txt 2>&1"
@@ -47,4 +48,3 @@
         chdir: "/opt/HistomicsUI"
       become: true
       become_user: "{{ girder_exec_user }}"
-

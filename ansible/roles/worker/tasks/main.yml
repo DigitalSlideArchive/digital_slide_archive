@@ -28,15 +28,15 @@
   apt:
     update_cache: yes
     name:
-      - libffi-dev
-      - libssl-dev
-      - python-pip
-      - python-dev
+      # - libffi-dev
+      # - libssl-dev
+      # - python-pip
+      # - python-dev
       - git
-      - libjpeg-dev
-      - libfreetype6-dev
-      - zlib1g-dev
-      - libpng-dev
+      # - libjpeg-dev
+      # - libfreetype6-dev
+      # - zlib1g-dev
+      # - libpng-dev
       - docker-ce
     state: present
     install_recommends: no

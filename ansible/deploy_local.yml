@@ -1,14 +1,13 @@
 ---
 - hosts: local
   roles:
+    - role: girder.mongodb
+      version: master
     - common
-    - mongodb
     - mq
-    - openslide
     - worker
     - role: girder.girder
       version: master
-      girder_path: "{{ root_dir }}/girder"
       girder_version: "latest"
       # We need this to install node
       girder_web: true

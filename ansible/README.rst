@@ -123,10 +123,12 @@ Prerequisites
 ::
 
     sudo apt-get update
-    sudo apt-get install -y --force-yes libssl-dev git python3-dev python3-distutils
-    sudo pip install -U pip
-    sudo pip install -U ansible
+    sudo apt-get install -y libssl-dev git python3-dev python3-distutils python3-pip
+    python3 -m pip install -U pip
+    python3 -m pip install -U ansible
     git clone https://github.com/DigitalSlideArchive/digital_slide_archive
+
+You may need to log out and log back on to ensure ansible is in your path.
 
 Deploy
 ######
