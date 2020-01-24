@@ -5,3 +5,6 @@ _build*
 .*.swo
 .eggs
 .tox
+.vagrant
+ansible/roles/girder.girder
+ansible/roles/girder.mongodb

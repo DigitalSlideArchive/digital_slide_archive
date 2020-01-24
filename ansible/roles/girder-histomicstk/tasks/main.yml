@@ -1,11 +1,11 @@
 ---
 - name: Always use virtualenv when logging in
   shell: |
-    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bash.bashrc
-    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/bashrc
-    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> /etc/profile
-    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.bashrc"
-    echo ". /home/ubuntu/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.profile"
+    echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> /etc/bash.bashrc
+    echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> /etc/bashrc
+    echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> /etc/profile
+    echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.bashrc"
+    echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.profile"
   become: true
 
 - name: Get the most recent version of pip
@@ -52,7 +52,7 @@
 - name: Set the girder configuration file
   template:
     src: girder.local.cfg.j2
-    dest: /home/ubuntu/.girder/girder.cfg
+    dest: /home/{{ girder_exec_user }}/.girder/girder.cfg
     mode: '0666'
 
 - name: Clone girder_worker_utils

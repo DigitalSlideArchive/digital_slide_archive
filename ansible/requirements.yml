@@ -1,2 +1,6 @@
+---
 - src: girder.girder
   version: master
+- src: girder.mongodb
+  version: master
+

@@ -68,18 +68,6 @@
     state: present
   when: girder_no_create_admin is undefined
 
-# - name: Ensure worker user exists
-#   girder:
-#     port: "{{ girder_socket_port }}"
-#     scheme: "{{ girder_socket_scheme }}"
-#     user:
-#       firstName: Worker
-#       lastName: Robot
-#       password: "{{ girder_celery_password }}"
-#       login: "{{ girder_celery_user }}"
-#       email: "{{ girder_celery_email }}"
-#     state: present
-
 - name: Restart girder as a service
   service: name=girder state=restarted enabled=yes
   become: true
@@ -88,7 +76,7 @@
 - name: Restart girder by touching config file
   become: true
   file:
-    path: /home/ubuntu/.girder/girder.cfg
+    path: /home/{{ girder_exec_user }}/.girder/girder.cfg
     state: touch
   when: docker is defined
 
@@ -313,7 +301,7 @@
 
 - name: Update from version 2.x as needed
   shell: >
-    mongo mongodb://mongodb/girder --quiet --eval 'db.item.updateMany({"largeImage.sourceName": "svs"}, {$set: {"largeImage.sourceName": "openslide"}})'
+    mongo mongodb://{{ mongo_private_ip }}/girder --quiet --eval 'db.item.updateMany({"largeImage.sourceName": "svs"}, {$set: {"largeImage.sourceName": "openslide"}})'
   register: update_output
 
 - name: Show update from version 2.x results

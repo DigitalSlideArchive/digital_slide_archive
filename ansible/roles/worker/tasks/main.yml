@@ -64,8 +64,8 @@
     group: "{{ worker_exec_group }}"
 
 - name: Install girder_worker
-  become: true
   pip:
+    executable: pip3
     name: "/opt/girder_worker[worker]"
     editable: true
     extra_args: "--find-links https://girder.github.io/large_image_wheels"
@@ -79,8 +79,8 @@
     version: "{{ girder_worker_utils_version }}"
 
 - name: Install girder_worker_utils
-  become: true
   pip:
+    executable: pip3
     name: /opt/girder_worker_utils
     editable: true
     state: present
@@ -94,8 +94,8 @@
     version: "{{ large_image_version }}"
 
 - name: Install large_image tasks
-  become: true
   pip:
+    executable: pip3
     name: "/opt/large_image/tasks[worker]"
     extra_args: "--find-links https://girder.github.io/large_image_wheels"
     editable: true
@@ -109,8 +109,8 @@
     version: "{{ slicer_cli_web_version }}"
 
 - name: Install slicer_cli_web
-  become: true
   pip:
+    executable: pip3
     name: "/opt/slicer_cli_web[worker]"
     editable: true
     extra_args: "--find-links https://girder.github.io/large_image_wheels"
