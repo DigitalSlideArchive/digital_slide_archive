@@ -1,0 +1,77 @@
+---
+version: '3'
+services:
+  girder:
+    build: .
+    privileged: true
+    # Set CURRENT_UID to your user id (e.g., `CURRENT_UID=$(id -u):$(id -g)`)
+    # so that assetstores and logs are owned by yourself.
+    user: ${CURRENT_UID}
+    # Set DSA_PORT to expose the interface on another port (default 8080).
+    ports:
+      - "${DSA_PORT:-8080}:8080"
+    links:
+      - "mongodb:mongodb"
+      - "rabbitmq:rabbitmq"
+    environment:
+      - GIRDER_CONFIG=/conf/girder.local.conf
+    command: bash -c 'python /conf/girder_config.py && girder mount /fuse && girder serve'
+    volumes:
+      # Default assetstore
+      - ./assetstore:/assetstore
+      # Location of girder.local.conf and girder_config.py
+      - .:/conf
+      # Location to store logs
+      - ./logs:/logs
+      # Needed to use slicer_cli_web to run docker containers
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Needed to mount remote assetstores as if they were filesystems (i.e.,
+      # to work fully with S3)
+      - /etc/passwd:/etc/passwd:ro
+      # Add additional mounts here to get access to existing files on your
+      # system.  Also add them to the worker container to reduce copying.
+  mongodb:
+    image: "mongo:latest"
+    # Set CURRENT_UID to your user id (e.g., `CURRENT_UID=$(id -u):$(id -g)`)
+    # so that database files and logs are owned by yourself.
+    user: ${CURRENT_UID}
+    command: --nojournal --logpath /var/log/mongodb/mongodb.log
+    volumes:
+      # Location to store database files
+      - ./db:/data/db
+      - ./logs:/var/log/mongodb
+    # Uncomment to allow access to the database from outside of the docker
+    # network.
+    # ports:
+    #   - "27017"
+  memcached:
+    image: memcached
+    command: -m 4096
+    # Uncomment to allow access to memcached from outside of the docker network
+    # ports:
+    #   - "11211"
+  rabbitmq:
+    image: "rabbitmq:latest"
+    # Uncomment to allow access to rabbitmq from outside of the docker network
+    # ports:
+    #   - "5672"
+  worker:
+    build: .
+    privileged: true
+    # Set CURRENT_UID to your user id (e.g., `CURRENT_UID=$(id -u):$(id -g)`)
+    # so that logs and temp files are owned by yourself.
+    user: ${CURRENT_UID}
+    links:
+      - "rabbitmq:rabbitmq"
+    # You may want to set concurrency to `nproc`.
+    command: |
+      bash -c "TEMP=${TEMP:-/tmp} python -m girder_worker --concurrency=2 -Ofair --prefetch-multiplier=1 >>/logs/worker.log 2>&1"
+    volumes:
+      # Location to store logs
+      - ./logs:/logs
+      # Needed to use slicer_cli_web to run docker containers
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Needed to allow transferring data to slicer_cli_web docker containuers
+      - ${TEMP:-/tmp}:${TEMP:-/tmp}
