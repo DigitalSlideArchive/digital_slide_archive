@@ -806,7 +806,7 @@ addresses via -l 0.0.0.0).
 
 To determine the current mongo docker version, use a command like
   docker exec histomicstk_mongodb mongo girder --eval 'db.version()'
-To check if mongo can be upgrade, query the compatability mode via
+To check if mongo can be upgraded, query the compatability mode via
   docker exec histomicstk_mongodb mongo girder --eval \\
   'db.adminCommand({getParameter: 1, featureCompatibilityVersion: 1})'
 Mongo can only be upgraded if the compatibility version is the same as the
@@ -814,7 +814,7 @@ semi-major version.  Before upgrading, set the compatibility mode.  For
 instance, if Mongo 3.6.1 is running,
   docker exec histomicstk_mongodb mongo girder --eval \\
   'db.adminCommand({setFeatureCompatibilityVersion: "3.6"})'
-after which Mongo can be upgraded to version 4.  After upgrading, set the
+after which Mongo can be upgraded to version 4.0.  After upgrading, set the
 compatibility mode to the new version.
 """)
 
