@@ -30,8 +30,6 @@ RUN apt-get update && \
     libfontconfig \
     # Install some additional packages for convenience when testing with bash
     iputils-ping telnet-ssl tmux less \
-    # Convenience when updating from previous versions \
-    mongodb-clients \
     && \
     apt-get remove -y python3-apt && \
     apt-get install -y python3-apt && \
@@ -76,16 +74,21 @@ ENV GIRDER_EXEC_USER ubuntu
 COPY . /home/ubuntu/digital_slide_archive/ansible/.
 RUN sudo chown -R ubuntu:ubuntu /home/ubuntu/digital_slide_archive/ansible
 WORKDIR /home/ubuntu/digital_slide_archive/ansible
+RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
+RUN sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends \
+    # Convenience when updating from previous versions \
+    mongodb-clients && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/*
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
     sudo apt-get install -y --no-install-recommends nodejs && \
     nodejs --version && \
     npm --version && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/*
 
-RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
-    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
-    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 # Explicitly use a specific version of python for girder
 # RUN python3.7 -m venv /home/ubuntu/.virtualenvs/girder && \
 #     sudo rm -rf /home/ubuntu/.cache && \

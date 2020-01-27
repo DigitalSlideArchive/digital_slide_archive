@@ -74,10 +74,10 @@ ENV GIRDER_EXEC_USER ubuntu
 COPY . /home/ubuntu/digital_slide_archive/ansible/.
 RUN sudo chown -R ubuntu:ubuntu /home/ubuntu/digital_slide_archive/ansible
 WORKDIR /home/ubuntu/digital_slide_archive/ansible
-
 RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+
 RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars="docker=girder_worker" && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/* \
                 /home/ubuntu/.cache \
