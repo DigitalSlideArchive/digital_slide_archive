@@ -1,6 +1,6 @@
-====================================
-Digital Slide Archive docker scripts
-====================================
+===========================================
+Digital Slide Archive devops docker scripts
+===========================================
 
 Description
 ===========
@@ -30,9 +30,12 @@ Scripts
 Usage
 =====
 
-A typical use case of these scripts is when one develops Digital Slide Archive and HistomicsUI locally on their computer.
-It is possible to run everything inside docker containers to simplify deployment. This is typically
-done using ``deploy_docker.py`` in the ``ansible`` folder with the command::
+Before other commands, it is assumed you have checked out this repository, and, optionally, the HistomicsUI repository::
+
+  $ git clone https://github.com:DigitalSlideArchive/digital_slide_archive
+  $ git clone https://github.com:DigitalSlideArchive/HistomicsUI  
+
+A typical use case of these scripts is when one develops Digital Slide Archive and HistomicsUI locally on their computer.  It is possible to run everything inside docker containers to simplify deployment. This is typically  done using ``deploy_docker.py`` in the ``ansible`` folder with the command::
 
   $ cd digital_slide_archive
   $ cd ansible
@@ -63,3 +66,10 @@ If your are actively changing the client, you may want to watch the plugin::
 And finally run the tests::
 
   $ devops/test.sh
+
+Migration
+=========
+
+If you were using these scripts with the Girder 2 / HistomicsTK deployment, they will work in nearly the same manner.  Before, you would have cloned the HistomicsTK repository.  Instead, you'll need to check out this (the digital_slide_archive) repository and the HistomicsUI repository.
+
+All of the Girder plugin and user interface code was moved from the HistomicsTK repository to the HistomicsUI repository.  The exact direcories within the repository are slightly different: the UI (web client) moved from ``web_client`` to ``histomocsui/web_client``.  The server code moved from ``server`` to ``histomicsui`` code.  Tests now use the tox framework rather than cmake.
