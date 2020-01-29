@@ -24,13 +24,11 @@
       when:
         - docker is defined
         - docker == "girder"
-
     - role: girder
       tags: girder
       when:
         - docker is defined
         - docker == "girder"
-
     - role: provision
       tags: provision
       when:

@@ -10,38 +10,27 @@ RUN apt-get update && \
     # Primary tools \
     sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
     # Python 3.6 \
-    python3.6-dev \
-    # Python 3.7 \
-    python3.7-dev python3.7-distutils \
-    # For full testing, add python 3.5 \
-    python3.5 \
+    python3.6-dev python3.6-distutils \
     # Editors \
     vim nano \
     # Git \
     git \
     # Fuse \
     fuse \
-    # Packages for other girder plugins \
-    libldap-dev \
-    libsasl2-dev \
     # Install packages for routing to mongodb \
     iptables dnsutils \
-    # For testing \
-    libfontconfig \
     # Install some additional packages for convenience when testing with bash
     iputils-ping telnet-ssl tmux less \
     && \
     apt-get remove -y python3-apt && \
     apt-get install -y python3-apt && \
-    sudo rm -rf /var/lib/apt/lists/* /tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/*
 RUN locale-gen en_US.UTF-8
 # Make Python 3.6 the default to make ansible content
 RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
     ln -s "$(which python3.6)" /usr/local/bin/python3 && \
     ln -s "$(which python3.6)" /usr/local/bin/python3m
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
-    python3.5 get-pip.py && \
-    python3.7 get-pip.py && \
     python3.6 get-pip.py && \
     rm get-pip.py && \
     which pip && \
@@ -52,11 +41,13 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     which python3 && \
     pip3 --version && \
     python3 --version && \
-    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
-    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 RUN pip install ansible && \
-    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
-    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+    # reduce docker volume \
+    bash -c 'rm -rf /usr/local/lib/python3.6/dist-packages/ansible/modules/{cloud,windows,storage}' && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 RUN adduser --disabled-password --gecos '' ubuntu && \
     adduser ubuntu sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -71,8 +62,7 @@ RUN git clone --depth=1 --no-checkout https://github.com/DigitalSlideArchive/dig
     rm -rf .git
 WORKDIR /home/ubuntu/digital_slide_archive
 ENV GIRDER_EXEC_USER ubuntu
-COPY . /home/ubuntu/digital_slide_archive/ansible/.
-RUN sudo chown -R ubuntu:ubuntu /home/ubuntu/digital_slide_archive/ansible
+COPY --chown=ubuntu:ubuntu . /home/ubuntu/digital_slide_archive/ansible/.
 WORKDIR /home/ubuntu/digital_slide_archive/ansible
 RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \

@@ -1,4 +1,12 @@
 ---
+- name: Get the most recent version of pip
+  pip:
+    name: pip
+    extra_args: -U
+    virtualenv: "{{ girder_virtualenv }}"
+    # Implicitly create a Python 3 virtualenv if it doesn't exist
+    virtualenv_command: "/usr/bin/python3 -m venv"
+
 - name: Always use virtualenv when logging in
   shell: |
     echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> /etc/bash.bashrc
@@ -7,12 +15,6 @@
     echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.bashrc"
     echo ". /home/{{ girder_exec_user }}/.virtualenvs/girder/bin/activate" >> "/home/{{ girder_exec_user }}/.profile"
   become: true
-
-- name: Get the most recent version of pip
-  pip:
-    name: pip
-    extra_args: -U
-    virtualenv: "{{ girder_virtualenv }}"
 
 - name: Install other python modules needed by ansible for provisioning (not in the girder virtualenv)
   become: true
@@ -30,11 +32,12 @@
     force: yes
     version: "{{ girder_version }}"
 
-- name: Reinstall girder with some optional components
+- name: Install girder with some optional components
   pip:
     chdir: "{{ girder_root }}"
     name: ".[mount]"
     editable: true
+    extra_args: "--find-links https://girder.github.io/large_image_wheels"
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
@@ -48,6 +51,11 @@
     editable: true
     virtualenv: "{{ girder_virtualenv }}"
     state: present
+
+- name: Ensure the .girder folder exists
+  file:
+    path: /home/{{ girder_exec_user }}/.girder
+    state: directory
 
 - name: Set the girder configuration file
   template:

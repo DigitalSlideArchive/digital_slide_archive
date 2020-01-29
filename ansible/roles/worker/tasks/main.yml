@@ -7,6 +7,7 @@
     state: present
     install_recommends: no
   become: true
+  when: docker is undefined
 
 # Note: Some configuration (likely SNI) on download.docker.com is causing
 # trouble with the ansible apt_key module. For now just use the shell command
@@ -23,24 +24,18 @@
   apt_repository:
     repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
+  when: docker is undefined
 
 - name: Install worker dependencies
   apt:
     update_cache: yes
     name:
-      # - libffi-dev
-      # - libssl-dev
-      # - python-pip
-      # - python-dev
       - git
-      # - libjpeg-dev
-      # - libfreetype6-dev
-      # - zlib1g-dev
-      # - libpng-dev
       - docker-ce
     state: present
     install_recommends: no
   become: true
+  when: docker is undefined
 
 - name: Start docker daemon
   service: name=docker state=started enabled=yes
@@ -107,6 +102,13 @@
     dest: /opt/slicer_cli_web
     accept_hostkey: yes
     version: "{{ slicer_cli_web_version }}"
+
+- name: Remove girder from requirements to keep docker smaller
+  replace:
+    regexp: '^girder.*$'
+    replace: ''
+    path: /opt/slicer_cli_web/requirements.txt
+  when: docker is defined
 
 - name: Install slicer_cli_web
   pip:

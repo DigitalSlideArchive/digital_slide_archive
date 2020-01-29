@@ -4,5 +4,8 @@ _build*
 .*.swp
 .*.swo
 .eggs
-.tox .vagrant ansible/roles/girder.girder ansible/roles/girder.mongodb
+.tox
+.vagrant
+ansible/roles/girder.girder
+ansible/roles/girder.mongodb
 ansible/sample.cfg
