@@ -1,7 +1,6 @@
 ---
 girder_version: master
 slicer_cli_web_version: master
-histomicstk_version: master
 histomicsui_version: master
 large_image_version: master
 girder_worker_version: master

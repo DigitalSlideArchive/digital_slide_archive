@@ -94,7 +94,7 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
 #     sudo rm -rf /home/ubuntu/.cache && \
 #     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
 #     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
-RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars=docker=histomicstk && \
+RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars=docker=girder && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/* \
                 /home/ubuntu/.cache \
                 /home/ubuntu/.ansible* \
