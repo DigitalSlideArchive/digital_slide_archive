@@ -21,3 +21,10 @@ Installation
 
 See `here <./ansible>`_ for installation instructions.
 
+There is also a minimal `docker-compose example <./devops/dsa>`_.
+
+For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
+
+There is a `migration guide <./ansible/migration.rst>`_  from the Girder 2 version.
+
+
