@@ -23,30 +23,30 @@ BaseName = 'histomicstk'
 ImageList = collections.OrderedDict([
     ('rmq', {
         'tag': 'rabbitmq:management',
-        'name': 'histomicstk_rmq',
+        'name': BaseName + '_rmq',
         'pull': True,
     }),
     ('mongodb', {
         'tag': 'mongo:latest',
-        'name': 'histomicstk_mongodb',
+        'name': BaseName + '_mongodb',
         'pull': True,
     }),
     ('memcached', {
         'tag': 'memcached:latest',
-        'name': 'histomicstk_memcached',
+        'name': BaseName + '_memcached',
         'pull': True,
     }),
     ('worker', {
-        'tag': 'dsarchive/girder_worker',
-        'name': 'histomicstk_girder_worker',
-        'dockerfile': 'Dockerfile-girder-worker',
-        'pinned': 'v0.1.6',
+        'tag': 'dsarchive/dsa_worker',
+        'name': BaseName + '_girder_worker',
+        'dockerfile': 'Dockerfile-worker',
+        'pinned': 'v1.0.0',
     }),
     ('histomicstk', {
-        'tag': 'dsarchive/histomicstk_main',
-        'name': 'histomicstk_histomicstk',
-        'dockerfile': 'Dockerfile-histomicstk',
-        'pinned': 'v0.1.6',
+        'tag': 'dsarchive/dsa_girder',
+        'name': BaseName + '_histomicstk',
+        'dockerfile': 'Dockerfile-girder',
+        'pinned': 'v1.0.0',
     }),
     ('cli', {
         'tag': 'dsarchive/histomicstk',
@@ -617,10 +617,8 @@ def images_build(retry=False, names=None):
     Build necessary docker images from our dockerfiles.
 
     This is equivalent to running:
-    docker build --force-rm --tag dsarchive/girder_worker \
-           -f Dockerfile-girder-worker .
-    docker build --force-rm --tag dsarchive/histomicstk_main \
-           -f Dockerfile-histomicstk .
+    docker build --force-rm --tag dsarchive/dsa_worker -f Dockerfile-worker .
+    docker build --force-rm --tag dsarchive/dsa_girder -f Dockerfile-girder .
 
     :param retry: True to retry until success
     :param names: None to build all, otherwise a string or a list of strings of
@@ -879,7 +877,7 @@ def wait_for_girder(client, ctn, maxWait=3600):
 
 if __name__ == '__main__':   # noqa
     parser = argparse.ArgumentParser(
-        description='Provision and run HistomicsTK in docker containers.')
+        description='Provision and run Digital Slide Archive in docker containers.')
     parser.add_argument(
         'command',
         choices=['start', 'restart', 'stop', 'rm', 'remove', 'status',
@@ -891,7 +889,7 @@ if __name__ == '__main__':   # noqa
         help='Assetstore path.')
     parser.add_argument(
         '--build', '-b', dest='build', action='store_true',
-        help='Build gider_worker and histomicstk docker images.')
+        help='Build girder and worker docker images.')
     parser.add_argument(
         '--cli', '-c', dest='cli', action='store_true', default=True,
         help='Pull and install the HistomicsTK cli docker image.')
@@ -990,8 +988,8 @@ if __name__ == '__main__':   # noqa
     parser.add_argument(
         '--worker-tmp-root', '--tmp', default='/tmp/girder_worker',
         help='The path to use for the girder_worker tmp_root.  This must be '
-        'reachable by the HistomicsTK and the girder_worker docker '
-        'containers.  It cannot be a top-level directory.')
+        'reachable by the girder and worker docker containers.  It cannot be '
+        'a top-level directory.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
     # Should we add an optional url or host value for rmq and mongo?
