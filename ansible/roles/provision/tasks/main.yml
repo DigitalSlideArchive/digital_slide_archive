@@ -1,7 +1,7 @@
 ---
 - name: Wait for girder to report version
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     get:
       path: "system/version"
@@ -56,7 +56,7 @@
 
 - name: Ensure girder admin user exists
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     user:
       firstName: admin
@@ -87,7 +87,7 @@
 
 - name: Wait for girder to report version
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     get:
       path: "system/version"
@@ -100,7 +100,7 @@
 
 - name: Set worker broker setting
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
@@ -112,7 +112,7 @@
 
 - name: Set worker backend setting
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
@@ -124,7 +124,7 @@
 
 - name: Set worker api url setting
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
@@ -136,7 +136,7 @@
 
 - name: Set the histomicstk webroot setting
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
@@ -148,7 +148,7 @@
 
 - name: Set the DSA brand name setting
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
@@ -160,7 +160,7 @@
 
 - name: Set homepage markdown setting
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
@@ -181,20 +181,20 @@
 
 - name: Get assetstore list
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     get:
       path: "/assetstore"
   register: assetstore_list
 
 - name: Ensure the existence of the filesystem assetstore
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     assetstore:
       name: default
       type: filesystem
@@ -205,20 +205,20 @@
 
 - name: Get assetstore list
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     get:
       path: "/assetstore"
   register: assetstore_list
 
 - name: Ensure the existence of the TCGA collection
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     collection:
       name: TCGA
       public: yes
@@ -228,10 +228,10 @@
 
 - name: Ensure the existence of the sample images folder
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     folder:
       parentType: collection
       parentId: "{{ tcga_collection['gc_return']['_id'] }}"
@@ -244,10 +244,10 @@
 
 - name: Import sample images into filesystem assetstore
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     post:
       path: "assetstore/{{ assetstore_list['gc_return'][0]['_id'] }}/import"
       parameters:
@@ -260,10 +260,10 @@
 
 - name: Ensure the existence of the Tasks collection
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     collection:
       name: Tasks
       public: yes
@@ -273,10 +273,10 @@
 
 - name: Ensure the existence of the Slicer CLI Web Tasks folder
   girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    port: "{{ girder_socket_port }}"
-    scheme: "{{ girder_socket_scheme }}"
     folder:
       parentType: collection
       parentId: "{{ tasks_collection['gc_return']['_id'] }}"
@@ -288,7 +288,7 @@
 
 - name: Set the slicer_cli_web default folder
   girder:
-    port: "{{ girder_socket_port }}"
+    port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"

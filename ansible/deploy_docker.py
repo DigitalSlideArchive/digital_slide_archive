@@ -227,11 +227,11 @@ def container_start_histomicstk(
         }
         config['binds'].extend(docker_mounts())
         config_mounts(kwargs.get('mount'), config)
-        if rmq == 'docker':
+        if rmq == 'docker' and 'rmq' in ImageList:
             config['links'][ImageList['rmq']['name']] = 'rmq'
-        if memcached == 'docker':
+        if memcached == 'docker' and 'memcached' in ImageList:
             config['links'][ImageList['memcached']['name']] = 'memcached'
-        if mongo != 'host':
+        if mongo != 'host' and 'mongodb' in ImageList:
             config['links'][ImageList['mongodb']['name']] = 'mongodb'
         params = {
             'image': image,
@@ -328,6 +328,13 @@ def container_start_mongodb(client, env, key='mongodb', mongo='docker',
         if ctn is None:
             config = {
                 'restart_policy': {'name': 'always'},
+                'binds': [
+                    # If we bind the log path, we also need to pass the logpath
+                    # as part of the container command and run the container
+                    # with the local log path's user ID so that  mongo will
+                    # write to that directory.
+                    # get_path(kwargs['logs']) + ':/var/log/mongodb:rw',
+                ]
             }
             params = {
                 'image': image,
@@ -337,9 +344,7 @@ def container_start_mongodb(client, env, key='mongodb', mongo='docker',
             }
             if mongodb_path != 'docker':
                 params['volumes'] = ['/data/db']
-                config['binds'] = [
-                    get_path(mongodb_path) + ':/data/db:rw',
-                ]
+                config['binds'].append(get_path(mongodb_path) + ':/data/db:rw')
             print('Creating %s - %s' % (image, name))
             ctn = client.create_container(
                 host_config=client.create_host_config(**config),
@@ -1010,8 +1015,8 @@ if __name__ == '__main__':   # noqa
             ImageList[key]['dockerfile'] = dockerfile
 
     if args.only:
-        only = args.only.split(',')
-        for key in ImageList.keys():
+        only = set(['cli'] + args.only.split(','))
+        for key in list(ImageList.keys()):
             if key not in only:
                 del ImageList[key]
 
