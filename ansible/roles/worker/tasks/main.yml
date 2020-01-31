@@ -103,13 +103,6 @@
     accept_hostkey: yes
     version: "{{ slicer_cli_web_version }}"
 
-- name: Remove girder from requirements to keep docker smaller
-  replace:
-    regexp: '^girder.*$'
-    replace: ''
-    path: /opt/slicer_cli_web/requirements.txt
-  when: docker is defined
-
 - name: Install slicer_cli_web
   pip:
     executable: pip3
