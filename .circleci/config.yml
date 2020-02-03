@@ -19,7 +19,7 @@ commands:
     steps:
       - run:
           name: Start containers.
-          command: export TERM=xterm && python ansible/deploy_docker.py start --no-cli
+          command: export TERM=xterm && python ansible/deploy_docker.py start --no-cli --no-retry
 jobs:
   build:
     working_directory: ~/project
