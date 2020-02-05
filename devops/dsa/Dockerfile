@@ -8,6 +8,9 @@ ENV GDAL_PAM_PROXY_DIR=/tmp/gdal
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
+# Yarn breaks their deployment once a year.  We don't use yarn.  Just remove it.
+RUN rm /etc/apt/sources.list.d/yarn.list
+
 # Install libfuse.  This allows better access to files on S3
 RUN apt-get update && \
     apt-get install -y fuse && \
@@ -27,8 +30,8 @@ RUN pip install --pre --no-cache-dir \
     large_image_tasks[girder,worker] \
     # girder[mount] adds dependencies to show tiles from S3 assets \
     girder[mount] \
-    # You could add additional girder plugins here (e.g.,
-    # girder-virtual-folders or girder-dicom-viewer)
+    # You could add additional girder plugins here (e.g., \
+    # girder-virtual-folders or girder-dicom-viewer) \
     # Use prebuilt wheels whenever possible \
     --find-links https://girder.github.io/large_image_wheels
 
@@ -41,6 +44,6 @@ COPY worker.local.cfg /usr/local/lib/python3.7/site-packages/girder_worker/worke
 
 # Build the girder web client
 RUN girder build && \
-    # Git rid of unnecessary files to keep the docker image smaller
+    # Git rid of unnecessary files to keep the docker image smaller \
     find /usr/local/lib/python3.7 -name node_modules -exec rm -rf {} \+ && \
     rm -rf /tmp/npm*

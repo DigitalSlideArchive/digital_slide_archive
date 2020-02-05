@@ -132,6 +132,33 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: docker exec histomicstk_histomicstk bash -lc 'tox -e flake8,lintclient'
+  docker-compose:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Run docker-compose up
+          command: bash -c 'CURRENT_UID=$(id -u):$(id -g) docker-compose up -d'
+          working_directory: ./devops/dsa
+      - run:
+          name: Update modules
+          command: pip install -U pip requests
+      - run:
+          name: Install modules needed for testing
+          command: pip install girder-client
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent 'http://localhost:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
+      - run:
+          name: Grant permissions to docker socket.
+          # This is better done by adding the user in the docker container to the group, but that complicates the docker-compose example.
+          command: sudo chmod a+xwr /var/run/docker.sock
+      - run:
+          name: Test the instance
+          command: python ansible/utils/cli_test.py dsarchive/histomicstk:latest --user=admin --password=password --test
   publish-docker:
     working_directory: ~/project
     machine: true
@@ -219,6 +246,13 @@ workflows:
       - test-lint:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - docker-compose:
           filters:
             tags:
               only: /^v.*/
