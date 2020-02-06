@@ -27,4 +27,6 @@ For local development including HistomicsUI, there are some `devops <./devops>`_
 
 There is a `migration guide <./ansible/migration.rst>`_  from the Girder 2 version.
 
-
+Funding
+-------
+This work is funded in part by the `NIH grant U24-CA194362-01 <http://grantome.com/grant/NIH/U24-CA194362-01>`_.
