@@ -270,8 +270,52 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              # Change back to only master once the girder-3-deployment branch is merged
-              # only: master
+              # Remove girder-3-deployment branch once it is merged
               only:
                 - master
                 - girder-3-deployment
+  # We want to run a build periodically to make sure it still works and to use
+  # all dependant libraries.  To republish dockers sooner, a build can be rerun
+  # manually.
+  periodic:
+    triggers:
+      - schedule:
+          # Run every Monday morning at 7 a.m.
+          cron: "0 7 * * 1"
+          filters:
+            branches:
+              # Remove girder-3-deployment branch once it is merged
+              only:
+                - master
+                - girder-3-deployment
+    jobs:
+      - build
+      - test-cli:
+          requires:
+            - build
+      - test-girder-build:
+          requires:
+            - build
+      - test-py27:
+          requires:
+            - build
+      - test-py35:
+          requires:
+            - build
+      - test-py36:
+          requires:
+            - build
+      - test-py37:
+          requires:
+            - build
+      - test-lint:
+          requires:
+            - build
+      - docker-compose
+      - publish-docker:
+          requires:
+            - test-cli
+            - test-girder-build
+            - test-lint
+            - test-py36
+            - test-py37
