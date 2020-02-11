@@ -63,6 +63,22 @@
     dest: /home/{{ girder_exec_user }}/.girder/girder.cfg
     mode: '0666'
 
+- name: Add a convenience script for restarting girder
+  template:
+    src: restart_girder.sh.j2
+    dest: /usr/local/bin/restart_girder.sh
+    mode: '0777'
+  become: true
+  when: docker is defined
+
+- name: Add a convenience script for rebuilding and restarting girder
+  template:
+    src: rebuild_and_restart_girder.sh.j2
+    dest: /usr/local/bin/rebuild_and_restart_girder.sh
+    mode: '0777'
+  become: true
+  when: docker is defined
+
 - name: Clone girder_worker_utils
   git:
     repo: git://github.com/girder/girder_worker_utils.git
