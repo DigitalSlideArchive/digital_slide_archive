@@ -1,19 +1,26 @@
-{% if page.menubar and page.show_sidebar %} 
-    {% assign content_width = 'is-4' %} 
-{% elsif page.menubar or page.show_sidebar %} 
-    {% assign content_width = 'is-8' %} 
-{% else %} 
-    {% assign content_width = 'is-12' %} 
+{% if page.menubar and page.show_sidebar %}
+    {% assign content_width = 'is-4' %}
+{% elsif page.menubar or page.show_sidebar %}
+    {% assign content_width = 'is-8' %}
+{% else %}
+    {% assign content_width = 'is-12' %}
 {% endif %}
 <!DOCTYPE html>
 <html>
   {% include head.html %}
-  <body>
+  {% if page.url == "/" %}
+    <body class="home">
+  {% else %}
+    <body>
+  {% endif %}
     {% include header.html %}
     {% unless page.hide_hero %}
         {% include hero.html %}
     {% endunless %}
     {% include callouts.html %}
+    {% if page.url == "/" %}
+      {% include what-is-dsa.html %}
+    {% endif %}
     <section class="section">
         <div class="container">
             <div class="columns">
@@ -42,4 +49,3 @@
     {%- include footer-scripts.html -%}
   </body>
 </html>
-
