@@ -1,15 +1,16 @@
-@charset "utf-8";
-@import url('https://fonts.googleapis.com/css?family=Roboto');
+@charset 'utf-8';
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap');
 
-$family-sans-serif: 'Roboto', sans-serif;
-$primary: red !default;
+$family-sans-serif: 'Open Sans', sans-serif;
+$primary: #2092d2 !default;
+$secondary: #2fb39b !default;
 
 $tabs-link-active-color: $primary;
 $tabs-link-active-border-bottom-color: $primary;
 
-@import "../node_modules/bulma/bulma.sass";
-@import "layout";
-@import "syntax";
-@import "showcase";
-@import "../node_modules/bulma-block-list/src/block-list.scss";
-@import "dsa-styles";
+@import '../node_modules/bulma/bulma.sass';
+@import 'layout';
+@import 'syntax';
+@import 'showcase';
+@import '../node_modules/bulma-block-list/src/block-list.scss';
+@import 'dsa-styles';

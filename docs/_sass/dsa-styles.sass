@@ -1,0 +1,110 @@
+/* START variables
+ * ==================================== */
+
+$top-offset: 70px
+
+/* ====================================
+ * END variables */
+
+/* START text styles
+ * ==================================== *
+
+.content
+  h1,
+  h2,
+  h3
+    font-weight: 300
+
+.hero-body
+  .title
+    font-size: 54px
+    font-weight: 300
+    padding-bottom: 10px
+
+  .subtitle
+    font-size: 20px
+/* .hero-body */
+
+/* ====================================
+ * END text styles */
+
+/* START header
+ * ==================================== */
+
+body > .navbar
+  height: $top-offset
+
+/* ====================================
+ * END header */
+
+/* START hero
+ * ==================================== */
+
+.home
+  .hero
+    height: calc(100vh - #{$top-offset})
+
+    &.has-hero-image
+      position: relative
+
+      .hero-body
+        align-items: center
+        display: flex
+        height: 100%
+        position: absolute
+        width: 100%
+        z-index: 2
+
+        .container
+          max-width: 768px
+          padding-bottom: 64px
+          text-align: center
+
+          .hero-buttons
+            padding: 20px 0
+
+          .hero-button
+            background: rgba(255, 255, 255, .5)
+            border: 2px solid #fff
+            color: #fff
+            margin: 0 5px
+            transition: background .15s ease-in-out, color .15s ease-in-out
+
+            &:hover
+              background: #fff
+              color: #363636
+
+      &::before
+        background: #000
+        content: ''
+        height: 100%
+        opacity: .8
+        position: absolute
+        width: 100%
+        z-index: 1
+    /* &.has-hero-image */
+  /* .hero */
+/* .home */
+
+/* ====================================
+ * END hero */
+
+/* START content area
+ * ==================================== */
+
+.section
+  &:nth-of-type(even)
+    background: #f5f5f5
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .2)
+
+.column
+  &.primary
+    h2
+      color: $primary
+
+  &.secondary
+    h2
+      color: $secondary
+
+/* ====================================
+ * END content area */

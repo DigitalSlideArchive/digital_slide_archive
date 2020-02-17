@@ -1,54 +1,35 @@
 ---
 # Hero Fields
-title: Bulma Clean Theme
-subtitle: This is the demo site for Bulma Clean Theme
+title: Harness the full potential of your digital pathology data
+subtitle: A containerized web-based platform for the management, visualization, and annotation of whole-slide digital pathology imaging data
+hero_image: '../assets/img/dsa_hero.jpg'
+hero_buttons:
+  - link_text: View Demo
+    link: #
+  - link_text: Read Docs
+    link: #
+  - link_text: View on GitHub
+    link: #
 
 # Page Details
-layout: home
+layout: page
 show_sidebar: false
 ---
 
-# Bulma Clean Theme demo website
+<div class="columns">
 
-This website showcases the options for the Bulma Clean theme. The theme is available as a ruby gem or can be used with GitHub pages.
+<!-- HistomicsUI Column -->
+<div class="column primary" markdown="1">
 
-[![Gem Version](https://badge.fury.io/rb/bulma-clean-theme.svg)](https://badge.fury.io/rb/bulma-clean-theme)
-![Gem](https://img.shields.io/gem/dt/bulma-clean-theme.svg)
+## HistomicsUI
 
-## Ruby Gem
+</div>
 
-The ruby gem is available on the Ruby Gems website at the following location. [https://rubygems.org/gems/bulma-clean-theme](https://rubygems.org/gems/bulma-clean-theme)
+<!-- HistomicsTK Column -->
+<div class="column secondary" markdown="1">
 
-## GitHub Pages
+## HistomicsTK
 
-The theme can be used with GitHub Pages bu setting the `remote_theme` in your Jekyll sites `_config.yml`
+</div>
 
-```yml
-remote_theme: chrisrhymes/bulma-clean-theme
-```
-
-## Instructions
-
-For full instructions, please see the Readme at the GitHub repo:
-[https://github.com/chrisrhymes/bulma-clean-theme/blob/master/README.md](https://github.com/chrisrhymes/bulma-clean-theme/blob/master/README.md)
-
-## Page Layouts
-
-This demo site showcases the available page layout options.
-
-* Page With Sidebar
-* Page Without Sidebar
-* Page With Menubar
-* Page With Tabs
-* Page Without Footer
-* Page Without Hero
-* Page With Contents
-* Landing Page With Callouts
-* Blog
-* Post
-
-## Supported By JetBrains
-
-JetBrains have kindly provided an Open Source licence to aid in the future development of Bulma Clean Theme.
-
-[![JetBrains](img/jetbrains-variant-4.svg)](https://www.jetbrains.com/?from=bulma-clean-theme)
+</div>
