@@ -18,10 +18,10 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: My Awesome Website
-tagline: I'm an awesome website!
+title: Digital Slide Archive
+tagline: Harness the full potential of your digital pathology data
 description: >
-  Enter a great description here
+  A containerized web-based platform for the management, visualization, and annotation of whole-slide digital pathology imaging data
 url: "https://myawesomeurl.com/"
 permalink: pretty
 favicon: /favicon.ico
