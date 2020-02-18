@@ -2,8 +2,11 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap');
 
 $family-sans-serif: 'Open Sans', sans-serif;
+
+// Color Variables
 $primary: #2092d2 !default;
 $secondary: #2fb39b !default;
+$gray: #999;
 
 $tabs-link-active-color: $primary;
 $tabs-link-active-border-bottom-color: $primary;
