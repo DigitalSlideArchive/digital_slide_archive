@@ -270,10 +270,8 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              # Remove girder-3-deployment branch once it is merged
               only:
                 - master
-                - girder-3-deployment
   # We want to run a build periodically to make sure it still works and to use
   # all dependant libraries.  To republish dockers sooner, a build can be rerun
   # manually.
@@ -284,10 +282,8 @@ workflows:
           cron: "0 7 * * 1"
           filters:
             branches:
-              # Remove girder-3-deployment branch once it is merged
               only:
                 - master
-                - girder-3-deployment
     jobs:
       - build
       - test-cli:
