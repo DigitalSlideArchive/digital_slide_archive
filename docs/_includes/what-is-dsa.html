@@ -1,14 +1,23 @@
-<section class="section">
-  <div class="container">
-    <div class="content">
-      <h2>What is DSA?</h2>
-      <p>The Digital Slide Archive is a system for working with large microscopy images.</p>
-      <ul>
-        <li>Organize images from a variety of assetstores, such as local files systems and S3.</li>
-        <li>Provide user access controls.</li>
-        <li>Image annotation and review.</li>
-        <li>Run algorithms on all or parts of images.</li>
-      </ul>
-    </div>
-  </div>
-</section>
+<h2>{{ page.about_title }}</h2>
+<p>{{ page.about_text }}</p>
+
+{% if page.about_list %}
+<ul class="about-bullets">
+  {% for bullet in page.about_list %}
+  <li>{{ bullet.list_item }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if page.about_resources %}
+<ul class="resource-links">
+  {% for resource in page.about_resources %}
+  <li>
+    <a href="{{ resource.link }}">
+      <img src="{{ resource.icon }}" alt="{{ resource.name }}" height="50" width="50">
+      {{ resource.name }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}

@@ -8,19 +8,12 @@
 <!DOCTYPE html>
 <html>
   {% include head.html %}
-  {% if page.url == "/" %}
-    <body class="home">
-  {% else %}
-    <body>
-  {% endif %}
+  <body>
     {% include header.html %}
     {% unless page.hide_hero %}
         {% include hero.html %}
     {% endunless %}
     {% include callouts.html %}
-    {% if page.url == "/" %}
-      {% include what-is-dsa.html %}
-    {% endif %}
     <section class="section">
         <div class="container">
             <div class="columns">
