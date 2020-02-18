@@ -6,6 +6,31 @@ $top-offset: 70px
 /* ====================================
  * END variables */
 
+/* START Misc.
+ * ==================================== */
+
+.button
+  &.is-secondary
+    background-color: $secondary
+    border-color: transparent
+    color: #fff
+
+    &:hover
+      background-color: darken($secondary, 3%)
+
+    &.is-outlined
+      background-color: transparent
+      border-color: $secondary
+      color: $secondary
+
+      &:hover
+        background-color: $secondary
+        color: #fff
+
+
+/* ====================================
+ * END Misc. */
+
 /* START text styles
  * ==================================== *
 
