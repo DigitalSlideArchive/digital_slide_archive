@@ -122,14 +122,63 @@ body > .navbar
     background: #f5f5f5
     box-shadow: 0 5px 20px rgba(0, 0, 0, .2)
 
-.column
-  &.primary
-    h2
-      color: $primary
+.home
+  .what-is-dsa
+    color: $gray
+    font-weight: 600
 
-  &.secondary
-    h2
-      color: $secondary
+    .resource-links
+      display: flex
+      list-style: none
+      margin: 0
+      padding: 45px 0 10px
+
+      li
+        flex-grow: 1
+        margin: 5px
+        padding: 0
+
+        a
+          align-items: flex-end
+          color: darken($gray, 15%)
+          display: flex
+
+          img
+            margin-right: 10px
+
+  .platforms
+    .column
+      &:nth-of-type(odd)
+        h2
+          color: $primary
+
+      &:nth-of-type(even)
+        h2
+          color: $secondary
+
+      .platform-description
+        h2
+          font-size: 36px
+
+      .platform-image
+        padding: 30px 0
+
+      .platform-features
+        border-top: 1px solid lighten($gray, 10%)
+
+        .feature
+          align-items: flex-start
+          display: flex
+
+          .feature-icon
+            height: auto
+            margin-right: 20px
+            min-width: 55px
+
+          .feature-text
+            h4
+              margin-bottom: 5px
+
 
 /* ====================================
  * END content area */
