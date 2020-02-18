@@ -1,0 +1,175 @@
+---
+- name: Install gpg dependencies
+  apt:
+    update_cache: yes
+    name:
+      - gpg-agent
+    state: present
+    install_recommends: no
+  become: true
+  when: docker is undefined
+
+# Note: Some configuration (likely SNI) on download.docker.com is causing
+# trouble with the ansible apt_key module. For now just use the shell command
+# to curl/use the system apt-key package.
+- name: Fetch GPG key for docker package
+  shell: >-
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  args:
+    warn: false
+  become: true
+
+- name: Add docker PPA
+  become: true
+  apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+  when: docker is undefined
+
+- name: Install worker dependencies
+  apt:
+    update_cache: yes
+    name:
+      - git
+      - docker-ce
+    state: present
+    install_recommends: no
+  become: true
+  when: docker is undefined
+
+- name: Start docker daemon
+  service: name=docker state=started enabled=yes
+  become: true
+  when: docker is undefined
+
+- name: Clone girder_worker
+  git:
+    repo: git://github.com/girder/girder_worker.git
+    dest: /opt/girder_worker
+    accept_hostkey: yes
+    force: yes
+    version: "{{ girder_worker_version }}"
+
+- name: Create local worker config file
+  template:
+    src: worker.local.cfg.j2
+    dest: /opt/girder_worker/girder_worker/worker.local.cfg
+    mode: 0644
+    owner: "{{ worker_exec_user }}"
+    group: "{{ worker_exec_group }}"
+
+- name: Install girder_worker
+  pip:
+    executable: pip3
+    name: "/opt/girder_worker[worker]"
+    editable: true
+    extra_args: "--find-links https://girder.github.io/large_image_wheels"
+    state: present
+
+- name: Clone girder_worker_utils
+  git:
+    repo: git://github.com/girder/girder_worker_utils.git
+    dest: /opt/girder_worker_utils
+    accept_hostkey: yes
+    version: "{{ girder_worker_utils_version }}"
+
+- name: Install girder_worker_utils
+  pip:
+    executable: pip3
+    name: /opt/girder_worker_utils
+    editable: true
+    state: present
+
+- name: Clone large_image
+  git:
+    repo: git://github.com/girder/large_image.git
+    dest: /opt/large_image
+    accept_hostkey: yes
+    force: yes
+    version: "{{ large_image_version }}"
+
+- name: Install large_image tasks
+  pip:
+    executable: pip3
+    name: "/opt/large_image/tasks[worker]"
+    extra_args: "--find-links https://girder.github.io/large_image_wheels"
+    editable: true
+    state: present
+
+- name: Clone slicer_cli_web
+  git:
+    repo: git://github.com/girder/slicer_cli_web.git
+    dest: /opt/slicer_cli_web
+    accept_hostkey: yes
+    version: "{{ slicer_cli_web_version }}"
+
+- name: Install slicer_cli_web
+  pip:
+    executable: pip3
+    name: "/opt/slicer_cli_web[worker]"
+    editable: true
+    extra_args: "--find-links https://girder.github.io/large_image_wheels"
+    state: present
+
+- name: Change ownership of worker to correct user
+  become: true
+  file:
+    dest: /opt/girder_worker
+    owner: "{{worker_exec_user}}"
+    group: "{{worker_exec_group}}"
+    state: directory
+    recurse: yes
+
+- name: Create docker group
+  group: name=docker state=present
+  when: docker is undefined
+
+- name: Add worker user to docker group
+  user: shell=/bin/bash
+        name={{ worker_exec_user }}
+        groups=docker
+        append=yes
+  become: true
+  when: docker is undefined
+
+- name: Restart docker daemon
+  service: name=docker state=restarted enabled=yes
+  become: true
+  when: docker is undefined
+
+- name: Install girder worker as a service
+  template:
+    src: girder_worker.service
+    dest: /etc/systemd/system/girder_worker.service
+    mode: 0644
+    owner: root
+  become: true
+  when: docker is undefined
+
+- name: Restart worker as a service
+  systemd: name=girder_worker enabled=yes state=restarted daemon_reload=yes
+  become: true
+  when: docker is undefined
+
+- name: Create tmp directory
+  file: state=directory path="/tmp/girder_worker"
+  become: true
+  when: docker is defined
+
+- name: Ensure tmp directory is owned by the right user and is public
+  file:
+    path: "/tmp/girder_worker"
+    owner: "{{ girder_exec_user }}"
+    group: "{{ girder_exec_group }}"
+    mode: u=rwx,g=rwx,o=rwx
+  become: true
+  when: docker is defined
+
+- name: Add a script to set hosts, ids, and other properties if necessary
+  copy:
+    src: ../../common/set_environment.py
+    dest: /opt/girder_worker/set_environment.py
+    mode: 0744
+    owner: root
+  become: true
+  when: docker is defined

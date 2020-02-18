@@ -1,0 +1,95 @@
+FROM ubuntu:18.04
+LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
+
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get --yes --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade && \
+    apt-get install -y --no-install-recommends \
+    # Primary tools \
+    sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
+    # Python 3.6 \
+    python3.6-dev python3.6-distutils \
+    # Editors \
+    vim nano \
+    # Git \
+    git \
+    # Fuse \
+    fuse \
+    # Install packages for routing to mongodb \
+    iptables dnsutils \
+    # Install some additional packages for convenience when testing with bash
+    iputils-ping telnet-ssl tmux less \
+    && \
+    apt-get remove -y python3-apt && \
+    apt-get install -y python3-apt && \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+RUN locale-gen en_US.UTF-8
+# Make Python 3.6 the default to make ansible content
+RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
+    ln -s "$(which python3.6)" /usr/local/bin/python3 && \
+    ln -s "$(which python3.6)" /usr/local/bin/python3m
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
+    python3.6 get-pip.py && \
+    rm get-pip.py && \
+    which pip && \
+    which python && \
+    pip --version && \
+    python --version && \
+    which pip3 && \
+    which python3 && \
+    pip3 --version && \
+    python3 --version && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN pip install ansible && \
+    # reduce docker volume \
+    bash -c 'rm -rf /usr/local/lib/python3.6/dist-packages/ansible/modules/{cloud,windows,storage}' && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN adduser --disabled-password --gecos '' ubuntu && \
+    adduser ubuntu sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER ubuntu
+ENV LANG en_US.UTF-8
+WORKDIR /home/ubuntu
+RUN git clone --depth=1 --no-checkout https://github.com/DigitalSlideArchive/digital_slide_archive && \
+    cd digital_slide_archive && \
+    # remove mkdir and enable checkout once this branch is merged \
+    mkdir ansible && \
+    # git checkout master -- ansible/ && \
+    rm -rf .git
+WORKDIR /home/ubuntu/digital_slide_archive
+ENV GIRDER_EXEC_USER ubuntu
+COPY --chown=ubuntu:ubuntu . /home/ubuntu/digital_slide_archive/ansible/.
+WORKDIR /home/ubuntu/digital_slide_archive/ansible
+RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+
+RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars="docker=girder_worker" && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/* \
+                /home/ubuntu/.cache \
+                /home/ubuntu/.ansible* \
+                /home/ubuntu/.wget-hsts \
+                /root/.cache/pip && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+
+RUN echo 'task_reject_on_worker_lost = True' >> /opt/girder_worker/girder_worker/celeryconfig.py
+RUN echo 'task_acks_late = True' >> /opt/girder_worker/girder_worker/celeryconfig.py
+
+RUN mkdir /opt/logs
+
+WORKDIR /opt/girder_worker
+
+# If the environment vairable
+#   HOST_MONGO=true
+# is set, mongodb is added to the /etc/hosts as mapping to the docker host ip
+# address
+CMD sudo -E python /opt/girder_worker/set_environment.py ubuntu tmp_root && \
+    sudo mkdir -p /tmp/girder_worker && \
+    sudo chmod a+rwx /tmp/girder_worker && \
+    sudo -E su ubuntu -c \
+    'TEMP="${GIRDER_WORKER_TMP_ROOT:-$TEMP}" PYTHONUNBUFFERED=true GW_DIRECT_PATHS=true python -m girder_worker --concurrency="${GIRDER_WORKER_CONCURRENCY:-2}" -Ofair --prefetch-multiplier=1 -E >/opt/logs/worker.log 2>&1'

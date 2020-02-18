@@ -1,0 +1,144 @@
+FROM ubuntu:18.04
+LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
+
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get --yes --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade && \
+    apt-get install -y --no-install-recommends \
+    # Primary tools \
+    sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
+    # Python 3.6 \
+    python3.6-dev python3.6-distutils \
+    # Editors \
+    vim nano \
+    # Git \
+    git \
+    # Fuse \
+    fuse \
+    # Install packages for routing to mongodb \
+    iptables dnsutils \
+    # Install some additional packages for convenience when testing with bash
+    iputils-ping telnet-ssl tmux less \
+    && \
+    apt-get remove -y python3-apt && \
+    apt-get install -y python3-apt && \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+RUN locale-gen en_US.UTF-8
+# Make Python 3.6 the default to make ansible content
+RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
+    ln -s "$(which python3.6)" /usr/local/bin/python3 && \
+    ln -s "$(which python3.6)" /usr/local/bin/python3m
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
+    python3.6 get-pip.py && \
+    rm get-pip.py && \
+    which pip && \
+    which python && \
+    pip --version && \
+    python --version && \
+    which pip3 && \
+    which python3 && \
+    pip3 --version && \
+    python3 --version && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN pip install ansible && \
+    # reduce docker volume \
+    bash -c 'rm -rf /usr/local/lib/python3.6/dist-packages/ansible/modules/{cloud,windows,storage}' && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN adduser --disabled-password --gecos '' ubuntu && \
+    adduser ubuntu sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER ubuntu
+ENV LANG en_US.UTF-8
+WORKDIR /home/ubuntu
+RUN git clone --depth=1 --no-checkout https://github.com/DigitalSlideArchive/digital_slide_archive && \
+    cd digital_slide_archive && \
+    # remove mkdir and enable checkout once this branch is merged \
+    mkdir ansible && \
+    # git checkout master -- ansible/ && \
+    rm -rf .git
+WORKDIR /home/ubuntu/digital_slide_archive
+ENV GIRDER_EXEC_USER ubuntu
+COPY --chown=ubuntu:ubuntu . /home/ubuntu/digital_slide_archive/ansible/.
+WORKDIR /home/ubuntu/digital_slide_archive/ansible
+RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_archive/ansible/roles/ && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+
+RUN sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends \
+    # Needed for ansible's creation of python virtualenv
+    python3-venv \
+    # Needed to build some python modules
+    gcc \
+    # Convenience when updating from previous versions \
+    mongodb-clients \
+    # Python 3.7 \
+    python3.7-dev python3.7-distutils \
+    # For full testing, add python 3.5 \
+    python3.5 \
+    && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/*
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
+    python3.5 get-pip.py && \
+    python3.7 get-pip.py && \
+    rm get-pip.py && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
+    sudo apt-get install -y --no-install-recommends nodejs && \
+    nodejs --version && \
+    npm --version && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/*
+
+# Explicitly use a specific version of python for girder
+# RUN python3.7 -m venv /home/ubuntu/.virtualenvs/girder && \
+#     sudo rm -rf /home/ubuntu/.cache && \
+#     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+#     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN ansible-playbook -i inventory/local docker_ansible.yml --extra-vars=docker=girder && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/* \
+                /home/ubuntu/.cache \
+                /home/ubuntu/.ansible* \
+                /home/ubuntu/.wget-hsts \
+                /root/.cache/pip \
+                /var/tmp/* \
+                /home/ubuntu/.npm \
+                /home/ubuntu/.cache \
+                /home/ubuntu/.ansible* \
+                /home/ubuntu/.wget-hsts \
+                /home/ubuntu/.config \
+                /root/.npm && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+ && \
+    bash -c ' \
+    # Reduce number of files in the docker \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -name node_modules -exec rm -rf {} \+ && \
+    # Make most files owned by root; this reduces owner issues when the \
+    # docker user or group is different on the target host \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -and \( -perm -600 -not -perm -700 \) -exec chmod 666 {} \+ && \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -and -perm -700 -exec chmod 777 {} \+ && \
+    sudo find {/home/ubuntu/.virtualenvs,/opt} -xdev \( -uid 1000 -or -gid 1000 \) -exec chown root:root {} \+ && \
+    # girder's shared output folder must still be owned by a user, not root \
+    sudo find /home/ubuntu/.virtualenvs/girder/share/girder -exec chown ubuntu:ubuntu {} \+ && \
+    sudo find /home/ubuntu/.girder -exec chown ubuntu:ubuntu {} \+ && \
+    true'
+
+WORKDIR /opt/HistomicsUI
+EXPOSE 8080
+
+# If the environment variable
+#   HOST_MONGO=true
+# is set, mongodb is added to the /etc/hosts as mapping to the docker host ip
+# address
+CMD sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
+    sudo -E sysctl -w net.ipv4.conf.eth0.route_localnet=1 && \
+    sudo -E iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017 && \
+    sudo -E iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE && \
+    sudo -E su ubuntu -c \
+    'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder mount /opt/digital_slide_archive/mount >/opt/logs/mount.log 2>&1' ; \
+    sudo -E su ubuntu -c \
+    'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder serve --dev >/opt/logs/girder.log 2>&1'

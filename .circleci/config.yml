@@ -1,0 +1,321 @@
+---
+version: 2.1
+commands:
+  usedockers:
+    description: "Make built dockers available"
+    steps:
+      - run:
+          name: Install dependencies
+          command: pip install ansible requests docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Load archived docker images
+          command: |
+            docker load -i /tmp/workspace/dsa_girder.tar
+            docker load -i /tmp/workspace/dsa_worker.tar
+  startcontainers:
+    description: Start containers for tests.
+    steps:
+      - run:
+          name: Start containers.
+          command: export TERM=xterm && python ansible/deploy_docker.py start --no-cli --no-retry
+jobs:
+  build:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install ansible requests docker
+      - run:
+          name: Build the dockers
+          command: export TERM=xterm && python ansible/deploy_docker.py build
+      - run:
+          name: Archive docker images
+          command: |
+            docker save -o dsa_girder.tar dsarchive/dsa_girder:latest
+            docker save -o dsa_worker.tar dsarchive/dsa_worker:latest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./dsa_girder.tar
+            - ./dsa_worker.tar
+  test-cli:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - run:
+          name: Start containers and run cli test.
+          command: export TERM=xterm && python ansible/deploy_docker.py start --cli-test
+      - run:
+          name: Show Girder logs to allow easier review
+          command: |
+            echo "=== info.log ==="
+            cat ~/.histomicstk/logs/info.log
+            echo "=== girder.log ==="
+            cat ~/.histomicstk/logs/girder.log
+            echo "=== worker.log ==="
+            cat ~/.histomicstk/logs/worker.log
+            echo "=== mount.log ==="
+            cat ~/.histomicstk/logs/mount.log
+  test-girder-build:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can rebuild girder
+          command: docker exec histomicstk_histomicstk bash -lc 'girder build --dev'
+      - run:
+          name: Check number of files owned by ubuntu user in girder container
+          command: |
+            docker run --rm -it --entrypoint bash dsarchive/dsa_girder:latest -c "echo -n 'Files that need chown: ' ; find / -xdev -uid 1000 -or -gid 1000 2>/dev/null | wc -l"
+          # We should add a test that if it is over some threshold to fail
+      - run:
+          name: Check number of files owned by ubuntu user in worker container
+          command: |
+            docker run --rm -it --entrypoint bash dsarchive/dsa_worker:latest -c "echo -n 'Files that need chown: ' ; find / -xdev -uid 1000 -or -gid 1000 2>/dev/null | wc -l"
+          # We should add a test that if it is over some threshold to fail
+  test-py27:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec histomicstk_histomicstk bash -lc 'tox -e py27'
+  test-py35:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec histomicstk_histomicstk bash -lc 'tox -e py35'
+  test-py36:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec histomicstk_histomicstk bash -lc 'tox -e py36'
+  test-py37:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec histomicstk_histomicstk bash -lc 'tox -e py37'
+  test-lint:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec histomicstk_histomicstk bash -lc 'tox -e flake8,lintclient'
+  docker-compose:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Run docker-compose up
+          command: bash -c 'CURRENT_UID=$(id -u):$(id -g) docker-compose up -d'
+          working_directory: ./devops/dsa
+      - run:
+          name: Update modules
+          command: pip install -U pip requests
+      - run:
+          name: Install modules needed for testing
+          command: pip install girder-client
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent 'http://localhost:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
+      - run:
+          name: Grant permissions to docker socket.
+          # This is better done by adding the user in the docker container to the group, but that complicates the docker-compose example.
+          command: sudo chmod a+xwr /var/run/docker.sock
+      - run:
+          name: Test the instance
+          command: python ansible/utils/cli_test.py dsarchive/histomicstk:latest --user=admin --password=password --test
+  publish-docker:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - run:
+          name: Publish images to Docker Hub
+          command: |
+              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              docker push dsarchive/dsa_worker:latest
+              docker push dsarchive/dsa_girder:latest
+              if [[ $CIRCLE_TAG =~ ^v.*$ ]]; then
+              docker tag dsarchive/dsa_worker:latest "dsarchive/dsa_worker:$CIRCLE_TAG"
+              docker tag dsarchive/dsa_girder:latest "dsarchive/dsa_girder:$CIRCLE_TAG"
+              docker push "dsarchive/dsa_worker:$CIRCLE_TAG"
+              docker push "dsarchive/dsa_girder:$CIRCLE_TAG"
+              fi
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-cli:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-girder-build:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-py27:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-py35:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-py36:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-py37:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-lint:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - docker-compose:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - publish-docker:
+          requires:
+            - test-cli
+            - test-girder-build
+            - test-lint
+            - test-py36
+            - test-py37
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              # Remove girder-3-deployment branch once it is merged
+              only:
+                - master
+                - girder-3-deployment
+  # We want to run a build periodically to make sure it still works and to use
+  # all dependant libraries.  To republish dockers sooner, a build can be rerun
+  # manually.
+  periodic:
+    triggers:
+      - schedule:
+          # Run every Monday morning at 7 a.m.
+          cron: "0 7 * * 1"
+          filters:
+            branches:
+              # Remove girder-3-deployment branch once it is merged
+              only:
+                - master
+                - girder-3-deployment
+    jobs:
+      - build
+      - test-cli:
+          requires:
+            - build
+      - test-girder-build:
+          requires:
+            - build
+      - test-py27:
+          requires:
+            - build
+      - test-py35:
+          requires:
+            - build
+      - test-py36:
+          requires:
+            - build
+      - test-py37:
+          requires:
+            - build
+      - test-lint:
+          requires:
+            - build
+      - docker-compose
+      - publish-docker:
+          requires:
+            - test-cli
+            - test-girder-build
+            - test-lint
+            - test-py36
+            - test-py37
