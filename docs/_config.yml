@@ -30,7 +30,6 @@ favicon: /favicon.ico
 #theme: bulma-clean-theme
 remote_theme: chrisrhymes/bulma-clean-theme
 plugins:
-  - jekyll-feed
   - jekyll-sitemap
   - jekyll-paginate
   - jekyll-seo-tag
