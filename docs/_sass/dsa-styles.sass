@@ -203,11 +203,36 @@ body > .navbar
         padding: 30px 0
 
       .platform-features
-        border-top: 1px solid lighten($gray, 10%)
+        border-top: 1px solid lighten($gray, 20%)
+
+        .triangle
+          border-color: lighten($gray, 20%) transparent transparent
+          border-style: solid
+          border-width: 20px 24px 0
+          height: 0
+          margin: 0 auto
+          position: relative
+          width: 0
+          z-index: 1
+
+          &::after
+            border-color: #fff transparent transparent
+            border-style: solid
+            border-width: 20px 24px 0
+            content: ''
+            height: 0
+            left: -24px
+            position: absolute
+            top: -22px
+            width: 0
+            z-index: 2
+        /* .triangle */
 
         .feature
           align-items: flex-start
+          border-bottom: 1px solid lighten($gray, 20%)
           display: flex
+          padding: 36px 0
 
           .feature-icon
             height: auto
@@ -218,6 +243,10 @@ body > .navbar
             h4
               margin-bottom: 5px
 
+        /* .feature */
+      /* .platform-features */
+    /* .column */
+  /* .platforms */
 /* .home */
 
 
