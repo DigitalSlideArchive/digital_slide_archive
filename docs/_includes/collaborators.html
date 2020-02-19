@@ -5,20 +5,20 @@
       <h2 class="org-logo"><img src="{{ org.logo }}" alt="{{ org.name }}"></h2>
     </header>
     <div class="org-members">
-      <ul>
-        {% for member in org.members %}
-        <li class="columns member">
-          <div class="column is-one-quarter headshot">
+      {% for member in org.members %}
+      <div class="columns is-mobile is-vcentered member">
+        <div class="column is-one-quarter-desktop is-one-quarter-mobile headshot">
+          <div class="circle">
             <img src="{{ member.headshot }}">
           </div>
-          <div class="column member-info">
-            <h4 class="member-name">{{ member.name }}</h4>
-            <span class="member-role">{{ member.role }}</span>
-            <span class="member-title">{{ member.title }}</span>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
+        </div>
+        <div class="column member-info">
+          <h5 class="member-name">{{ member.name }}</h5>
+          <span class="member-role">{{ member.role }}</span>
+          <span class="member-title">{{ member.title }}</span>
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
 </div>

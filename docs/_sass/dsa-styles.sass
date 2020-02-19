@@ -290,6 +290,53 @@ $gray-button: darken($gray, 30%)
       /* .column */
     /* .columns */
   /* .callouts */
+
+  .collaborators
+    .org-header
+      &::after
+        background: $secondary
+        border-radius: 50px
+        content: ''
+        display: block
+        height: 4px
+        width: 100%
+
+      .org-logo
+        padding: 0 20px
+
+    .org-members
+      .member
+        padding: 20px 0
+
+        .headshot
+          padding: 15px
+
+          .circle
+            border-radius: 100%
+            height: 0
+            overflow: hidden
+            padding-bottom: 100% // height matches width
+
+            img
+              height: auto
+              width: 100%
+
+        .member-info
+          padding: 15px
+          .member-name
+            margin: 0 0 5px
+
+          span
+            display: block
+
+            &.member-role
+              font-weight: 300
+
+            &.member-title
+              color: lighten($gray, 15%)
+              font-size: 14px
+              font-weight: 600
+  /* .collaborators */
 /* .home */
 
 /* ====================================
