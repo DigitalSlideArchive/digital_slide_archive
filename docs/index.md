@@ -89,4 +89,22 @@ platforms:
       - name: Broad Support for History Image Formats
         description: A wide variety of tiled image formats are supported, including tiff, svs, and jp2. Images can be retiled automatically as needed for processing algorithms. Additional formats can be added with a pluggable Python interface.
         icon: '../assets/img/icons/icon-history_image_formats-secondary.svg'
+
+# Callouts Section
+# =================================
+callouts:
+  - heading: Demos & Examples
+    link: https://google.com
+    link_text: View Demos
+    image: ../assets/img/demos_examples.jpg
+
+  - heading: Success Stories
+    link: https://google.com
+    link_text: View Stories
+    image: ../assets/img/success_stories.jpg
+
+  - heading: Papers/Publications
+    link: https://google.com
+    link_text: Read Papers
+    image: ../assets/img/papers_publications.jpg
 ---
