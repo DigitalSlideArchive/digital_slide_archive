@@ -3,6 +3,8 @@
 
 $top-offset: 70px
 
+$gray-button: darken($gray, 30%)
+
 /* ====================================
  * END variables */
 
@@ -27,6 +29,40 @@ $top-offset: 70px
         background-color: $secondary
         color: #fff
 
+      &.is-inverted
+        background-color: transparent
+        border-color: #fff
+        color: #fff
+
+        &:hover
+          background-color: #fff
+          color: $secondary
+
+  &.is-gray
+    background-color: $gray-button
+    border-color: transparent
+    color: #fff
+
+    &:hover
+      background-color: darken($gray-button, 3%)
+
+    &.is-outlined
+      background-color: transparent
+      border-color: $gray-button
+      color: $gray-button
+
+      &:hover
+        background-color: $gray-button
+        color: #fff
+
+      &.is-inverted
+        background-color: transparent
+        border-color: #fff
+        color: #fff
+
+        &:hover
+          background-color: #fff
+          color: $gray-button
 
 /* ====================================
  * END Misc. */
