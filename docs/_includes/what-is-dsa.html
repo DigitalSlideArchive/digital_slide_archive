@@ -10,9 +10,9 @@
 {% endif %}
 
 {% if page.about_resources %}
-<ul class="resource-links">
+<ul class="columns resource-links">
   {% for resource in page.about_resources %}
-  <li>
+  <li class="column">
     <a href="{{ resource.link }}">
       <img src="{{ resource.icon }}" alt="{{ resource.name }}" height="50" width="50">
       {{ resource.name }}
