@@ -247,6 +247,59 @@ body > .navbar
       /* .platform-features */
     /* .column */
   /* .platforms */
+
+  .callouts
+    padding: 0
+
+    .columns
+      margin: 0
+
+      .column
+        padding: 100px 20px
+        position: relative
+        text-align: center
+
+        .callout-text
+          position: relative
+          z-index: 2
+
+          h2
+            color: #fff
+
+        .callout-image
+          bottom: 0
+          left: 0
+          overflow: hidden
+          position: absolute
+          right: 0
+          top: 0
+          z-index: 1
+
+          img
+            filter: blur(5px)
+            height: auto
+            left: 50%
+            min-width: 140%
+            mix-blend-mode: multiply
+            position: absolute
+            top: 50%
+            transform: rotate(-10deg) translate(-50%, -50%)
+
+        &.primary
+          .callout-image
+            background: $primary
+
+        &.secondary
+          .callout-image
+            background: $secondary
+
+        &.gray
+          .callout-image
+            background: $gray-button
+      /* .column */
+    /* .columns */
+  /* .callouts */
+
 /* .home */
 
 
