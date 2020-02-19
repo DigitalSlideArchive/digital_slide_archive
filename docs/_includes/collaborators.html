@@ -1,0 +1,25 @@
+{% for org in page.organizations %}
+<div class="column">
+  <div class="content">
+    <header class="org-header">
+      <h2 class="org-logo"><img src="{{ org.logo }}" alt="{{ org.name }}"></h2>
+    </header>
+    <div class="org-members">
+      <ul>
+        {% for member in org.members %}
+        <li class="columns member">
+          <div class="column is-one-quarter headshot">
+            <img src="{{ member.headshot }}">
+          </div>
+          <div class="column member-info">
+            <h4 class="member-name">{{ member.name }}</h4>
+            <span class="member-role">{{ member.role }}</span>
+            <span class="member-title">{{ member.title }}</span>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endfor %}

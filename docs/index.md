@@ -122,4 +122,28 @@ callouts:
     link: https://google.com
     link_text: Read Papers
     image: ../assets/img/papers_publications.jpg
+
+# Collaborators Section
+# =================================
+organizations:
+  - name: Feinberg School of Medicine - Northwestern University
+    logo:
+    members:
+      - name: Lee A.D. Cooper, PhD
+        role: HistomicsTK Lead
+        title: Associate Professor of Pathology
+
+  - name: Emory University - School of Medicine
+    logo:
+    members:
+      - name: David A. Gutman, MD, PhD
+        role: Digital Slide Archive Lead
+        title: Associate Professor of Neurology
+
+  - name: Kitware, Inc.
+    logo:
+    members:
+      - name: David Manthey
+        role: Software Engineering & Deployment
+        title: Staff R&D Engineer
 ---
