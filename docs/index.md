@@ -18,17 +18,19 @@ hero_buttons:
   - link_text: View on GitHub
     link: #
 
-# What is DSA
+# What is DSA Section
 # =================================
 about_title: What is DSA?
 about_text: The Digital Slide Archive is a system for working with large microscopy images.
 
+# Capabilities of DSA
 about_list:
   - list_item: Organize images from a variety of assetstores, such as local files systems and S3.
   - list_item: Provide user access controls.
   - list_item: Image annotation and review.
   - list_item: Run algorithms on all or parts of images.
 
+# Resource links
 about_resources:
   - name: Gitter Channel
     link: #
