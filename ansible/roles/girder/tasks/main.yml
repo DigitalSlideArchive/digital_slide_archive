@@ -169,6 +169,8 @@
       - girder-homepage
       - girder-ldap
       - girder-dicom-viewer
+      - girder-archive-access
+    extra_args: "--pre"
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
