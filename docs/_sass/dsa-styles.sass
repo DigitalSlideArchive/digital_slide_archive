@@ -1,7 +1,8 @@
 /* START variables
  * ==================================== */
 
-$top-offset: 52px
+$header-height: 52px
+$footer-height: 82px
 
 $gray-button: darken($gray, 30%)
 
@@ -79,12 +80,36 @@ $gray-button: darken($gray, 30%)
 /* ====================================
  * END text styles */
 
+/* START Site Structure
+ * ==================================== *
+
+.site-wrapper
+  /* This min-height ensures that if the page is longer than
+     the viewport height, it will push the footer down. If it
+     is NOT longer, the footer will never stray higher than
+     the bottom of the screen. */
+  min-height: calc(100vh - #{$header-height + $footer-height})
+
+.footer
+  background: darken($gray-button, 15%)
+  color: #fff
+  padding: 2rem 0
+
+  a
+    color: lighten($link, 15%)
+
+    &:hover
+      text-decoration: underline
+
+/* ====================================
+ * END Site Structure */
+
 /* START hero
  * ==================================== */
 
 .home
   .hero
-    height: calc(100vh - #{$top-offset})
+    height: calc(100vh - #{$header-height})
 
     &.has-hero-image
       position: relative
@@ -342,23 +367,6 @@ $gray-button: darken($gray, 30%)
 
 /* ====================================
  * END content area */
-
-/* START Footer
- * ==================================== */
-
-.footer
-  background: darken($gray-button, 15%)
-  color: #fff
-  padding: 2rem 0
-
-  a
-    color: lighten($link, 15%)
-
-    &:hover
-      text-decoration: underline
-
-/* ====================================
- * END Footer */
 
 /* START Responsive Goodness
  * ==================================== */

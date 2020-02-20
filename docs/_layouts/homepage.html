@@ -3,37 +3,40 @@
   {% include head.html %}
   <body class="home">
     {% include header.html %}
-    {% include hero.html %}
+    <div class="site-wrapper">
+      {% include hero.html %}
 
-    <section class="section what-is-dsa">
-      <div class="container">
-        <div class="content">
-          {% include what-is-dsa.html %}
+      <section class="section what-is-dsa">
+        <div class="container">
+          <div class="content">
+            {% include what-is-dsa.html %}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="section platforms">
-      <div class="container">
-        <div class="columns is-variable is-8">
-          {% include platforms.html %}
+      <section class="section platforms">
+        <div class="container">
+          <div class="columns is-variable is-8">
+            {% include platforms.html %}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="section callouts">
-      <div class="columns no-gap">
-        {% include home-callouts.html %}
-      </div>
-    </section>
-
-    <section class="section collaborators">
-      <div class="container">
-        <div class="columns is-variable is-5">
-          {% include collaborators.html %}
+      <section class="section callouts">
+        <div class="columns no-gap">
+          {% include home-callouts.html %}
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="section collaborators">
+        <div class="container">
+          <div class="columns is-variable is-5">
+            {% include collaborators.html %}
+          </div>
+        </div>
+      </section>
+
+    </div>
 
     {% include footer.html %}
 
