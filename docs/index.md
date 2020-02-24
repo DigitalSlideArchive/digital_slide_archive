@@ -1,10 +1,15 @@
 ---
 layout: home
 
+# Header Content
+# =================================
+header:
+    - logo_image: ../assets/img/dsa_logo.svg
+
 # Banner Content
 # =================================
 title: Harness the full potential of your digital pathology data
-subtitle: A containerized web-based platform for the management, visualization, and annotation of whole-slide digital pathology imaging data
+subtitle: A containerized web-based platform for the analysis, visualization, management and annotation of whole-slide digital pathology imaging data
 
 hero_image: assets/img/dsa_hero.jpg
 
@@ -21,7 +26,7 @@ hero_buttons:
 # What is DSA Section
 # =================================
 about_title: What is DSA?
-about_text: The Digital Slide Archive is a system for working with large microscopy images.
+about_text: The Digital Slide Archive (DSA) is a system for working with large microscopy images.
 
 # Capabilities of DSA
 about_list:
