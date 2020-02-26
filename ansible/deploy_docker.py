@@ -19,32 +19,37 @@ if not (LooseVersion('1.9') <= LooseVersion(docker.version)):
     raise Exception('docker or docker-py must be >= version 1.9')
 
 
-BaseName = 'histomicstk'
+BaseName = 'dsa'
 ImageList = collections.OrderedDict([
-    ('rmq', {
+    ('rabbitmq', {
         'tag': 'rabbitmq:management',
-        'name': BaseName + '_rmq',
+        'name': BaseName + '_rabbitmq',
+        'oldnames': ['histomicstk_rmq'],
         'pull': True,
     }),
     ('mongodb', {
         'tag': 'mongo:latest',
         'name': BaseName + '_mongodb',
+        'oldnames': ['histomicstk_mongodb'],
         'pull': True,
     }),
     ('memcached', {
         'tag': 'memcached:latest',
         'name': BaseName + '_memcached',
+        'oldnames': ['histomicstk_memcached'],
         'pull': True,
     }),
     ('worker', {
         'tag': 'dsarchive/dsa_worker',
-        'name': BaseName + '_girder_worker',
+        'name': BaseName + '_worker',
+        'oldnames': ['histomicstk_girder_worker'],
         'dockerfile': 'Dockerfile-worker',
         'pinned': 'v1.0.0',
     }),
-    ('histomicstk', {
+    ('girder', {
         'tag': 'dsarchive/dsa_girder',
-        'name': BaseName + '_histomicstk',
+        'name': BaseName + '_girder',
+        'oldnames': ['histomicstk_histomicstk'],
         'dockerfile': 'Dockerfile-girder',
         'pinned': 'v1.0.0',
     }),
@@ -84,7 +89,7 @@ def containers_provision(**kwargs):  # noqa
     """
     client = docker_client()
     ctn = get_docker_image_and_container(
-        client, 'histomicstk', version=kwargs.get('pinned'))
+        client, 'girder', version=kwargs.get('pinned'))
 
     if kwargs.get('conf'):
         merge_configuration(client, ctn, **kwargs)
@@ -96,7 +101,7 @@ def containers_provision(**kwargs):  # noqa
     if password == '':
         password = getpass.getpass('Password for %s: ' % (
             username if username else 'default admin user'))
-    # docker exec -i -t histomicstk_histomicstk bash -c
+    # docker exec -i -t dsa_girder bash -c
     # 'cd /home/ubuntu/digital_slide_archive/ansible && ansible-playbook -i
     # inventory/local docker_ansible.yml --extra-vars=docker=provision'
     extra_vars = {
@@ -147,8 +152,8 @@ def containers_start(
         port=8080, rmq='docker', mongo='docker', memcached='docker',
         provision=False, **kwargs):
     """
-    Start all appropriate containers.  This is, at least, girder_worker and
-    histomicstk.  Optionally, mongodb and rabbitmq are included.
+    Start all appropriate containers.  This is, at least, worker and girder.
+    Optionally, mongodb and rabbitmq are included.
 
     :param port: default port to expose.
     :param rmq: 'docker' to use a docker for rabbitmq, 'host' to use the docker
@@ -187,11 +192,11 @@ def containers_start(
         containers_provision(**kwargs)
 
 
-def container_start_histomicstk(
-        client, env, key='histomicstk', port=8080, rmq='docker', mongo='docker',
+def container_start_girder(
+        client, env, key='girder', port=8080, rmq='docker', mongo='docker',
         memcached='docker', provision=False, **kwargs):
     """
-    Start a histomicstk container.
+    Start a Girder container.
 
     :param client: docker client.
     :param env: dictionary to store environment variables.
@@ -227,8 +232,8 @@ def container_start_histomicstk(
         }
         config['binds'].extend(docker_mounts())
         config_mounts(kwargs.get('mount'), config)
-        if rmq == 'docker' and 'rmq' in ImageList:
-            config['links'][ImageList['rmq']['name']] = 'rmq'
+        if rmq == 'docker' and 'rabbitmq' in ImageList:
+            config['links'][ImageList['rabbitmq']['name']] = 'rabbitmq'
         if memcached == 'docker' and 'memcached' in ImageList:
             config['links'][ImageList['memcached']['name']] = 'memcached'
         if mongo != 'host' and 'mongodb' in ImageList:
@@ -358,8 +363,8 @@ def container_start_mongodb(client, env, key='mongodb', mongo='docker',
         client.start(container=ctn.get('Id'))
 
 
-def container_start_rmq(client, env, key='rmq', rmq='docker', rmqport=None,
-                        **kwargs):
+def container_start_rabbitmq(
+        client, env, key='rabbitmq', rmq='docker', rmqport=None, **kwargs):
     """
     Start a rabbitmq container if desired, or set an environment variable so
     other containers know where to find it.
@@ -439,7 +444,7 @@ def container_start_worker(client, env, key='worker', rmq='docker', **kwargs):
         config['binds'].extend(docker_mounts())
         config_mounts(kwargs.get('mount'), config)
         if rmq == 'docker':
-            config['links'][ImageList['rmq']['name']] = 'rmq'
+            config['links'][ImageList['rabbitmq']['name']] = 'rabbitmq'
         else:
             env['HOST_RMQ'] = 'true' if rmq == 'host' else rmq
         env['GIRDER_WORKER_TMP_ROOT'] = worker_tmp_root
@@ -594,13 +599,14 @@ def get_docker_image_and_container(client, key, pullOrBuild=True, version=None):
                     raise
                 if not ImageList[key].get('pull'):
                     images_build(True, key)
-    name = ImageList[key].get('name')
-    if name:
+    if ImageList[key].get('name'):
         containers = client.containers(all=True)
-        ctn = [entry for entry in containers if name in
-               [val.strip('/') for val in entry.get('Names', [])]]
-        if len(ctn):
-            return ctn[0]
+        names = [ImageList[key].get('name')] + ImageList[key].get('oldnames', [])
+        for name in names:
+            ctn = [entry for entry in containers if name in
+                   [val.strip('/') for val in entry.get('Names', [])]]
+            if len(ctn):
+                return ctn[0]
     return None
 
 
@@ -802,21 +808,21 @@ def show_info():
     """
     print("""
 Running containers can be joined using a command like
-  docker exec -i -t histomicstk_histomicstk bash
+  docker exec -i -t dsa_girder bash
 
 To allow docker containers to use memcached, make sure the host is running
 memcached and it is listening on the docker IP address (or listening on all
 addresses via -l 0.0.0.0).
 
 To determine the current mongo docker version, use a command like
-  docker exec histomicstk_mongodb mongo girder --eval 'db.version()'
+  docker exec dsa_mongodb mongo girder --eval 'db.version()'
 To check if mongo can be upgraded, query the compatability mode via
-  docker exec histomicstk_mongodb mongo girder --eval \\
+  docker exec dsa_mongodb mongo girder --eval \\
   'db.adminCommand({getParameter: 1, featureCompatibilityVersion: 1})'
 Mongo can only be upgraded if the compatibility version is the same as the
 semi-major version.  Before upgrading, set the compatibility mode.  For
 instance, if Mongo 3.6.1 is running,
-  docker exec histomicstk_mongodb mongo girder --eval \\
+  docker exec dsa_mongodb mongo girder --eval \\
   'db.adminCommand({setFeatureCompatibilityVersion: "3.6"})'
 after which Mongo can be upgraded to version 4.0.  After upgrading, set the
 compatibility mode to the new version.
@@ -858,7 +864,7 @@ def wait_for_girder(client, ctn, maxWait=3600):
     sys.stdout.write('Waiting for Girder to report version: ')
     sys.stdout.flush()
     # This really should be the girder_api_url from the current settings
-    girder_api_url = 'http://histomicstk:8080/api/v1'
+    girder_api_url = 'http://girder:8080/api/v1'
     exec_command = 'bash -c ' + six.moves.shlex_quote(
         'curl "%s/system/version"' % girder_api_url)
     while time.time() - starttime < maxWait:
@@ -891,7 +897,7 @@ if __name__ == '__main__':   # noqa
         help='Start, stop, stop and remove, restart, check the status of, or '
              'build our own docker containers')
     parser.add_argument(
-        '--assetstore', '-a', default='~/.histomicstk/assetstore',
+        '--assetstore', '-a', default='~/.dsa/assetstore',
         help='Assetstore path.')
     parser.add_argument(
         '--build', '-b', dest='build', action='store_true',
@@ -916,7 +922,7 @@ if __name__ == '__main__':   # noqa
         help='Merge a Girder configuration file with the default '
         'configuration in the docker container during provisioning.')
     parser.add_argument(
-        '--db', '-d', dest='mongodb_path', default='~/.histomicstk/db',
+        '--db', '-d', dest='mongodb_path', default='~/.dsa/db',
         help='Database path (if a Mongo docker container is used).  Use '
              '"docker" for the default docker storage location.')
     parser.add_argument(
@@ -927,7 +933,7 @@ if __name__ == '__main__':   # noqa
         '--info', action='store_true',
         help='Show installation and usage notes.')
     parser.add_argument(
-        '--logs', '--log', '-l', default='~/.histomicstk/logs',
+        '--logs', '--log', '-l', default='~/.dsa/logs',
         help='Logs path.')
     parser.add_argument(
         '--memcached', default='docker',
@@ -993,7 +999,7 @@ if __name__ == '__main__':   # noqa
     parser.add_argument(
         '--worker-api-url',
         help='The alternate Girder API URL used by workers to reach Girder.  '
-        'This defaults to http://histomicstk:8080/api/v1')
+        'This defaults to http://girder:8080/api/v1')
     parser.add_argument(
         '--worker-tmp-root', '--tmp', default='/tmp/girder_worker',
         help='The path to use for the girder_worker tmp_root.  This must be '
@@ -1038,6 +1044,15 @@ if __name__ == '__main__':   # noqa
     if args.command in ('stop', 'restart', 'rm', 'remove'):
         containers_stop(remove=args.command in ('rm', 'remove'))
     if args.command in ('start', 'restart'):
+        # Migration of ~/.histomicstk to ~/.dsa
+        keys = ['assetstore', 'logs', 'mongodb_path']
+        oldpath, newpath = '~/.histomicstk', '~/.dsa'
+        if (os.path.isdir(os.path.expanduser(oldpath)) and
+                not os.path.isdir(os.path.expanduser(newpath)) and
+                not any(getattr(args, key, '').startswith(oldpath) for key in keys) and
+                any(getattr(args, key, '').startswith(newpath) for key in keys)):
+            os.rename(os.path.expanduser(oldpath), os.path.expanduser(newpath))
+
         containers_start(**vars(args))
     if args.command in ('status', ) or args.status:
         containers_status(**vars(args))

@@ -47,9 +47,9 @@
     worker_exec_user: ubuntu
     worker_exec_group: ubuntu
     mongo_private_ip: mongodb
-    girder_api_url: http://histomicstk:8080/api/v1
+    girder_api_url: http://girder:8080/api/v1
     mongo_girder_database: girder
-    mq_private_ip: rmq
+    mq_private_ip: rabbitmq
     memcached_url: memcached
     # I'd rather use python 3.7, but ansible does not work with it without more
     # fiddling

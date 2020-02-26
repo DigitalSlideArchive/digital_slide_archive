@@ -2,4 +2,4 @@
 
 var="$(echo $@)"
 
-docker exec -it histomicstk_histomicstk bash -lc "tox $var"
+docker exec -it dsa_girder bash -lc "tox $var"
