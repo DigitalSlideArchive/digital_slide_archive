@@ -43,6 +43,8 @@ There are many options that can be used along with the ``deploy_docker.py`` comm
 
 By default, the deployment places all database, log, and assetstore files in the ``~/.histomicstk`` directory.  The Digital Slide Archive is run on localhost at port 8080.
 
+A default administrator account is created with the username ``admin`` and password ``password``.  The password can be changed after the first start, or a new administrator account with a different username can be created and the default ``admin`` user deleted.  If you change the administrator user or password, subsequent runs of ``deploy_docker.py`` will require specifying the appropriate user and password or passing the appropriate option to request the username and password on the terminal.
+
 Update an installation
 ######################
 
