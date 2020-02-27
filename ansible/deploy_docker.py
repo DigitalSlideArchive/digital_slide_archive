@@ -280,6 +280,7 @@ def container_start_memcached(client, env, key='memcached', memcached='docker', 
             }
             params = {
                 'image': image,
+                'command': ['memcached', '-m', str(kwargs.get('cache', 1024))],
                 'detach': True,
                 'hostname': key,
                 'name': name,
@@ -895,6 +896,9 @@ if __name__ == '__main__':   # noqa
     parser.add_argument(
         '--build', '-b', dest='build', action='store_true',
         help='Build girder and worker docker images.')
+    parser.add_argument(
+        '--cache', type=int, default=1024,
+        help='memcached memory in Mbytes.  Default 1024.')
     parser.add_argument(
         '--cli', '-c', dest='cli', action='store_true', default=True,
         help='Pull and install the HistomicsTK cli docker image.')
