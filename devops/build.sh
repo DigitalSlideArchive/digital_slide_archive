@@ -6,4 +6,4 @@
 
 var="$(echo $@)"
 
-docker exec -it histomicstk_histomicstk bash -lc "girder build --dev $var"
+docker exec -it dsa_girder bash -lc "girder build --dev $var"

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker exec -it histomicstk_histomicstk bash
+docker exec -it dsa_girder bash

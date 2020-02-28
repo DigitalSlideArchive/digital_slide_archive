@@ -13,6 +13,8 @@ Going Back
 
 If, for some reason, you need to move back to Girder 2, you will need to adjust some values in the Mongo database.  This is because, as part of the update, the version of ``large_image`` is updated, and it has a name change for one of the tile sources.  Before or after downgrading via the old script, you'll need to use a mongo client to connect to the mongo database (for instance, by running ``docker exec -it histomicstk_mongodb mongo girder``).  Then, issue the Mongo command ``db.item.updateMany({"largeImage.sourceName": "openslide"}, {$set: {"largeImage.sourceName": "svs"}})``.
 
+On the current deployment, data is stored, by default, in ``~/.dsa``.  In the Girder 2 deployment, it was stored in ``~/.histomicstk``.  To return to the Girder 2 version, you'll need to rename ``~/.dsa`` to ``~/.histomicstk``.
+
 Mongo
 -----
 
