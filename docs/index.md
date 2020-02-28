@@ -26,7 +26,7 @@ hero_buttons:
 # What is DSA Section
 # =================================
 about_title: What is DSA?
-about_text: The Digital Slide Archive (DSA) is a platform  that provides the ability to store, manage, visualize and annotate large imaging data sets.  The DSA is an umbrella term and consists of an analysis toolkit (HistomicsTK), a library to manage/visualize slides (HistomicsUI) as well as a database layer (using Mongo) , and a web-server that provides a rich API.  This system allows;
+about_text: The Digital Slide Archive (DSA) is a platform  that provides the ability to store, manage, visualize and annotate large imaging data sets.  The DSA is an umbrella term and consists of an analysis toolkit (HistomicsTK), a library to manage/visualize slides (HistomicsUI) as well as a database layer (using Mongo), and a web-server that provides a rich API.  This system allows;
 
 # Capabilities of DSA
 about_list:
