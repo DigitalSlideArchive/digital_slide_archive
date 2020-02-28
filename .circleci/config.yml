@@ -177,6 +177,25 @@ jobs:
               docker push "dsarchive/dsa_worker:$CIRCLE_TAG"
               docker push "dsarchive/dsa_girder:$CIRCLE_TAG"
               fi
+  docs:
+    docker:
+      - image: circleci/ruby:latest
+    steps:
+      - checkout
+      - run:
+          name: Bundle install
+          command: |
+            cd docs
+            bundle install
+            bundle update
+      - run:
+          name: Build docs
+          command: |
+            cd docs
+            mkdir /tmp/artifacts
+            bundle exec jekyll build -d /tmp/artifacts --baseurl /0/tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts
 
 workflows:
   version: 2
@@ -272,6 +291,13 @@ workflows:
             branches:
               only:
                 - master
+      - docs:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
   # We want to run a build periodically to make sure it still works and to use
   # all dependant libraries.  To republish dockers sooner, a build can be rerun
   # manually.
