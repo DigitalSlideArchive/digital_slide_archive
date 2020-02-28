@@ -4,10 +4,12 @@
             <p class="title is-2">{{ page.title }}</p>
             <p class="subtitle is-3">{{ page.subtitle }}</p>
             {% if page.hero_buttons %}
-              <div class="hero-buttons">
+              <div class="hero-buttons columns  is-centered">
                 {% for button in page.hero_buttons %}
+                  <div class="column is-3">
                   <a href="{{ button.link | prepend: site.baseurl  }}" class="button hero-button is-medium">{{ button.link_text }}</a>
-                {% endfor %}
+                  </div>
+                  {% endfor %}
               </div>
             {% endif %}
         </div>

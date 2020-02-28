@@ -2,7 +2,7 @@
 <p>{{ page.about_text }}</p>
 
 {% if page.about_list %}
-<ul class="about-bullets">
+<ul>
   {% for bullet in page.about_list %}
   <li>{{ bullet.list_item }}</li>
   {% endfor %}
