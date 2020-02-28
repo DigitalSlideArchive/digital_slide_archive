@@ -73,18 +73,15 @@ jobs:
           name: Start nginx
           command: |
             sudo apt-get install nginx
-            sudo cp .circleci/proxy.nginx /etc/nginx/sites-available/default
+            sudo cp .circleci/dsa_proxy.nginx /etc/nginx/sites-available/default
             sudo service nginx restart
       - run:
           name: Start containers
-          command: export TERM=xterm && python ansible/deploy_docker.py start --cfg=.circleci/proxy.cfg
-      - run:
-          name: Rebuild and restart girder
-          command: docker exec dsa_girder bash -lc 'rebuild_and_restart_girder.sh'
+          command: export TERM=xterm && python ansible/deploy_docker.py start --cfg=.circleci/dsa_proxy.cfg
       - run:
           name: "Wait for girder to be available"
           command: |
-            for f in `seq 120`; do curl --silent 'http://127.0.0.1/girder/api/v1/system/version' | tac | tac | grep -q 'release' && break; sleep 1; done
+            for f in `seq 120`; do curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | tac | tac | grep -q 'release' && break; sleep 1; done
       - run:
           name: "Check that we can read from the api and static assets in the proxy path locations"
           # grep -q will close its connection as soon as it finds a match, but
@@ -92,12 +89,12 @@ jobs:
           # program that reads the entire contents avoids this problem.
           # grepping unquietly first does this.
           command: |
-            curl --silent 'http://127.0.0.1/girder/'
-            curl --silent 'http://127.0.0.1/girder/api/v1/system/version'
-            curl --silent 'http://127.0.0.1/girder/static/built/plugins/large_image/extra/geojs.js' | head || true
-            curl --silent 'http://127.0.0.1/girder/' | grep '/girder/static/built/plugins/large_image' | grep -q '/girder/static/built/plugins/large_image' && echo 'correct references'
-            curl --silent 'http://127.0.0.1/girder/api/v1/system/version' | grep 'release' | grep -q 'release' && echo 'reports version'
-            curl --silent 'http://127.0.0.1/girder/static/built/plugins/large_image/extra/geojs.js' | grep 'createRenderer' | grep -q 'createRenderer' && echo 'can reach geojs'
+            curl --silent 'http://127.0.0.1/dsa/'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/system/version'
+            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' | head || true
+            curl --silent 'http://127.0.0.1/dsa/' | grep '/dsa/static/built/plugins/large_image' | grep -q '/dsa/static/built/plugins/large_image' && echo 'correct references'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | grep 'release' | grep -q 'release' && echo 'reports version'
+            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' | grep 'createRenderer' | grep -q 'createRenderer' && echo 'can reach geojs'
       - run:
           name: Show Girder logs to allow easier review
           command: |

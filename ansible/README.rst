@@ -116,3 +116,27 @@ Inside the vagrant box, tests can be run by typing::
     cd /opt/HistomicsUI
     tox
 
+Docker and Reverse Proxy
+------------------------
+
+One common deployment is to install the Digital Slide Archive via docker and expose it as a subdirectory on another web host via a reverse proxy.  For instance, instead of having the Digital Slide Archive be reached at ``http://myserver.com:8080``, you can have it reachable at ``http://myserver.com/dsa/``.  To do this, a webserver is needed to provide the reverse proxy redirection, and some additional configuration needs to be specified as part of the provisioning of the docker containers.
+
+Follow the guide for `Girder Reverse Proxy <https://girder.readthedocs.io/en/latest/deploy.html#reverse-proxy>`_ to configure Apache or nginx appropriately.
+
+Create a local configuration file that can be passed to the ``deploy_docker.py`` script.  For instance, save the following as a file called ``dsa_proxy.cfg``::
+
+    [global]
+    tools.proxy.on = True
+
+    [server]
+    api_root = "/dsa/api/v1"
+    static_public_path = "/dsa/static"
+
+Now, when you issue the ``deploy_docker.py start`` command, specify the custom configuration file::
+
+    python deploy_docker.py start --cfg=dsa_proxy.cfg
+
+You'll need to specify the ``--cfg`` option whenever the ``start`` command used, including when updating an existing installation.
+
+    Note:
+        If you change the path of the reverse proxy on a running instance, you'll need to change the config file internal to the docker Girder container and rebuild and restart Girder within the docker.  This is in addition to restarting Apache or nginx as appropriate.
