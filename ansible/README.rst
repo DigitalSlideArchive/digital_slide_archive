@@ -4,6 +4,8 @@ Install Digital Slide Archive
 
 There are several ways to install the Digital Slide Archive and HistomicsUI.  If you intend to use the interface, use the Docker installation.  If you don't have docker installed, the Vagrant installation is the easiest method. 
 
+This has been tested on systems with 4 Gb of RAM and 20 Gb of disk space, though it works better with more memory.
+
 Installing via Docker
 ---------------------
 
@@ -11,6 +13,8 @@ This method should work on any system running Docker.  It has been tested with a
 
 Prerequisites
 #############
+
+At a minimum, you need `Docker <https://docs.docker.com/install/>`_, `Python <https://www.python.org/downloads/>`_, `pip <https://pip.pypa.io/en/stable/installing/>`_.  You also need `git <https://git-scm.com/downloads>`_ or to download the installation files from the `source repository <https://github.com/DigitalSlideArchive/digital_slide_archive/tree/master/ansible>`_.
 
 Install git, python-pip, and docker.io.  On Ubuntu, this can be done via::
 
