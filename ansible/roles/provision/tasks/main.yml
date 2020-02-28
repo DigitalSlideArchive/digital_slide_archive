@@ -12,6 +12,11 @@
   retries: 300
   when: docker is defined
 
+- name: Rebuild girder if the static_public_path is not the default.
+  shell: "if $(grep static_public_path /home/{{ girder_exec_user }}/.girder/girder.cfg | grep -v '\"/static\"'); then rebuild_and_restart_girder.sh; fi"
+  args:
+    executable: /bin/bash
+
 - name: Reinstall HistomicsUI - in development deployments this can be necessary
   pip:
     name: /opt/HistomicsUI
