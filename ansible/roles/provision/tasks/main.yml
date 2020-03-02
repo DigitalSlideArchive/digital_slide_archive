@@ -139,7 +139,7 @@
         key: worker.api_url
         value: "{{ girder_api_url }}"
 
-- name: Set the histomicstk webroot setting
+- name: Set the DSA brand name setting
   girder:
     port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
@@ -151,7 +151,7 @@
         key: "core.brand_name"
         value: "Digital Slide Archive"
 
-- name: Set the DSA brand name setting
+- name: Set the histomics webroot setting.
   girder:
     port: "{{ girder_socket_port|string }}"
     scheme: "{{ girder_socket_scheme }}"
@@ -161,6 +161,20 @@
       path: system/setting
       parameters:
         key: "histomicsui.webroot_path"
+        value: "histomics"
+
+- name: Set the histomics alternate webroot setting.
+  # The default allows ./histomics to work.  This allows the deprecated
+  # ./histomicstk to continue to work.
+  girder:
+    port: "{{ girder_socket_port|string }}"
+    scheme: "{{ girder_socket_scheme }}"
+    username: "{{ girder_admin_user }}"
+    password: "{{ girder_admin_password }}"
+    put:
+      path: system/setting
+      parameters:
+        key: "histomicsui.alternate_webroot_path"
         value: "histomicstk"
 
 - name: Set homepage markdown setting
@@ -182,7 +196,7 @@
 
           Developers who want to use the Girder REST API should check out the [interactive web API docs](api/v1).
 
-          The [HistomicsUI](histomicstk) application is enabled.
+          The [HistomicsUI](histomics) application is enabled.
 
 - name: Get assetstore list
   girder:
