@@ -107,7 +107,7 @@ platforms:
         icon: assets/img/feature-icons/icon-extensibility.svg
 
       - name: Broad Support for Histology Image Formats
-        description: A wide variety of tiled image formats are supported, including tiff, svs, and jp2. Images can be retiled automatically as needed for processing algorithms. Additional formats can be added with a pluggable Python interface.
+        description: The same wide variety of histology images that can be viewed can be used with any processing algorithms. Sub-images can be processed at custom tile sizes and magnifications as needed.
         icon: assets/img/feature-icons/icon-history_image_formats-secondary.svg
 
 # Callouts Section
