@@ -4,7 +4,7 @@ layout: home
 # Header Content
 # =================================
 header:
-    - logo_image: ../assets/img/dsa_logo.svg
+    - logo_image: assets/img/dsa_logo.svg
 
 # Banner Content
 # =================================
