@@ -58,7 +58,7 @@ about_resources:
 platforms:
   # HistomicsUI
   - title: HistomicsUI
-    description: Web-based application for examining, annotating, and processing histology images to extract both low and high level features (e.g. cellular structure, feature types).
+    description: HistomicsUI is a web-based application for examining, annotating, and processing histology images to extract both low and high level features (e.g. cellular structure, feature types).
     docs_url: google.com
     github_url: github.com
     screenshot: assets/img/histomicsui_screenshot.png
@@ -85,13 +85,13 @@ platforms:
 
   # HistomicsTK
   - title: HistomicsTK
-    description: HistomicsTK is a Python toolkit based on image processing, for quantitative analysis of whole-slide digital pathology images.
+    description: HistomicsTK is a Python image-processing toolkit for quantitative analysis of whole-slide digital pathology images.
     docs_url: google.com
     github_url: github.com
     screenshot: assets/img/histomicstk_screenshot.png
     features:
-      - name: Preprocessing and Format Support
-        description: HistomicsTK provides color normalization and deconvolution operations to improve the robustness of analytic pipelines. The Large Image plugin gives programmers a convenient interface for reading from whole-slide imaging formats.
+      - name: Preprocessing
+        description: HistomicsTK provides color normalization and deconvolution operations to improve the robustness of analytic pipelines.
         icon: assets/img/feature-icons/icon-preprocessing.svg
 
       - name: Object Detection and Segmentation
