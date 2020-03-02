@@ -164,12 +164,13 @@
 - name: Install Girder plugins
   pip:
     name:
-      - girder-virtual-folders
-      - girder-resource-path-tools
+      - girder-archive-access
+      - girder-dicom-viewer
       - girder-homepage
       - girder-ldap
-      - girder-dicom-viewer
-      - girder-archive-access
+      - girder-resource-path-tools
+      - girder-virtual-folders
+      - girder-xtk-demo
     extra_args: "--pre"
     virtualenv: "{{ girder_virtualenv }}"
     state: present
