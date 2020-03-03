@@ -98,7 +98,7 @@ digital_slide_archive is cloned will be seen in the TCGA collection of Girder.
 
 The front-end UI that allows you to apply analysis modules in HistomicsTK's
 docker plugins on data stored in Girder can be accessed at
-http://localhost:8009/histomicsui.
+http://localhost:8009/histomicstk.
 
 You can also ssh into the vagrant virtual box using the command ``vagrant ssh``.
 Digital Slide Archive and its dependencies are installed at the location
