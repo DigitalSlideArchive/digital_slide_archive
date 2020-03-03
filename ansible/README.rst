@@ -25,7 +25,9 @@ The current user needs to be a member of the docker group::
 
     sudo usermod -aG docker `id -u -n`
 
-After which, you will need to log out and log back in.
+After which, you will need re-evaluate group membership::
+
+    newgrp docker
 
 Install the python docker module::
 
