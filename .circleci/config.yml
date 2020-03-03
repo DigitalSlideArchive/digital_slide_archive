@@ -42,6 +42,10 @@ jobs:
           paths:
             - ./dsa_girder.tar
             - ./dsa_worker.tar
+      - store_artifacts:
+          path: ./dsa_girder.tar
+      - store_artifacts:
+          path: ./dsa_worker.tar
   test-cli:
     working_directory: ~/project
     machine: true
