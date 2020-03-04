@@ -130,6 +130,11 @@ jobs:
           command: |
             docker run --rm -it --entrypoint bash dsarchive/dsa_worker:latest -c "echo -n 'Files that need chown: ' ; find / -xdev -uid 1000 -or -gid 1000 2>/dev/null | wc -l"
           # We should add a test that if it is over some threshold to fail
+      - run:
+          name: Show docker logs for easier debug.
+          command: |
+            docker logs dsa_girder
+            docker logs dsa_worker
   test-py27:
     working_directory: ~/project
     machine: true

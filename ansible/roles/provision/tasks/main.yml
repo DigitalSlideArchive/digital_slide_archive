@@ -17,20 +17,6 @@
   args:
     executable: /bin/bash
 
-- name: Reinstall HistomicsUI - in development deployments this can be necessary
-  pip:
-    name: /opt/HistomicsUI
-    editable: true
-    virtualenv: "{{ girder_virtualenv }}"
-    state: present
-
-- name: Reinstall slicer_cli_web - in development deployments this can be necessary
-  pip:
-    name: /opt/slicer_cli_web[girder]
-    editable: true
-    virtualenv: "{{ girder_virtualenv }}"
-    state: present
-
 - name: Create directory for logs
   file: state=directory path="{{ root_dir }}/logs"
 
