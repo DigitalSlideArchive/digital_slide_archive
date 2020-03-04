@@ -138,6 +138,12 @@ CMD sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
     sudo -E sysctl -w net.ipv4.conf.eth0.route_localnet=1 && \
     sudo -E iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017 && \
     sudo -E iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE && \
+    # reinstall some modules in editable mode to make it easier for \
+    # developers to edit code outside of the docker \
+    sudo -E su ubuntu -c \
+    '/home/ubuntu/.virtualenvs/girder/bin/pip install -e /opt/HistomicsUI' ; \
+    sudo -E su ubuntu -c \
+    'pushd /opt/slicer_cli_web; /home/ubuntu/.virtualenvs/girder/bin/pip install -e .[girder]; popd' ; \
     sudo -E su ubuntu -c \
     'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder mount /opt/digital_slide_archive/mount >/opt/logs/mount.log 2>&1' ; \
     sudo -E su ubuntu -c \
