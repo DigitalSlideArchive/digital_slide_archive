@@ -8,13 +8,23 @@ Description
 This folder contains a set of scripts that are convenient to develop
 Digital Slide Archive and HistomicsUI inside its docker container.
 
-The following environment variable need to be defined for these scripts
-to run:
+The following environment variables can be defined to affect how these scripts
+run:
 
-* ``HISTOMICS_TESTDATA_FOLDER``: Folder in which the test data will be installed
-  on the host computer. This allows one to not download the test data every time,
-  but instead keep it directly on the host computer. If the container is removed,
-  there is no need to download the data again.
+* ``HISTOMICS_TESTDATA_FOLDER``: Folder where test data will be located on the
+  host computer.  Data from this folder can be imported into a filesystem
+  assetstore from the ``/data`` directory.  This defaults to 
+  ``~/.histomics_data`` if that directory is present.
+
+* ``HISTOMICS_SOURCE_FOLDER``: If the HistomicsUI repository is available 
+  locally, it is mounted into the running docker container to make development
+  easier.  This defaults to a directory located at ``../../HistomicsUI`` in 
+  relation to this README file.
+
+* ``SLICER_CLI_WEB_SOURCE_FOLDER``: If the slicer_cli_web repository is 
+  available locally, it is mounted into the running docker container to make
+  development easier.  This defaults to a directory located at 
+  ``../../slicer_cli_web`` in relation to this README file.
 
 Scripts
 =======
