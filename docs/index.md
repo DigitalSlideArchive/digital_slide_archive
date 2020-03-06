@@ -114,18 +114,18 @@ platforms:
 # =================================
 callouts:
   - heading: Demos & Examples
-    link: https://google.com
-    link_text: View Demos
+    link: #
+    link_text: Coming Soon #View Demos
     image: assets/img/home-callouts/demos_examples.jpg
 
   - heading: Success Stories
-    link: https://google.com
-    link_text: View Stories
+    link: #
+    link_text: Coming Soon #View Stories
     image: assets/img/home-callouts/success_stories.jpg
 
   - heading: Papers/Publications
-    link: https://google.com
-    link_text: Read Papers
+    link: #
+    link_text: Coming Soon #Read Papers
     image: assets/img/home-callouts/papers_publications.jpg
 
 # Collaborators Section

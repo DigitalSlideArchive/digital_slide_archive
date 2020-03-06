@@ -3,7 +3,9 @@
   <div class="content">
     <div class="callout-text">
       <h2>{{ callout.heading }}</h2>
-      <a href="{{ callout.link }}" class="button is-medium {% cycle 'is-primary', 'is-gray', 'is-secondary' %} is-outlined is-inverted">{{ callout.link_text }}</a>
+      <a class="button is-medium {% cycle 'is-primary', 'is-gray', 'is-secondary' %} is-outlined is-inverted"> <!-- href="{{ callout.link }}" -->
+        {{ callout.link_text }}
+      </a>
     </div>
     <div class="callout-image">
       <img src="{{ callout.image }}">
