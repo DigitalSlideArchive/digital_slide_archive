@@ -15,13 +15,13 @@ hero_image: assets/img/dsa_hero.jpg
 
 hero_buttons:
   - link_text: View Demo
-    link: #
-
-  - link_text: Read Docs
-    link: #
+    link: http://demo.kitware.com/histomicstk/histomicstk
 
   - link_text: View on GitHub
-    link: #
+    link: https://github.com/DigitalSlideArchive
+
+  - link_text: Installation
+    link: https://github.com/DigitalSlideArchive/digital_slide_archive/blob/master/ansible/README.rst
 
 # What is DSA Section
 # =================================
@@ -37,20 +37,20 @@ about_list:
 
 # Resource links
 about_resources:
-  - name: Gitter Channel
-    link: #
+  - name: Gitter
+    link: https://gitter.im/DigitalSlideArchive/HistomicsTK
     icon: assets/img/resource-icons/icon_gitter.png
 
-  - name: Discourse Forum
-    link: #
+  - name: Discourse
+    link: https://discourse.girder.org/c/histomicstk
     icon: assets/img/resource-icons/icon_discourse.png
 
-  - name: JupyterNotebooks
-    link: #
+  - name: Jupyter Notebooks
+    link: https://digitalslidearchive.github.io/HistomicsTK/examples.html
     icon: assets/img/resource-icons/icon_jupyternb.png
 
-  - name: Youtube Channel
-    link: #
+  - name: Youtube
+    link: https://www.youtube.com/channel/UCJVNVQXivYPDb4goNU4tK3A
     icon: assets/img/resource-icons/icon_youtube.png
 
 # Platforms Content
@@ -59,8 +59,8 @@ platforms:
   # HistomicsUI
   - title: HistomicsUI
     description: HistomicsUI is a web-based application for examining, annotating, and processing histology images to extract both low and high level features (e.g. cellular structure, feature types).
-    docs_url: google.com
-    github_url: github.com
+    docs_url: https://github.com/DigitalSlideArchive/HistomicsUI/blob/master/README.rst
+    github_url: https://github.com/DigitalSlideArchive/HistomicsUI
     screenshot: assets/img/histomicsui_screenshot.png
     features:
       - name: Secure Data Management
@@ -86,8 +86,8 @@ platforms:
   # HistomicsTK
   - title: HistomicsTK
     description: HistomicsTK is a Python image-processing toolkit for quantitative analysis of whole-slide digital pathology images.
-    docs_url: google.com
-    github_url: github.com
+    docs_url: https://digitalslidearchive.github.io/HistomicsTK/
+    github_url: https://github.com/DigitalSlideArchive/HistomicsTK
     screenshot: assets/img/histomicstk_screenshot.png
     features:
       - name: Preprocessing
