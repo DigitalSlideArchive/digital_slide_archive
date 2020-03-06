@@ -133,25 +133,31 @@ callouts:
 organizations:
   - name: Feinberg School of Medicine - Northwestern University
     logo: assets/img/collaborators/logo-feinberg_school_of_medicine.png
+    link: https://www.feinberg.northwestern.edu/
     members:
       - name: Lee A.D. Cooper, PhD
         role: HistomicsTK Lead
         title: Associate Professor of Pathology
         headshot: assets/img/collaborators/headshot-lee_cooper.jpg
+        link: https://www.feinberg.northwestern.edu/faculty-profiles/az/profile.html?xid=44206
 
   - name: Emory University - School of Medicine
     logo: assets/img/collaborators/logo-emory_school_of_medicine.png
+    link: https://www.med.emory.edu/
     members:
       - name: David A. Gutman, MD, PhD
         role: Digital Slide Archive Lead
         title: Associate Professor of Neurology
         headshot: assets/img/collaborators/headshot-david_gutman.jpg
+        link: https://winshipcancer.emory.edu/bios/faculty/gutman-david.html
 
   - name: Kitware, Inc.
     logo: assets/img/collaborators/logo-kitware.png
+    link: https://www.kitware.com/
     members:
       - name: David Manthey
         role: Software Engineering & Deployment
         title: Staff R&D Engineer
         headshot: assets/img/collaborators/headshot-david_manthey.jpg
+        link: https://www.kitware.com/david-manthey/
 ---
