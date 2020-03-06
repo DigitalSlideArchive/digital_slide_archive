@@ -1,23 +1,32 @@
-<h2>{{ page.about_title }}</h2>
-<p>{{ page.about_text }}<span>:</span></p>
+<div class="columns">
+  <div class="column is-9">
+      <h2>{{ page.about_title }}</h2>
+      <p>{{ page.about_text }}<span>:</span></p>
 
-{% if page.about_list %}
-<ul>
-  {% for bullet in page.about_list %}
-  <li>{{ bullet.list_item }}</li>
-  {% endfor %}
-</ul>
-{% endif %}
-
-{% if page.about_resources %}
-<ul class="columns resource-links">
-  {% for resource in page.about_resources %}
-  <li class="column">
-    <a href="{{ resource.link }}">
-      <img src="{{ resource.icon }}" alt="{{ resource.name }}" height="50" width="50">
-      {{ resource.name }}
-    </a>
-  </li>
-  {% endfor %}
-</ul>
-{% endif %}
+     {% if page.about_list %}
+      <ul>
+        {% for bullet in page.about_list %}
+        <li>{{ bullet.list_item }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+  </div>
+  <div class="column is-1"></div>
+  <div class="resource-links column">
+      {% if page.about_resources %}
+      <h2>{{ page.about_resources_title }}</h2>
+      <ul>
+        {% for resource in page.about_resources %}
+        <li class="column">
+          <a href="{{ resource.link }}">
+            <i class="{{ resource.icon }} fa-2x"></i>
+            <span class="icon-jupyter"></span>
+            <!-- <img src="{{ resource.icon }}" alt="{{ resource.name }}" height="50" width="50"> -->
+            {{ resource.name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+     {% endif %}
+  </div>
+</div>

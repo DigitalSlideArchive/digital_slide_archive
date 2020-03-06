@@ -178,7 +178,7 @@ $gray-button: darken($gray, 30%)
 .home
   .what-is-dsa
     color: #7a7a7a
-    font-weight: 600
+    font-weight: 400
 
     h2
       margin-top: 5%
@@ -197,22 +197,30 @@ $gray-button: darken($gray, 30%)
       margin-bottom: 4%
 
     .resource-links
-      list-style: none
-      margin: 0
-      padding: 45px 0 10px
+      h2
+        margin-top: 50px
+        margin-bottom: 10%
+      ul
+        list-style: none
+        margin: 0
+        padding: 15px 0 10px
 
-      li
-        margin: 5px
-        padding: 0
-        margin-bottom: 5%
+        li
+          margin: 5px
+          padding: 0
+          margin-bottom: 20px
 
-        a
-          align-items: flex-end
-          color: darken($gray, 15%)
-          display: flex
+          a
+            align-items: flex-end
+            color: darken($gray, 15%)
+            display: flex
+            &:hover
+              color: darken($primary, 3%)
 
-          img
-            margin-right: 10px
+            svg
+              margin-right: 10px
+              width: 30px
+              height: 30px
 
     /* .resource-links */
   /* .what-is-dsa */

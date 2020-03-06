@@ -36,22 +36,24 @@ about_list:
   - list_item: Run algorithms on all or parts of images.
 
 # Resource links
+about_resources_title: Resources
+
 about_resources:
   - name: Gitter
     link: https://gitter.im/DigitalSlideArchive/HistomicsTK
-    icon: assets/img/resource-icons/icon_gitter.png
+    icon: fab fa-gitter #assets/img/resource-icons/icon_gitter.png
 
   - name: Discourse
     link: https://discourse.girder.org/c/histomicstk
-    icon: assets/img/resource-icons/icon_discourse.png
+    icon: fab fa-discourse #assets/img/resource-icons/icon_discourse.png
 
-  - name: Jupyter Notebooks
+  - name: Jupyter
     link: https://digitalslidearchive.github.io/HistomicsTK/examples.html
-    icon: assets/img/resource-icons/icon_jupyternb.png
+    icon: fas fa-book #assets/img/resource-icons/icon_jupyternb.png
 
   - name: Youtube
     link: https://www.youtube.com/channel/UCJVNVQXivYPDb4goNU4tK3A
-    icon: assets/img/resource-icons/icon_youtube.png
+    icon: fab fa-youtube #assets/img/resource-icons/icon_youtube.png
 
 # Platforms Content
 # =================================
