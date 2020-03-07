@@ -1,10 +1,11 @@
-- name: About
-  link: /about
-- name: Success Stories
-  link: #
-- name: Publications
-  link: #
-- name: Demos
-  link: #
-- name: Contact
-  link: #
+ - name: About
+   link: About
+ - name: Collaborators
+   link: Collaborators
+ - name: Contact
+   link: #
+   dropdown:
+   - name: Visit Contact Page
+     link: https://www.kitware.com/contact-us/
+   - name: Send Email
+     link: mailto:kitware@kitware.com
