@@ -7,7 +7,7 @@
               <div class="hero-buttons columns  is-centered">
                 {% for button in page.hero_buttons %}
                   <div class="column is-3">
-                  <a href="{{ button.link | prepend: site.baseurl  }}" class="button hero-button is-medium">{{ button.link_text }}</a>
+                  <a href="{{ button.link }}" class="button hero-button is-medium">{{ button.link_text }}</a>
                   </div>
                   {% endfor %}
               </div>
