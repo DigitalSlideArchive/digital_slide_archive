@@ -2,6 +2,7 @@
 
 # Optionally set
 #
+# $GIRDER_SOURCE_FOLDER to the girder source repository
 # $HISTOMICS_SOURCE_FOLDER to the HistomicsUI source repository
 # $SLICER_CLI_WEB to the slicer_cli_web source repository
 # $HISTOMICS_TESTDATA_FOLDER to a location to store data files
@@ -21,6 +22,11 @@ declare -a OPTS
 HISTOMICS_TESTDATA_FOLDER=${HISTOMICS_TESTDATA_FOLDER:-~/.histomics_data}
 if [ -d "$HISTOMICS_TESTDATA_FOLDER" ]; then
   OPTS+=(--mount "$HISTOMICS_TESTDATA_FOLDER:/data/")
+fi
+
+GIRDER_SOURCE_FOLDER="${GIRDER_SOURCE_FOLDER:-${DIR}/../../girder}"
+if [ -d "$GIRDER_SOURCE_FOLDER" ]; then
+  OPTS+=(--mount "$GIRDER_SOURCE_FOLDER:/opt/girder/")
 fi
 
 HISTOMICS_SOURCE_FOLDER="${HISTOMICS_SOURCE_FOLDER:-${DIR}/../../HistomicsUI}"
