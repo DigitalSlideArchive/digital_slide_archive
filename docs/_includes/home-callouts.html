@@ -1,0 +1,15 @@
+{% for callout in page.callouts %}
+<div class="column {% cycle 'primary', 'gray', 'secondary' %}">
+  <div class="content">
+    <div class="callout-text">
+      <h2>{{ callout.heading }}</h2>
+      <a class="button is-medium {% cycle 'is-primary', 'is-gray', 'is-secondary' %} is-outlined is-inverted"> <!-- href="{{ callout.link }}" -->
+        {{ callout.link_text }}
+      </a>
+    </div>
+    <div class="callout-image">
+      <img src="{{ callout.image }}">
+    </div>
+  </div>
+</div>
+{% endfor %}

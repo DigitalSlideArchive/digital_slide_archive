@@ -1,0 +1,35 @@
+{% for platform in page.platforms %}
+<div class="column">
+  <div class="content">
+    <div class="platform-description">
+      <h2>{{ platform.title }}</h2>
+      <p>{{ platform.description }}</p>
+      <div class="platform-links">
+        {% capture thecycle %}{% cycle 'primary', 'secondary' %}{% endcapture %}
+        <a href="{{ platform.docs_url }}" class="button {%if thecycle == 'primary' %}is-primary{% else %}is-secondary{% endif%} is-medium platform-docs">Documentation</a>
+        <a href="{{ platform.github_url }}" class="button {%if thecycle == 'primary' %}is-primary{% else %}is-secondary{% endif%} is-outlined is-medium platform-docs">
+          <span class="icon is-medium">
+            <i class="fab fa-github"></i>
+          </span>
+          <span>View on GitHub</span>
+        </a>
+      </div>
+    </div>
+    <div class="platform-image">
+      <img src="{{ platform.screenshot }}" alt="">
+    </div>
+    <div class="platform-features">
+      <div class="triangle"></div>
+      {% for feature in platform.features %}
+      <div class="feature">
+        <img src="{{ feature.icon }}" class="feature-icon">
+        <div class="feature-text">
+          <h4>{{ feature.name }}</h4>
+          <p>{{ feature.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}

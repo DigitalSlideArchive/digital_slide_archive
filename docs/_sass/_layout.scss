@@ -1,0 +1,20 @@
+div.highlight {
+    margin-bottom: 1rem;
+}
+
+@include desktop {
+    .navbar-item {
+        &.is-hoverable:hover {
+            .navbar-dropdown {
+                display: block;
+            }
+        }
+        padding: 0 1.5rem;
+    }
+}
+
+.contents {
+    box-shadow: $box-shadow;
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+}

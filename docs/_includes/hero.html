@@ -1,0 +1,17 @@
+<section class="hero {% if page.hero_height %} {{ page.hero_height }} {% else %} is-medium {% endif %} {% if page.hero_image %}has-hero-image{% endif %} is-bold is-primary" {% if page.hero_image %} style="background: url('{{ page.hero_image }}') no-repeat center center; background-size: cover;" {% endif %}>
+    <div class="hero-body">
+        <div class="container">
+            <p class="title is-2">{{ page.title }}</p>
+            <p class="subtitle is-3">{{ page.subtitle }}</p>
+            {% if page.hero_buttons %}
+              <div class="hero-buttons columns  is-centered">
+                {% for button in page.hero_buttons %}
+                  <div class="column is-3">
+                  <a href="{{ button.link | prepend: site.baseurl  }}" class="button hero-button is-medium">{{ button.link_text }}</a>
+                  </div>
+                  {% endfor %}
+              </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
