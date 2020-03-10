@@ -13,7 +13,9 @@
   when: docker is defined
 
 - name: Rebuild girder if the static_public_path is not the default.
-  shell: "if $(grep static_public_path /home/{{ girder_exec_user }}/.girder/girder.cfg | grep -v '\"/static\"'); then rebuild_and_restart_girder.sh; fi"
+  shell: |
+    export PATH="{{ girder_virtualenv }}/bin:$PATH"
+    if grep static_public_path /home/{{ girder_exec_user }}/.girder/girder.cfg | grep -v '"/static"'; then rebuild_and_restart_girder.sh; fi
   args:
     executable: /bin/bash
 
