@@ -11,6 +11,11 @@ The Digital Slide Archive is a system for working with large microscopy images.
 
 - Run algorithms on all or parts of images.
 
+Website
+-------
+
+See `https://digitalslidearchive.github.io/digital_slide_archive/` for information about the system.
+
 Demo Instance
 -------------
 
