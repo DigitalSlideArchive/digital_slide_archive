@@ -145,6 +145,8 @@ CMD sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
     sudo -E su ubuntu -c \
     'pushd /opt/slicer_cli_web; /home/ubuntu/.virtualenvs/girder/bin/pip install -e .[girder]; popd' ; \
     sudo -E su ubuntu -c \
+    'pushd /opt/girder; /home/ubuntu/.virtualenvs/girder/bin/pip install -e .[mount]; popd' ; \
+    sudo -E su ubuntu -c \
     'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder mount /opt/digital_slide_archive/mount >/opt/logs/mount.log 2>&1' ; \
     sudo -E su ubuntu -c \
     'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder serve --dev >/opt/logs/girder.log 2>&1'
