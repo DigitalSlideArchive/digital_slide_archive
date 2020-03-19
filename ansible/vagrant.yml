@@ -37,7 +37,7 @@
   post_tasks:
     - name: Ensure we can rebuild the girder web client
       shell: >-
-        bash -lc "girder build --dev >/tmp/test_build.txt 2>&1"
+        bash -lc "girder build >/tmp/test_build.txt 2>&1"
       become: true
       become_user: "{{ girder_exec_user }}"
 

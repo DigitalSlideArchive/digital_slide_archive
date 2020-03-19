@@ -119,7 +119,7 @@ jobs:
       - startcontainers
       - run:
           name: Ensure that we can rebuild girder
-          command: docker exec dsa_girder bash -lc 'girder build --dev'
+          command: docker exec dsa_girder bash -lc 'girder build'
       - run:
           name: Check number of files owned by ubuntu user in girder container
           command: |

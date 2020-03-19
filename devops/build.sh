@@ -6,4 +6,5 @@
 
 var="$(echo $@)"
 
+# We build in dev mode to get source maps on the client
 docker exec -it dsa_girder bash -lc "girder build --dev $var"
