@@ -1,5 +1,5 @@
 #!/bin/bash
 
-var="$(echo $@)"
+var="$@"
 
-docker exec -it dsa_girder bash -lc "tox $var"
+docker exec -it dsa_girder bash -lc "tox \"$var\""
