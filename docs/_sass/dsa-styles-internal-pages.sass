@@ -1,0 +1,92 @@
+
+/* START internal page hero
+ * ==================================== */
+
+ /* ====================================
+ * END internal page hero */
+
+
+/* START internal pages hero
+ * ==================================== */
+.internal-page
+  .hero
+    height: calc(35vh - #{$header-height})
+
+    &.has-hero-image
+      position: relative
+
+    .hero-body
+      align-items: center
+      display: flex
+      height: 100%
+      position: absolute
+      width: 100%
+      z-index: 2
+
+      .container
+        max-width: 1000px
+        text-align: center
+
+        .title
+          font-size: 60px
+          font-weight: 300
+          padding-bottom: 30px
+
+        .subtitle
+          font-size: 22px
+          padding: 0 90px
+
+    &::before
+      background: #000
+      content: ''
+      height: 100%
+      left: 0
+      opacity: .8
+      position: absolute
+      width: 100%
+      z-index: 1
+    /* &.has-hero-image */
+  /* .internal page hero */
+/* .internal page */
+
+/* ====================================
+ * END internal pages hero */
+
+/* START papers and publications page
+ * ==================================== */
+.publications
+
+  .citation
+    align-items: flex-start
+    border-bottom: 1px solid lighten($gray, 20%)
+    display: flex
+    padding: 30px 0
+
+    &:last-child
+      border-bottom: 0
+      margin-bottom: 5%
+
+    .citation-text
+      min-height: 60px
+      h4
+        margin-bottom: 10px
+        color: $primary
+        font-size: 22px
+      p
+        margin-bottom: 10px
+        color: $grey-darker
+
+      .citation-numbers
+        color: #7a7a7a
+
+    .citation-link-icon
+      margin-top: 0.7%
+      margin-left: 20px
+      font-size: 0.7em
+      color: $primary
+
+  /* .citation */
+/* .publications */
+
+ /* ====================================
+ * END papers and publications page */
