@@ -3,7 +3,7 @@ LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --yes --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade && \
     apt-get install -y --no-install-recommends \
@@ -56,9 +56,7 @@ ENV LANG en_US.UTF-8
 WORKDIR /home/ubuntu
 RUN git clone --depth=1 --no-checkout https://github.com/DigitalSlideArchive/digital_slide_archive && \
     cd digital_slide_archive && \
-    # remove mkdir and enable checkout once this branch is merged \
-    mkdir ansible && \
-    # git checkout master -- ansible/ && \
+    mkdir -p ansible && \
     rm -rf .git
 WORKDIR /home/ubuntu/digital_slide_archive
 ENV GIRDER_EXEC_USER ubuntu
@@ -77,14 +75,17 @@ RUN sudo apt-get update && \
     # Convenience when updating from previous versions \
     mongodb-clients \
     # Python 3.7 \
-    python3.7-dev python3.7-distutils \
+    python3.7-dev python3.7-venv \
+    # Python 3.8 \
+    python3.8-dev python3.8-venv \
     # For full testing, add python 3.5 \
-    python3.5 \
+    python3.5 python3.5-venv \
     && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/*
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3.5 get-pip.py && \
     python3.7 get-pip.py && \
+    python3.8 get-pip.py && \
     rm get-pip.py && \
     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+

@@ -175,6 +175,16 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: docker exec dsa_girder bash -lc 'tox -e py37'
+  test-py38:
+    working_directory: ~/project
+    machine: true
+    steps:
+      - checkout
+      - usedockers
+      - startcontainers
+      - run:
+          name: Ensure that we can run tests
+          command: docker exec dsa_girder bash -lc 'tox -e py38'
   test-lint:
     working_directory: ~/project
     machine: true
@@ -324,6 +334,15 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - test-py38:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
       - test-lint:
           requires:
             - build
@@ -347,6 +366,7 @@ workflows:
             - test-lint
             - test-py36
             - test-py37
+            - test-py38
           filters:
             tags:
               only: /^v.*/
@@ -395,6 +415,9 @@ workflows:
       - test-py37:
           requires:
             - build
+      - test-py38:
+          requires:
+            - build
       - test-lint:
           requires:
             - build
@@ -406,3 +429,4 @@ workflows:
             - test-lint
             - test-py36
             - test-py37
+            - test-py38
