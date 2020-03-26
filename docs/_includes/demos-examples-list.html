@@ -1,0 +1,14 @@
+<div class="demos columns">
+  {% for demo in page.demos %}
+    <div class="column is-6">
+      <h4 class="has-text-right">
+        {{ demo.title }}
+      </h4>
+    </div>
+    <div>
+      <a href="{{ demo.link }}" class="button demo-buttons is-medium">
+        {{ demo.link_text }}
+      </a>
+    </div>
+  {% endfor %}
+</div>
