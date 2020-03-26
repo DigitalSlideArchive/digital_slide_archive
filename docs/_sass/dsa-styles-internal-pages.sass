@@ -47,6 +47,11 @@
       z-index: 1
     /* &.has-hero-image */
   /* .internal page hero */
+
+  .section
+    background: #fff
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0)
+
 /* .internal page */
 
 /* ====================================
@@ -68,11 +73,11 @@
     .citation-text
       min-height: 60px
       h4
-        margin-bottom: 10px
+        margin-bottom: 7px
         color: $primary
-        font-size: 22px
+        font-size: 24px
       p
-        margin-bottom: 10px
+        margin-bottom: 7px
         color: $grey-darker
 
       .citation-numbers
@@ -99,7 +104,7 @@
   h4
     margin-bottom: 10px
     color: #363636
-    font-size: 22px
+    font-size: 24px
 
   .demo-buttons
     background-color: $secondary
@@ -116,3 +121,110 @@
 
  /* ====================================
  * END demos and examples page */
+
+/* START success stories list
+ * ==================================== */
+.success-stories
+  .story
+    align-items: flex-start
+    display: flex
+    padding: 0px 0
+    margin-bottom: 1%
+    &:nth-of-type(odd)
+      background: lighten($primary, 48%)
+    &:nth-of-type(even)
+      background: lighten($secondary, 50%)
+    &:hover
+      &:nth-of-type(odd)
+        background: lighten($primary, 45%)
+      &:nth-of-type(even)
+        background: lighten($secondary, 47%)
+
+    .story-text
+      min-height: 60px
+      margin-top: 2%
+      padding-right: 10%
+      h4
+        margin-bottom: 10px
+        color: $primary
+        font-size: 26px
+      p
+        margin-bottom: 30px
+        color: $grey-darker
+        font-size: 20px
+
+    .read-story-button
+      background-color: $primary
+      border-color: transparent
+      color: #fff
+      transition: background .15s ease-in-out, color .15s ease-in-out
+
+      &:hover
+        background: #fff
+        color: #363636
+        border-color: $secondary
+
+    .story-image
+      padding: 20px 0
+      img
+        border: 1px solid lighten($gray, 10%)
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .2)
+
+/* ====================================
+ * END success stories list */
+
+ /* START success stories page
+ * ==================================== */
+.success-story-page
+  padding-bottom: 170px
+
+  .story
+    align-items: flex-start
+    display: flex
+    padding-top: 70px
+
+    .story-text
+      min-height: 60px
+      padding-top: 20px
+      padding-right: 50px
+      h4
+        margin-bottom: 10px
+        color: $secondary
+        font-size: 36px
+        padding-bottom: 40px
+      p
+        margin-bottom: 30px
+        color: $grey-darker
+        font-size: 20px
+        line-height: 1.7
+
+    .link-button
+      margin-top: 20px
+      background-color: $secondary
+      border-color: transparent
+      color: #fff
+      transition: background .15s ease-in-out, color .15s ease-in-out
+
+      &:hover
+        background: #fff
+        color: #363636
+        border-color: $secondary
+
+    .story-image
+      padding-top: 130px
+
+  .references
+    align-items: flex-start
+    display: flex
+    padding-top: 70px
+
+    h4
+      margin-bottom: 10px
+      color: $secondary
+      font-size: 32px
+
+    p
+      font-size: 22px
+
+/* ====================================
+ * END success stories list */
