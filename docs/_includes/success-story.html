@@ -1,0 +1,27 @@
+<div class="columns">
+    <div class="success-story-page">
+      {% for story in page.stories %}
+        <div class="story">
+          <div class="story-text  column is-6">
+            <h4>{{ story.title }}</h4>
+            <p>{{ story.description-full }}</p>
+            <a href="{{ story.resource-link }}" class="button link-button is-medium">
+              View Resources
+            </a>
+          </div>
+          <div class="story-image column is-6">
+            <img src="{{ site.baseurl }}/{{ story.image }}" alt="">
+          </div>
+        </div>
+        <div class="references">
+          <h4> References </h4>
+          <!-- {% for reference in story.references %}
+            <div class="column is-12">
+              <p>{{ reference.ref }}</p>
+            </div>
+          {% endfor %} -->
+        </div>
+      {% endfor %}
+      <div class="space"></div>
+    </div>
+</div>
