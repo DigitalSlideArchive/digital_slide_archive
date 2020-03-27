@@ -1,6 +1,5 @@
 <div class="success-story-page">
-  {% for story in page.stories %}
-    {% if story.id == 1 %}
+  {% for story in page.story %}
       <div class="story">
         <h4>{{ story.title }}</h4>
         <div class="columns is-multiline">
@@ -33,6 +32,5 @@
           </div>
         {% endfor %}
       </div>
-    {% endif %}
   {% endfor %}
 </div>
