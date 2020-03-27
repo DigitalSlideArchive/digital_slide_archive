@@ -18,7 +18,7 @@ stories:
    page-link: success-story-The-Digital-Slide-Archive-and-TCGA
    image: assets/img/success-stories/story-image-1.png
  - story-id: 2
-   title: Developing Machine-Mearning Tools Through Collaborative Annotation Studies
+   title: Developing Machine-Learning Tools Through Collaborative Annotation Studies
    description-short: "The primary determinant in machine learning algorithm performance is the availability of abundant labeled data for training ..."
    page-link: success-story-Developing-Machine-Learning-Tools-Through-Collaborative-Annotation-Studies
    image: assets/img/success-stories/story-image-2.png
