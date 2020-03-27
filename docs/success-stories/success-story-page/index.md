@@ -20,13 +20,13 @@ stories:
    resource-link: https://cancer.digitalslidearchive.org/
    image: assets/img/success-stories/story-image-1.png
    references:
-     - ref: "The Cancer Genome Atlas Research Network Comprehensive and integrated genomic characterization of adult soft tissue sarcomas, Cell, 171(4), pp. 950-965, November 2017, "
+     - text: "The Cancer Genome Atlas Research Network Comprehensive and integrated genomic characterization of adult soft tissue sarcomas, Cell, 171(4), pp. 950-965, November 2017, "
        PMID: 29100075
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=29100075
-     - ref: "DA Gutman, M Khalilia , S Lee , M Nalisnik , Z Mullen , J Beezley , D Chittajallu , D Manthey, LAD Cooper, The Digital Slide Archive: A Software Platform for Management, Integration and Analysis of Histology for Cancer Research, Cancer Research, 77(21), pp. 75-78, November 2017, "
+     - text: "DA Gutman, M Khalilia , S Lee , M Nalisnik , Z Mullen , J Beezley , D Chittajallu , D Manthey, LAD Cooper, The Digital Slide Archive: A Software Platform for Management, Integration and Analysis of Histology for Cancer Research, Cancer Research, 77(21), pp. 75-78, November 2017, "
        PMID: 29092945
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=29092945
-     - ref: "DA Gutman, J Cobb, D Somanna, Y Park, F Wang, T Kurc, JH Saltz, DJ Brat, LAD Cooper, Cancer Digital Slide Archive: an informatics resource to support integrated in silico analysis of TCGA pathology data, Journal of the American Medical Informatics Association JAMIA, 20(6), pp. 1091-98, November 2013, "
+     - text: "DA Gutman, J Cobb, D Somanna, Y Park, F Wang, T Kurc, JH Saltz, DJ Brat, LAD Cooper, Cancer Digital Slide Archive: an informatics resource to support integrated in silico analysis of TCGA pathology data, Journal of the American Medical Informatics Association JAMIA, 20(6), pp. 1091-98, November 2013, "
        PMID: 23893318
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=23893318
  - id: 2

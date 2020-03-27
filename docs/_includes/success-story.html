@@ -22,9 +22,9 @@
         <h4> References </h4>
         {% for reference in story.references %}
           <div>
-            <p>{{ reference.ref }}
-              <a href="{{ reference.ref.link }}">
-                {{ reference.ref.PMID }}
+            <p>{{ reference.text }}
+              <a href="{{ reference.link }}">
+                {{ reference.PMID }}
               </a>
           </p>
           </div>
@@ -33,3 +33,14 @@
     {% endif %}
   {% endfor %}
 </div>
+
+<script>
+  function getStoryIdFromURL() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+      vars[key] = value;
+      console.log("story-id is " + value);
+    });
+  }
+  getStoryIdFromURL();
+</script>
