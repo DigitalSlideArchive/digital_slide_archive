@@ -1,6 +1,6 @@
 <div class="success-story-page">
   {% for story in page.stories %}
-    {% if story.id == 1 %}
+    {% if story.id == 2 %}
       <div class="story">
         <h4>{{ story.title }}</h4>
         <div class="columns is-multiline">
@@ -23,6 +23,9 @@
         {% for reference in story.references %}
           <div>
             <p>{{ reference.text }}
+              <a href="{{ reference.DOI }}">{{ reference.DOI }}</a>
+              <br>
+              PMID:
               <a href="{{ reference.link }}">
                 {{ reference.PMID }}
               </a>

@@ -20,13 +20,16 @@ stories:
    resource-link: https://cancer.digitalslidearchive.org/
    image: assets/img/success-stories/story-image-1.png
    references:
-     - text: "The Cancer Genome Atlas Research Network Comprehensive and integrated genomic characterization of adult soft tissue sarcomas, Cell, 171(4), pp. 950-965, November 2017, "
+     - text: "Abeshouse, Adam, Clement Adebamowo, Sally N. Adebamowo, Rehan Akbani, Teniola Akeredolu, Adrian Ally, Matthew L. Anderson, et al. “Comprehensive and Integrated Genomic Characterization of Adult Soft Tissue Sarcomas.” Cell 171, no. 4 (November 2017): 950–965.e28. "
+       DOI: https://doi.org/10.1016/j.cell.2017.10.014
        PMID: 29100075
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=29100075
-     - text: "DA Gutman, M Khalilia , S Lee , M Nalisnik , Z Mullen , J Beezley , D Chittajallu , D Manthey, LAD Cooper, The Digital Slide Archive: A Software Platform for Management, Integration and Analysis of Histology for Cancer Research, Cancer Research, 77(21), pp. 75-78, November 2017, "
+     - text: "Gutman, David A., Mohammed Khalilia, Sanghoon Lee, Michael Nalisnik, Zach Mullen, Jonathan Beezley, Deepak R. Chittajallu, David Manthey, and Lee A.D. Cooper. “The Digital Slide Archive: A Software Platform for Management, Integration, and Analysis of Histology for Cancer Research.” Cancer Research 77, no. 21 (October 31, 2017): e75–78. "
+       DOI: https://doi.org/10.1158/0008-5472.can-17-0629
        PMID: 29092945
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=29092945
-     - text: "DA Gutman, J Cobb, D Somanna, Y Park, F Wang, T Kurc, JH Saltz, DJ Brat, LAD Cooper, Cancer Digital Slide Archive: an informatics resource to support integrated in silico analysis of TCGA pathology data, Journal of the American Medical Informatics Association JAMIA, 20(6), pp. 1091-98, November 2013, "
+     - text: "Gutman, David A, Jake Cobb, Dhananjaya Somanna, Yuna Park, Fusheng Wang, Tahsin Kurc, Joel H Saltz, Daniel J Brat, Lee A D Cooper, and Jun Kong. “Cancer Digital Slide Archive: An Informatics Resource to Support Integrated in Silico Analysis of TCGA Pathology Data.” Journal of the American Medical Informatics Association 20, no. 6 (November 2013): 1091–98. "
+       DOI: https://doi.org/10.1136/amiajnl-2012-001469
        PMID: 23893318
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=23893318
  - id: 2
@@ -39,13 +42,16 @@ stories:
    resource-link: http://demo.kitware.com/histomicstk/
    image: assets/img/success-stories/story-image-2.png
    references:
-     - ref: "R Chandradevan, AA Aljudi, BR Drumheller, N Kunananthaseelan, M Amgad, DA Gutman, LAD Cooper, DL Jaye, Machine-based detection and classification for bone marrow aspirate differential counts: initial development focusing on nonneoplastic cells, Laboratory Investigation, September 2019, "
+     - text: "Chandradevan, Ramraj, Ahmed A. Aljudi, Bradley R. Drumheller, Nilakshan Kunananthaseelan, Mohamed Amgad, David A. Gutman, Lee A. D. Cooper, and David L. Jaye. “Machine-Based Detection and Classification for Bone Marrow Aspirate Differential Counts: Initial Development Focusing on Nonneoplastic Cells.” Laboratory Investigation 100, no. 1 (September 30, 2019): 98–109. "
+       DOI: https://doi.org/10.1038/s41374-019-0325-7
        PMID: 31570774
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=31570774
-     - ref: "M Amgad, H Elfandy, HH Khallaf, LA Atteya, MAT Elsebaie, LSA Elnasr, RA Sakr, HSE Salem, AF Ismail, AM Saad, J Ahmed, MAT Elsebaie, M Rahman, IA Ruhban, NM Elgazar, Y Alagha, MH Osman, AM Alhusseiny, MM Khalaf, AF Younes, A Abdulkarim, DM Younes, AM Gadallah, AM Elkashash, SY Fala, BM Zaki, J Beezley, DR Chittajallu, D Manthey, DA Gutman, LAD Cooper, Structured Crowdsourcing Enables Convolutional Segmentation of Histology Images, Oxford Bioinformatics, February 2019, "
+     - text: "Amgad, Mohamed, Habiba Elfandy, Hagar Hussein, Lamees A Atteya, Mai A T Elsebaie, Lamia S Abo Elnasr, Rokia A Sakr, et al. “Structured Crowdsourcing Enables Convolutional Segmentation of Histology Images.” Edited by Robert Murphy. Bioinformatics 35, no. 18 (February 6, 2019): 3461–67. "
+       DOI: https://doi.org/10.1093/bioinformatics/btz083
        PMID: 30726865
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=30726865
-     - ref: "P Mobadersany, S Yousefi, M Amgad, DA Gutman, JS Barnholtz-Sloan, JE Velazquez-Vega, DJ Brat, LAD Cooper, Predicting cancer outcomes from histology and genomics using convolutional networks, PNAS, 115(13), pp. 2970-2979, March 2018, "
+     - text: "Mobadersany, Pooya, Safoora Yousefi, Mohamed Amgad, David A. Gutman, Jill S. Barnholtz-Sloan, José E. Velázquez Vega, Daniel J. Brat, and Lee A. D. Cooper. “Predicting Cancer Outcomes from Histology and Genomics Using Convolutional Networks.” Proceedings of the National Academy of Sciences 115, no. 13 (March 12, 2018): E2970–79. "
+       DOI: https://doi.org/10.1073/pnas.1717139115
        PMID: 29531073
        link: https://www.ncbi.nlm.nih.gov/pubmed/?term=29531073
 ---
