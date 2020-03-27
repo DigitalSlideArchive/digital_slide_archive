@@ -1,6 +1,6 @@
 <div class="success-story-page">
   {% for story in page.stories %}
-    {% if story.id == 2 %}
+    {% if story.id == 1 %}
       <div class="story">
         <h4>{{ story.title }}</h4>
         <div class="columns is-multiline">
@@ -36,14 +36,3 @@
     {% endif %}
   {% endfor %}
 </div>
-
-<script>
-  function getStoryIdFromURL() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-      vars[key] = value;
-      console.log("story-id is " + value);
-    });
-  }
-  getStoryIdFromURL();
-</script>
