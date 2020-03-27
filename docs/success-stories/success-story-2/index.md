@@ -1,7 +1,7 @@
 ---
 layout: success-story-page
 show_sidebar: false
-permalink: /success-stories/success-story-2/
+permalink: /success-stories/success-story-Developing-Machine-Learning-Tools-Through-Collaborative-Annotation-Studies/
 
 # Banner Content
 # =================================
@@ -12,7 +12,8 @@ hero_image: /assets/img/home-callouts/success_stories.jpg
 # Story
 # =================================
 story:
- - title: Developing machine-learning tools through collaborative annotation studies
+ - title: Developing Machine-Mearning Tools Through Collaborative Annotation Studies
+   link-id: Developing-Machine-Learning-Tools-Through-Collaborative-Annotation-Studies
    description-para-1: "The primary determinant in machine learning algorithm performance is the availability of abundant labeled data for training. Collecting data for applications like tissue region segmentation and cell classification is challenging given the limited availability of experts and tools needed to collect and review annotations.<br><br>
    Our web-based platform enables users to collaborate all over the world, and has been used to generate over 120,000 human markups of histopathology in multiple annotation studies."
    description-para-2: "Our API and user roles allow us to create collaborative annotation study teams that engage users with different expertise levels, ranging from pathologists to medical students, to collaboratively generate large and extensively reviewed annotation datasets. In a study with over 25 participants from over 5 countries, we generated over 25,000 annotated tissue regions to generate the richest public dataset of annotated breast-cancer tissues to date. The ability to programmatically monitor and manage these studies through the API is key to their success.<br><br>

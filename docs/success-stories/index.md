@@ -15,11 +15,11 @@ stories:
  - story-id: 1
    title: The Digital Slide Archive and TCGA
    description-short: "The Cancer Digital Slide Archive is a website that hosts whole-slide images of pathologic specimens associated with the TCGA studies ..."
-   page-link: success-story-1
+   page-link: success-story-The-Digital-Slide-Archive-and-TCGA
    image: assets/img/success-stories/story-image-1.png
  - story-id: 2
-   title: Developing machine-learning tools through collaborative annotation studies
+   title: Developing Machine-Mearning Tools Through Collaborative Annotation Studies
    description-short: "The primary determinant in machine learning algorithm performance is the availability of abundant labeled data for training ..."
-   page-link: success-story-2
+   page-link: success-story-Developing-Machine-Learning-Tools-Through-Collaborative-Annotation-Studies
    image: assets/img/success-stories/story-image-2.png
 ---
