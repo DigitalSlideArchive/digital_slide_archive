@@ -27,10 +27,10 @@
                             {% endfor %}
                         </div>
                       </div>
-                    {% else if item.name == "About" || item.name == "Collaborators" %}
-                        <a href=" {{ site.baseurl }}/#{{ item.link }} " class="navbar-item smooth-scroll">{{ item.name }}</a>
+                    {% elsif item.name == "About" or item.name == "Collaborators" %}
+                        <a href=" {{ site.baseurl }}/#{{ item.link }} " class="navbar-item">{{ item.name }}</a>
                     {% else %}
-                        <a href="{{ item.link }}" class="navbar-item {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
+                        <a href=" {{ item.link }} " class="navbar-item {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
                     {% endif %}
                 {% endfor %}
                 {% endif %}

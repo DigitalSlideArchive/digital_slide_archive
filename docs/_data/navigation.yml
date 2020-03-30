@@ -2,8 +2,14 @@
    link: About
  - name: Collaborators
    link: Collaborators
+ - name: Demos
+   link: /demos-examples/
+ - name: Success Stories
+   link: /success-stories/
+ - name: Publications
+   link: /papers-publications/
  - name: Contact
-   link: #
+   link:
    dropdown:
    - name: Visit Contact Page
      link: https://www.kitware.com/contact-us/
