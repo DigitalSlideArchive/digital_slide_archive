@@ -17,8 +17,7 @@ story:
    description-para-1: "The primary determinant in machine learning algorithm performance is the availability of abundant labeled data for training. Collecting data for applications like tissue region segmentation and cell classification is challenging given the limited availability of experts and tools needed to collect and review annotations.<br><br>
    Our web-based platform enables users to collaborate all over the world, and has been used to generate over 120,000 human markups of histopathology in multiple annotation studies."
    description-para-2: "Our API and user roles allow us to create collaborative annotation study teams that engage users with different expertise levels, ranging from pathologists to medical students, to collaboratively generate large and extensively reviewed annotation datasets. In a study with over 25 participants from over 5 countries, we generated over 25,000 annotated tissue regions to generate the richest public dataset of annotated breast-cancer tissues to date. The ability to programmatically monitor and manage these studies through the API is key to their success.<br><br>
-   Collecting data on this scale allows us to generate highly accurate machine-learning models for tasks like tissue segmentation and cell classification and detection, and to understand the limits of concordance among human experts.<br><br>
-   Link to Kitware demo site	- http://demo.kitware.com/histomicstk/"
+   Collecting data on this scale allows us to generate highly accurate machine-learning models for tasks like tissue segmentation and cell classification and detection, and to understand the limits of concordance among human experts.<br><br>"
    resource-link: http://demo.kitware.com/histomicstk/
    image: assets/img/success-stories/story-image-2.png
    references:
