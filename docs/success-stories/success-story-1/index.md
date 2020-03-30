@@ -15,7 +15,7 @@ story:
  - title: The Digital Slide Archive and TCGA
    link-id: The-Digital-Slide-Archive-and-TCGA
    description-para-1: "The Cancer Digital Slide Archive is a website that hosts whole-slide images of pathologic specimens associated with the TCGA studies. At over 10,000 images and 20 Terabytes, the CDSA has enabled a number of the TCGA Analysis Working Group Studies [sources], as well as other investigator-driven studies that utilize the digital pathology images [sources]<br><br>
-   The Digital Slide Archive project builds on the success of our experience with the Cancer Digital Slide Archive, creating a software platform that allows users to create their own digital pathology servers to support data management and hosting for their own investigations.  Comments about who else is using this."
+   The Digital Slide Archive project builds on the success of our experience with the Cancer Digital Slide Archive, creating a software platform that allows users to create their own digital pathology servers to support data management and hosting for their own investigations."
    description-para-2: ""
    resource-link: https://cancer.digitalslidearchive.org/
    image: assets/img/success-stories/story-image-1.png
