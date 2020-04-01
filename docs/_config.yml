@@ -26,6 +26,8 @@ url: "https://myawesomeurl.com/"
 permalink: pretty
 favicon: /favicon.ico
 
+logo_image: /assets/img/dsa_logo.svg
+
 # Build settings
 #theme: bulma-clean-theme
 remote_theme: chrisrhymes/bulma-clean-theme

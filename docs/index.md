@@ -1,11 +1,6 @@
 ---
 layout: home
 
-# Header Content
-# =================================
-header:
-    - logo_image: assets/img/dsa_logo.svg
-
 # Banner Content
 # =================================
 title: Harness the full potential of your digital pathology data
