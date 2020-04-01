@@ -26,6 +26,8 @@ url: "https://myawesomeurl.com/"
 permalink: pretty
 favicon: /favicon.ico
 
+logo_image: /assets/img/dsa_logo.svg
+
 # Build settings
 #theme: bulma-clean-theme
 remote_theme: chrisrhymes/bulma-clean-theme
@@ -36,6 +38,10 @@ plugins:
   - kramdown
   - rouge
   - github-pages
+
+collections:
+  success_stories:
+    output: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -69,7 +75,7 @@ defaults:
       path: ""
       type: "pages"
     values:
-      show_sidebar: true
+      show_sidebar: false
 
 markdown: kramdown
 highlighter: rouge

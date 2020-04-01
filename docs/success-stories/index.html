@@ -1,0 +1,25 @@
+---
+layout: default
+title: Success Stories
+subtitle: Read about some of the amazing outcomes that are being realized by our platform.
+hero_image: /assets/img/home-callouts/success_stories.jpg
+---
+
+<div class="success-stories content">
+  {% for story in site.success_stories %}
+  <div class="columns is-8 is-variable is-vcentered story">
+    {% if story.hero_image %}
+    <div class="story-image">
+      <img src="{{ story.hero_image }}">
+    </div>
+    {% endif %}
+    <div class="column is-three-quarters story-content">
+      <h2>{{ story.title }}</h2>
+      {% if story.description %}
+      <p>{{ story.description }}</p>
+      {% endif %}
+      <a href="{{ story.url }}" class="button is-primary is-medium">Read Full Story</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>

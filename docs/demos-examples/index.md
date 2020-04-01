@@ -1,6 +1,5 @@
 ---
 layout: demos-examples
-show_sidebar: false
 permalink: /demos-examples/
 
 # Banner Content

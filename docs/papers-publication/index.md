@@ -1,6 +1,5 @@
 ---
 layout: papers-publications
-show_sidebar: false
 permalink: /papers-publications/
 
 # Banner Content

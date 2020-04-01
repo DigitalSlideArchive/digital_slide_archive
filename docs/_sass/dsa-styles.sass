@@ -65,6 +65,15 @@ $gray-button: darken($gray, 30%)
           background-color: #fff
           color: $gray-button
 
+.nested
+  margin: 0 30px 30px
+
+  &.is-left
+    float: left
+
+  &.is-right
+    float: right
+
 /* ====================================
  * END Misc. */
 
@@ -170,36 +179,28 @@ $gray-button: darken($gray, 30%)
 /* START content area
  * ==================================== */
 
-.section
-  &:nth-of-type(even)
-    background: #f7f7f7
-    box-shadow: 0 5px 20px rgba(0, 0, 0, .2)
-
 .home
+  .section
+    &:nth-of-type(even)
+      background: #f7f7f7
+      box-shadow: 0 5px 20px rgba(0, 0, 0, .2)
+
   .what-is-dsa
     color: #7a7a7a
     font-weight: 400
 
-    h2
-      margin-top: 5%
-      margin-bottom: 2%
-
     p
       font-size: 18px
-      margin-bottom: 1%
       line-height: 1.8
 
     li
       font-size: 18px
-      margin-bottom: 1%
+      margin-bottom: 5px
 
     ul
-      margin-bottom: 4%
+      padding: 10px 0
 
     .resource-links
-      h2
-        margin-top: 50px
-        margin-bottom: 10%
       ul
         list-style: none
         margin: 0
@@ -207,20 +208,21 @@ $gray-button: darken($gray, 30%)
 
         li
           margin: 5px
-          padding: 0
           margin-bottom: 20px
+          padding: 0
 
           a
             align-items: flex-end
             color: darken($gray, 15%)
             display: flex
+
             &:hover
               color: darken($primary, 3%)
 
             svg
+              height: 30px
               margin-right: 10px
               width: 30px
-              height: 30px
 
     /* .resource-links */
   /* .what-is-dsa */
@@ -238,7 +240,8 @@ $gray-button: darken($gray, 30%)
       .platform-description
         h2
           font-size: 36px
-          margin-top: 10%
+          margin-top: 30px
+
         p
           min-height: 80px
 
@@ -349,9 +352,6 @@ $gray-button: darken($gray, 30%)
   /* .callouts */
 
   .collaborators
-    margin-top: 1%
-    margin-bottom: 2%
-
     .org-header
       &::after
         background: $secondary

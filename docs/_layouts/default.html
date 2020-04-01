@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html>
   {% include head.html %}
-  <body class="internal-page">
+  <body class="internal-page{% if page.collection == 'success_stories' %} success-story{% endif %}{% if page.url == '/success-stories/' %} success-stories{% endif %}">
     {% include header.html %}
     <div class="site-wrapper">
       {% unless page.hide_hero %}
