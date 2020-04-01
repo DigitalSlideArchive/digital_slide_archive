@@ -110,18 +110,40 @@
 /* START success stories list */
 
 .success-stories
-  .story
-    border-bottom: 1px solid lighten($gray, 20%)
-    padding: 20px 0
+  .site-wrapper
+    & > .section
+      padding: 0
 
-    &:last-of-type
-      border-bottom: 0
+      & > .container
+        max-width: 100%
 
-    .story-image
-      padding: 20px 0
+        & > .columns
+          margin: 0 !important
 
-      img
-        box-shadow: 0 5px 20px rgba(0, 0, 0, .2), 0 2px 5px rgba(0, 0, 0, .2)
+          & > .column
+            padding: 0
+
+  .stories
+    .story
+      background: lighten($primary, 46%)
+      border-bottom: 3px solid #fff
+      margin: 0 !important
+      padding: 25px 25px 40px
+
+      &:nth-child(even)
+        background: lighten($secondary, 47%)
+
+      .container
+        margin: 0 auto
+
+      &:last-of-type
+        border-bottom: 0
+
+      .story-image
+        padding: 20px 0
+
+        img
+          box-shadow: 0 5px 20px rgba(0, 0, 0, .2), 0 2px 5px rgba(0, 0, 0, .2)
 
 /* START success stories page */
 
