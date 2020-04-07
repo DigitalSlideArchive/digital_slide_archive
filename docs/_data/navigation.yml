@@ -9,7 +9,6 @@
  - name: Publications
    link: /papers-publications/
  - name: Contact
-   link:
    dropdown:
    - name: Visit Contact Page
      link: https://www.kitware.com/contact-us/
