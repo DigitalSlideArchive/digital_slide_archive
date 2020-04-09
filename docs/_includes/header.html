@@ -28,7 +28,7 @@
                         </div>
                       </div>
                     {% elsif item.name == "About" or item.name == "Collaborators" %}
-                        <a href=" {{ site.baseurl | relative_url }}/#{{ item.link }} " class="navbar-item">{{ item.name }}</a>
+                        <a href=" {{ '/' | relative_url }}/#{{ item.link }} " class="navbar-item">{{ item.name }}</a>
                     {% else %}
                         <a href=" {{ item.link }} " class="navbar-item {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
                     {% endif %}
