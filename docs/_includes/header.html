@@ -23,14 +23,12 @@
                         <a class="navbar-link {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
                         <div class="navbar-dropdown">
                             {% for subitem in item.dropdown %}
-                            <a href="{{ subitem.link }}" class="navbar-item {% if subitem.link == page.url %}is-active{% endif %}">{{ subitem.name }}</a>
+                            <a href="{{ subitem.link | prepend: site.baseurl }}" class="navbar-item {% if subitem.link == page.url %}is-active{% endif %}">{{ subitem.name }}</a>
                             {% endfor %}
                         </div>
                       </div>
-                    {% elsif item.name == "About" or item.name == "Collaborators" %}
-                        <a href=" {{ '/' | relative_url }}/#{{ item.link }} " class="navbar-item">{{ item.name }}</a>
                     {% else %}
-                        <a href=" {{ item.link }} " class="navbar-item {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
+                        <a href="{{ item.link | prepend: site.baseurl }}" class="navbar-item {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
                     {% endif %}
                 {% endfor %}
                 {% endif %}
