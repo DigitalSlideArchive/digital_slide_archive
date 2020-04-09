@@ -1,11 +1,6 @@
 ---
 layout: home
 
-# Header Content
-# =================================
-header:
-    - logo_image: assets/img/dsa_logo.svg
-
 # Banner Content
 # =================================
 title: Harness the full potential of your digital pathology data
@@ -116,18 +111,18 @@ platforms:
 # =================================
 callouts:
   - heading: Demos & Examples
-    link: #
-    link_text: Coming Soon #View Demos
+    link: demos-examples
+    link_text: View Demos
     image: assets/img/home-callouts/demos_examples.jpg
 
   - heading: Success Stories
-    link: #
-    link_text: Coming Soon #View Stories
+    link: success-stories
+    link_text: View Stories
     image: assets/img/home-callouts/success_stories.jpg
 
-  - heading: Papers/Publications
-    link: #
-    link_text: Coming Soon #Read Papers
+  - heading: Papers & Publications
+    link: papers-publications
+    link_text: Read Papers
     image: assets/img/home-callouts/papers_publications.jpg
 
 # Collaborators Section

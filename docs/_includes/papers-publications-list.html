@@ -1,0 +1,24 @@
+<div class="columns">
+    <div class="publications">
+        {% for publication in page.publications %}
+        <div class="citation">
+          <div class="citation-text column is-11">
+            <h4>{{ publication.title }}</h4>
+            <p>{{ publication.full-citation }}
+            <a href="{{ publication.DOI_link }}">
+              {{ publication.DOI_link }}
+            </a></p>
+            <div class="citation-numbers">
+              PMID: {{ publication.PMID }} <br>
+              DOI: {{ publication.DOI }}
+            </div>
+          </div>
+          <div class="citation-link-icon column is-1">
+            <a href="{{ publication.link }}">
+              <i class="fas fa-external-link-alt fa-2x"></i>
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,23 @@
+{% for demo in page.demos %}
+  <div class="demos columns">
+    <div class="column is-8">
+      <h4>
+        {{ demo.title }}
+      </h4>
+      <p>
+        {{ demo.description }}
+        <i class="far fa-eye icon-border"></i>
+        {{ demo.description2 }}
+      </p>
+      <div>
+        <a href="{{ demo.link }}" class="button demo-buttons is-medium">
+          {{ demo.link_text }}
+        </a>
+      </div>
+    </div>
+    <div class="column is-4">
+      <img src="{{ demo.image }}" class="feature-icon">
+    </div>
+  </div>
+{% endfor %}
+
