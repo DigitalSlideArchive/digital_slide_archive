@@ -25,6 +25,7 @@ description: >
 url: "https://myawesomeurl.com/"
 permalink: pretty
 favicon: /favicon.ico
+baseurl: "/digital_slide_archive/"
 
 logo_image: /assets/img/dsa_logo.svg
 
