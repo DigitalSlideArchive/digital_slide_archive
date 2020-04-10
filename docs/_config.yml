@@ -27,7 +27,7 @@ permalink: pretty
 favicon: /favicon.ico
 baseurl: "/digital_slide_archive/"
 
-logo_image: /assets/img/dsa_logo.svg
+logo_image: assets/img/dsa_logo.svg
 
 # Build settings
 #theme: bulma-clean-theme

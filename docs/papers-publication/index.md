@@ -6,7 +6,7 @@ permalink: /papers-publications/
 # =================================
 title: Papers and Publications
 subtitle: We have been involved in these and related research areas for several years
-hero_image: /assets/img/home-callouts/papers_publications.jpg
+hero_image: assets/img/home-callouts/papers_publications.jpg
 
 # Papers and Publications list
 # =================================
