@@ -36,19 +36,19 @@ about_resources_title: Resources
 about_resources:
   - name: Gitter
     link: https://gitter.im/DigitalSlideArchive/HistomicsTK
-    icon: fab fa-gitter #assets/img/resource-icons/icon_gitter.png
+    icon: fab fa-gitter
 
   - name: Discourse
     link: https://discourse.girder.org/c/histomicstk
-    icon: fab fa-discourse #assets/img/resource-icons/icon_discourse.png
+    icon: fab fa-discourse
 
   - name: Jupyter
     link: https://digitalslidearchive.github.io/HistomicsTK/examples.html
-    icon: fas fa-book #assets/img/resource-icons/icon_jupyternb.png
+    icon: fas fa-book
 
   - name: Youtube
     link: https://www.youtube.com/channel/UCJVNVQXivYPDb4goNU4tK3A
-    icon: fab fa-youtube #assets/img/resource-icons/icon_youtube.png
+    icon: fab fa-youtube
 
 # Platforms Content
 # =================================
