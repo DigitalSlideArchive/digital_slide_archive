@@ -16,8 +16,7 @@
       </div>
     </div>
     <div class="column is-4">
-      <img src="{{ demo.image }}" class="feature-icon">
+      <img src="{{ demo.image | prepend: site.baseurl }}" class="feature-icon">
     </div>
   </div>
 {% endfor %}
-

@@ -2,12 +2,12 @@
 layout: page
 title:  "The Digital Slide Archive and TCGA"
 description: "The Cancer Digital Slide Archive is a website that hosts whole-slide images of pathologic specimens associated with the TCGA studies ..."
-hero_image: /assets/img/success-stories/story-image-1.png
+hero_image: assets/img/success-stories/story-image-1.png
 ---
 
 <div class="story-content is-clearfix" markdown="1">
 
-![](/assets/img/success-stories/story-image-1.png){:width="480px" height="auto" .box.nested.is-right}
+![](/digital_slide_archive/assets/img/success-stories/story-image-1.png){:width="480px" height="auto" .box.nested.is-right}
 
 ## The Story
 

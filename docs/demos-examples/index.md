@@ -6,7 +6,7 @@ permalink: /demos-examples/
 # =================================
 title: Demos and Examples
 subtitle:
-hero_image: /assets/img/home-callouts/demos_examples.jpg
+hero_image: assets/img/home-callouts/demos_examples.jpg
 
 # Demos
 # =================================
@@ -16,5 +16,5 @@ demos:
    description2: "image icon in the Annotations panel on the right side of the screen, you'll see the results of a collaborative annotation."
    link: http://demo.kitware.com/histomicstk/histomicstk#?image=5bbdee4fe629140048d01adf&bounds=25823%2C19101%2C43534%2C29208%2C0
    link_text: View Demo
-   image: /assets/img/demo-images/DSA_Demo_Image.png
+   image: assets/img/demo-images/DSA_Demo_Image.png
 ---

@@ -2,7 +2,7 @@
 layout: default
 title: Success Stories
 subtitle: Read about some of the amazing outcomes that are being realized by our platform.
-hero_image: /assets/img/home-callouts/success_stories.jpg
+hero_image: assets/img/home-callouts/success_stories.jpg
 ---
 
 <div class="success-stories content">
@@ -10,7 +10,7 @@ hero_image: /assets/img/home-callouts/success_stories.jpg
   <div class="columns is-8 is-variable is-vcentered story">
     {% if story.hero_image %}
     <div class="story-image">
-      <img src="{{ story.hero_image }}">
+      <img src="{{ story.hero_image | prepend: site.baseurl }}">
     </div>
     {% endif %}
     <div class="column is-three-quarters story-content">
@@ -18,7 +18,7 @@ hero_image: /assets/img/home-callouts/success_stories.jpg
       {% if story.description %}
       <p>{{ story.description }}</p>
       {% endif %}
-      <a href="{{ story.url }}" class="button is-primary is-medium">Read Full Story</a>
+      <a href="{{ story.url | prepend: site.baseurl }}" class="button is-primary is-medium">Read Full Story</a>
     </div>
   </div>
   {% endfor %}

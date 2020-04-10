@@ -2,12 +2,12 @@
 layout: page
 title:  "Developing Machine-Learning Tools Through Collaborative Annotation Studies"
 description: "The primary determinant in machine learning algorithm performance is the availability of abundant labeled data for training ..."
-hero_image: /assets/img/success-stories/story-image-2.png
+hero_image: assets/img/success-stories/story-image-2.png
 ---
 
 <div class="story-content is-clearfix" markdown="1">
 
-![](/assets/img/success-stories/story-image-2.png){:width="480px" height="auto" .box.nested.is-right}
+![](/digital_slide_archive/assets/img/success-stories/story-image-2.png){:width="480px" height="auto" .box.nested.is-right}
 
 ## The Story
 
