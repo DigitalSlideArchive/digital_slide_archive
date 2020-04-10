@@ -19,7 +19,7 @@ Our API and user roles allow us to create collaborative annotation study teams t
 
 Collecting data on this scale allows us to generate highly accurate machine-learning models for tasks like tissue segmentation and cell classification and detection, and to understand the limits of concordance among human experts.
 
-[View Demo Site](http://demo.kitware.com/histomicstk/){: .button.is-primary.is-medium}
+[View Demo Site](https://demo.kitware.com/histomicstk/){: .button.is-primary.is-medium}
 
 </div>
 

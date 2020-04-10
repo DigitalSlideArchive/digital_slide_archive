@@ -10,7 +10,7 @@ hero_image: assets/img/dsa_hero.jpg
 
 hero_buttons:
   - link_text: View Demo
-    link: http://demo.kitware.com/histomicstk/histomicstk
+    link: https://demo.kitware.com/histomicstk/histomicstk
 
   - link_text: View on GitHub
     link: https://github.com/DigitalSlideArchive
@@ -47,7 +47,7 @@ about_resources:
     icon: fas fa-book #assets/img/resource-icons/icon_jupyternb.png
 
   - name: Youtube
-    link: https://www.youtube.com/channel/UCJVNVQXivYPDb4goNU4tK3A
+    link: https://www.youtube.com/channel/UCe9RJmSdEJLTWkRhSOIVAlg
     icon: fab fa-youtube #assets/img/resource-icons/icon_youtube.png
 
 # Platforms Content
