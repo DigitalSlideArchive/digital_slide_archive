@@ -1,3 +1,15 @@
 {% for diagram in page.diagrams %}
-
+<div class="columns is-multiline system-overview ">
+  <div class="column is-12">
+    <h2>{{ diagram.title }}</h2>
+  </div>
+  <div class="column is-9">
+    <img src="{{ diagram.image | prepend: site.baseurl }}">
+  </div>
+  <div class="column is-12">
+    <p>
+      {{ diagram.description }}
+    </p>
+  </div>
+</div>
 {% endfor %}
