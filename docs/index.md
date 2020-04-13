@@ -33,6 +33,10 @@ about_list:
 # Resource links
 about_resources_title: Resources
 
+about_system_diagram: assets/img/system-diagrams/system-diagram.svg
+about_system_diagram_caption: System Overview
+about_system_link: system-overview
+
 about_resources:
   - name: Gitter
     link: https://gitter.im/DigitalSlideArchive/HistomicsTK
