@@ -51,7 +51,7 @@ about_resources:
     icon: fas fa-book
 
   - name: Youtube
-    link: https://www.youtube.com/channel/UCJVNVQXivYPDb4goNU4tK3A
+    link: https://www.youtube.com/channel/UCe9RJmSdEJLTWkRhSOIVAlg
     icon: fab fa-youtube
 
 # Platforms Content
