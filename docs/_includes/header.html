@@ -16,15 +16,17 @@
         </div>
         <div class="navbar-menu" id="navMenu">
             <div class="navbar-end">
-                {% if site.data.navigation %}
+                {% if site.data.navigation  %}
                 {% for item in site.data.navigation %}
                     {% if item.dropdown %}
                       <div class="navbar-item has-dropdown is-hoverable">
                         <a class="navbar-link {% if item.link == page.url %}is-active{% endif %}">{{ item.name }}</a>
                         <div class="navbar-dropdown">
-                            {% for subitem in item.dropdown %}
-                            <a href="{{ subitem.link | prepend: site.baseurl }}" class="navbar-item {% if subitem.link == page.url %}is-active{% endif %}">{{ subitem.name }}</a>
-                            {% endfor %}
+                          {% for subitem in item.dropdown %}
+                            <a href="{{ subitem.link | prepend: site.baseurl }}" class="navbar-item {% if subitem.link == page.url %}is-active{% endif %}">
+                              {{ subitem.name }}
+                            </a>
+                          {% endfor %}
                         </div>
                       </div>
                     {% else %}
@@ -32,6 +34,20 @@
                     {% endif %}
                 {% endfor %}
                 {% endif %}
+
+                {% if site.data.contact_links  %}
+                <div class="navbar-item has-dropdown is-hoverable">
+                  <a class="navbar-link">Contact</a>
+                  <div class="navbar-dropdown">
+                    {% for item in site.data.contact_links %}
+                      <a href="{{ item.link }}" class="navbar-item">
+                        {{ item.name }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endif %}
+
             </div>
         </div>
     </div>

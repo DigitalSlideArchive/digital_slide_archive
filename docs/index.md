@@ -10,7 +10,7 @@ hero_image: assets/img/dsa_hero.jpg
 
 hero_buttons:
   - link_text: View Demo
-    link: http://demo.kitware.com/histomicstk/histomicstk
+    link: https://demo.kitware.com/histomicstk/histomicstk
 
   - link_text: View on GitHub
     link: https://github.com/DigitalSlideArchive
