@@ -28,12 +28,12 @@
      {% endif %}
   </div>
 </div>
-<div class="columns is-multiline system-overview-section">
+<div class="columns is-multiline is-left system-overview-section">
   {% if page.about_system_diagram %}
-  <div class="column is-12">
+  <div class="column is-9">
     <img src="{{ page.about_system_diagram | prepend: site.baseurl }}" class="feature-icon">
   </div>
-  <div class="column is-12 has-text-centered">
+  <div class="column is-9 has-text-centered">
       {{ page.about_system_diagram_caption }}
       <a href="{{ page.about_system_link }}">
         {{ page.about_system_overview_page_button }}

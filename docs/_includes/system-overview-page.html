@@ -1,5 +1,5 @@
-{% for diagram in page.diagrams %}
 <div class="columns is-multiline system-overview-page">
+  {% for diagram in page.diagrams %}
   <div class="column is-12">
     <h2>{{ diagram.title }}</h2>
   </div>
@@ -11,5 +11,6 @@
       {{ diagram.description }}
     </p>
   </div>
+  {% endfor %}
 </div>
-{% endfor %}
+
