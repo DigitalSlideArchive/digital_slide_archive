@@ -18,7 +18,7 @@ hero_image: assets/img/home-callouts/success_stories.jpg
       {% if story.description %}
       <p>{{ story.description }}</p>
       {% endif %}
-      <a href="{{ story.url | prepend: site.baseurl }}" class="button is-primary is-medium">Read Full Story</a>
+      <a href="{{ story.url | remove_first: '/' | prepend: site.baseurl }}" class="button is-primary is-medium">Read Full Story</a>
     </div>
   </div>
   {% endfor %}
