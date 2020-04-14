@@ -35,7 +35,7 @@ about_resources_title: Resources
 
 about_system_diagram: assets/img/system-diagrams/system-diagram.svg
 about_system_diagram_caption: "Figure: DSA System Diagram."
-about_system_overview_page_button: ( view detailed system overview )
+about_system_overview_page_button: ( View detailed system overview )
 about_system_link: system-overview
 
 about_resources:
