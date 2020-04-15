@@ -6,7 +6,7 @@ permalink: /system-overview/
 # =================================
 title: System Overview
 subtitle:
-hero_image: assets/img/system-diagrams/system-diagram.svg
+hero_image: assets/img/home-callouts/system-overview.jpg
 ---
 
 <div class="system-overview-page" markdown="1">
