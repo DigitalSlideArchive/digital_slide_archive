@@ -5,7 +5,7 @@ permalink: /system-overview/
 # Banner Content
 # =================================
 title: System Overview
-subtitle:
+subtitle: Infographic overview of DSA, covering the key components and setup options.
 hero_image: assets/img/home-callouts/system-overview.jpg
 ---
 

@@ -5,7 +5,7 @@ permalink: /demos-examples/
 # Banner Content
 # =================================
 title: Demos and Examples
-subtitle:
+subtitle: The best way to learn more about DSA is through the interactive demos and examples below.
 hero_image: assets/img/home-callouts/demos_examples.jpg
 
 # Demos
