@@ -31,7 +31,9 @@
 <div class="columns is-multiline is-left system-overview-section">
   {% if page.about_system_diagram %}
   <div class="column is-9">
-    <img src="{{ page.about_system_diagram | prepend: site.baseurl }}" class="feature-icon">
+    <a href="{{ page.about_system_link }}">
+      <img src="{{ page.about_system_diagram | prepend: site.baseurl }}" class="feature-icon">
+    </a>
   </div>
   <div class="column is-9 has-text-centered">
       {{ page.about_system_diagram_caption }}
