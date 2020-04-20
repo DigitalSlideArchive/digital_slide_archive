@@ -33,22 +33,27 @@ about_list:
 # Resource links
 about_resources_title: Resources
 
+about_system_diagram: assets/img/system-diagrams/system-diagram.svg
+about_system_diagram_caption: "DSA System Diagram."
+about_system_overview_page_button: ( View detailed system overview )
+about_system_link: system-overview
+
 about_resources:
   - name: Gitter
     link: https://gitter.im/DigitalSlideArchive/HistomicsTK
-    icon: fab fa-gitter #assets/img/resource-icons/icon_gitter.png
+    icon: fab fa-gitter
 
   - name: Discourse
     link: https://discourse.girder.org/c/histomicstk
-    icon: fab fa-discourse #assets/img/resource-icons/icon_discourse.png
+    icon: fab fa-discourse
 
   - name: Jupyter
     link: https://digitalslidearchive.github.io/HistomicsTK/examples.html
-    icon: fas fa-book #assets/img/resource-icons/icon_jupyternb.png
+    icon: fas fa-book
 
   - name: Youtube
     link: https://www.youtube.com/channel/UCe9RJmSdEJLTWkRhSOIVAlg
-    icon: fab fa-youtube #assets/img/resource-icons/icon_youtube.png
+    icon: fab fa-youtube
 
 # Platforms Content
 # =================================
