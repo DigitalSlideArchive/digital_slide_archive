@@ -17,9 +17,7 @@ The Digital Slide Archive is typically either installed on a single computer or 
 
 ![Single Computer Diagram](../assets/img/system-diagrams/system-diagram-single-computer-setup.svg "Single Computer Diagram"){:width="75%"}
 
-The default installation of the Digital Slide Archive is on a single computer. This is the simplest was to deploy DSA, though image analysis tasks are limited by the processing power of a single system.
-
-available processing power a single computer.
+The default installation of the Digital Slide Archive is on a single computer. This is the simplest way to deploy DSA, though image analysis tasks are limited by the processing power of a single system.
 
 Image and other data files, the database, and log files are all stored on the local file system. Data files can also be stored or imported from external assetstores, such as Amazon S3.
 
