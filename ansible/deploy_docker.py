@@ -229,6 +229,7 @@ def container_start_girder(
                 get_path(kwargs['logs']) + ':/opt/digital_slide_archive/logs:rw',
                 get_path(kwargs['assetstore']) + ':/opt/digital_slide_archive/assetstore:rw',
             ],
+            'init': True,
         }
         config['binds'].extend(docker_mounts())
         config_mounts(kwargs.get('mount'), config)
@@ -439,7 +440,8 @@ def container_start_worker(client, env, key='worker', rmq='docker', **kwargs):
                 get_path(kwargs['logs']) + ':/opt/logs:rw',
                 '%s:%s' % (worker_tmp_root, worker_tmp_root),
                 get_path(kwargs['assetstore']) + ':/opt/digital_slide_archive/assetstore:rw',
-            ]
+            ],
+            'init': True,
         }
         config['binds'].extend(docker_mounts())
         config_mounts(kwargs.get('mount'), config)
