@@ -70,9 +70,11 @@ $gray-button: darken($gray, 30%)
 
   &.is-left
     float: left
+    margin-left: 0
 
   &.is-right
     float: right
+    margin-right: 0
 
 /* ====================================
  * END Misc. */
@@ -84,7 +86,13 @@ $gray-button: darken($gray, 30%)
   h1,
   h2,
   h3
-    font-weight: 500
+    font-weight: 400
+
+  h2
+    font-size: 2.25em
+
+  h3
+    font-size: 1.4em
 
 /* ====================================
  * END text styles */
@@ -434,8 +442,17 @@ $gray-button: darken($gray, 30%)
             .hero-button
               margin-bottom: 10px
               margin-top: 10px
-      /* .hero-body */
-    /* .hero */
+
+  .nested
+    display: block
+    margin: 15px 0
+    max-width: 100%
+
+    &.is-left
+      float: none
+
+    &.is-right
+      float: none
 
 /* max-width 768px */
 

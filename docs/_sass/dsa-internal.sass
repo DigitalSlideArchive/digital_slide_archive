@@ -144,16 +144,60 @@
       font-size: 13px
 
 /* START system overview page */
-body
-    &.system-overview
-        background: #f7f7f7
+.system-overview
+  background: #f7f7f7
 
 .system-overview-page
-  padding-top: 20px
   padding-bottom: 50px
+  padding-top: 20px
 
   code
     background-color: #ededed
 
+// START documentation
+
+.documentation
+  .page-content
+    & > .column
+      align-items: flex-start
+      display: flex
+
+      .contents
+        flex: 1
+
+        li
+          font-size: 13px !important
+
+      .content
+        flex: 3
+        padding-left: 50px
+
+    .doc-main-section
+      border-bottom: 1px solid lighten($gray, 30%)
+      margin: 0 !important
+      padding: 30px 0 !important
+
+    .doc-sub-section
+      border-bottom: 1px solid lighten($gray, 30%)
+      border-left: 6px solid lighten($gray, 30%)
+      padding: 30px
+
+      &.columns
+        margin: 0 !important
+
+      .doc-image
+        font-size: 11px
+        font-style: italic
+        line-height: 1.25em
+
 /* ====================================
  * END content area */
+
+@media screen and (max-width: 768px)
+  .documentation
+    .page-content
+      & > .column
+        display: block
+
+        .content
+          padding-left: 0
