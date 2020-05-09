@@ -5,7 +5,10 @@ toc: true
 
 # Banner Content
 # =================================
-title: DSA / HistomicsTK Documentation
+title: Documentation & Examples
+subtitle: Checkout some of the amazing things you can do using our platform.
+
+hero_image: assets/img/dsa_hero.jpg
 
 ---
 
