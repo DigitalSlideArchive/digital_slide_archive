@@ -5,7 +5,7 @@ toc: true
 
 # Banner Content
 # =================================
-title: DSA/HistomicsTK Documentation
+title: DSA / HistomicsTK Documentation
 
 ---
 
