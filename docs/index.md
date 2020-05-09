@@ -117,7 +117,7 @@ platforms:
 callouts:
   - heading: Documentation
     link: documentation
-    link_text: View Docs & Examples
+    link_text: Use Cases & Examples
     image: assets/img/home-callouts/demos_examples.jpg
 
   - heading: Success Stories
