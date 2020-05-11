@@ -10,7 +10,7 @@ hero_image: assets/img/dsa_hero.jpg
 
 hero_buttons:
   - link_text: View Demo
-    link: https://demo.kitware.com/histomicstk/histomicstk
+    link: https://demo.kitware.com/histomicstk/#collection/5bbdeb97e629140048d017ba/folder/5bbdeba3e629140048d017bb
 
   - link_text: View on GitHub
     link: https://github.com/DigitalSlideArchive
@@ -115,9 +115,9 @@ platforms:
 # Callouts Section
 # =================================
 callouts:
-  - heading: Demos & Examples
-    link: demos-examples
-    link_text: View Demos
+  - heading: Documentation
+    link: documentation
+    link_text: Use Cases & Examples
     image: assets/img/home-callouts/demos_examples.jpg
 
   - heading: Success Stories

@@ -2,12 +2,12 @@
 layout: page
 title:  "Developing Machine-Learning Tools Through Collaborative Annotation Studies"
 description: "The primary determinant in machine learning algorithm performance is the availability of abundant labeled data for training ..."
-hero_image: assets/img/success-stories/story-image-2.png
+hero_image: assets/img/demo-images/DSA_Demo_Image.png
 ---
 
 <div class="story-content is-clearfix" markdown="1">
 
-![](../../assets/img/success-stories/story-image-2.png){:width="480px" height="auto" .box.nested.is-right}
+![](../../assets/img/demo-images/DSA_Demo_Image.png){:width="480px" height="auto" .box.nested.is-right}
 
 ## The Story
 
@@ -17,9 +17,9 @@ Our web-based platform enables users to collaborate all over the world, and has 
 
 Our API and user roles allow us to create collaborative annotation study teams that engage users with different expertise levels, ranging from pathologists to medical students, to collaboratively generate large and extensively reviewed annotation datasets. In a study with over 25 participants from over 5 countries, we generated over 25,000 annotated tissue regions to generate the richest public dataset of annotated breast-cancer tissues to date. The ability to programmatically monitor and manage these studies through the API is key to their success.
 
-Collecting data on this scale allows us to generate highly accurate machine-learning models for tasks like tissue segmentation and cell classification and detection, and to understand the limits of concordance among human experts.
+Collecting data on this scale allows us to generate highly accurate machine-learning models for tasks like tissue segmentation and cell classification and detection, and to understand the limits of concordance among human experts. The data from the collaborative annotation study is available on a demo instance of the Digital Slide Archive. The link goes to one of the TCGA slides that was used in the study. If you click the "eye" image icon in the Annotations panel on the right side of the screen, you'll see the results of a collaborative annotation.
 
-[View Demo Site](https://demo.kitware.com/histomicstk/){: .button.is-primary.is-medium}
+[View Dataset Visualization](https://demo.kitware.com/histomicstk/histomicstk#?image=5bbdee4fe629140048d01adf&bounds=25823%2C19101%2C43534%2C29208%2C0){: .button.is-primary.is-medium}
 
 </div>
 
