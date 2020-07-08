@@ -15,8 +15,8 @@ from girder.utility.server import configureServer
 configureServer()
 
 # Ensure worker settings are correct
-Setting().set('worker.broker', 'amqp://guest@rabbitmq/')
-Setting().set('worker.backend', 'amqp://guest@rabbitmq/')
+Setting().set('worker.broker', 'amqp://guest:guest@rabbitmq/')
+Setting().set('worker.backend', 'amqp://guest:guest@rabbitmq/')
 Setting().set('worker.api_url', 'http://girder:8080/api/v1')
 
 # If there is are no users, create an admin user
