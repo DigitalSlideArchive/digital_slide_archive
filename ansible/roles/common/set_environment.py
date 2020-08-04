@@ -131,8 +131,8 @@ def set_hosts():
         else:
             import socket
             rmqhost = socket.gethostbyname(rmqhost)
-        if 'rmq' not in [line.split()[-1] for line in hosts]:
-            hosts.append('%s rmq' % rmqhost)
+        if 'rabbitmq' not in [line.split()[-1] for line in hosts]:
+            hosts.append('%s rabbitmq' % rmqhost)
             changed = True
     hosts.append('%s dockerhost' % hostip)
     changed = True

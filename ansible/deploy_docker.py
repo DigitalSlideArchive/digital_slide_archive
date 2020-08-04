@@ -396,6 +396,10 @@ def container_start_rabbitmq(
             if rmqport:
                 params['ports'] = [5672]
                 config['port_bindings'] = {5672: int(rmqport)}
+            if kwargs.get('rmqconf'):
+                config['binds'] = [
+                    kwargs['rmqconf'] + ':/etc/rabbitmq/rabbitmq.conf:ro',
+                ]
             print('Creating %s - %s' % (image, name))
             ctn = client.create_container(
                 host_config=client.create_host_config(**config),
@@ -442,6 +446,11 @@ def container_start_worker(client, env, key='worker', rmq='docker', **kwargs):
             ],
         }
         config['binds'].extend(docker_mounts())
+        if kwargs.get('workerconf'):
+            config['binds'] = [
+                kwargs['workerconf'] +
+                ':/usr/local/lib/python3.7/site-packages/girder_worker/worker.local.cfg:ro',
+            ]
         config_mounts(kwargs.get('mount'), config)
         if rmq == 'docker':
             config['links'][ImageList['rabbitmq']['name']] = 'rabbitmq'
@@ -990,6 +999,9 @@ if __name__ == '__main__':   # noqa
         help='Either use rabbitmq from docker or from host (docker, host, or '
         'IP adress or hostname of host.')
     parser.add_argument(
+        '--rmqconf', '--rmqcfg',
+        help='Mount a local file as /etc/rabbitmq/rabbitmq.conf.')
+    parser.add_argument(
         '--status', '-s', action='store_true',
         help='Report the status of relevant docker containers and images.')
     parser.add_argument(
@@ -1005,6 +1017,10 @@ if __name__ == '__main__':   # noqa
         help='The path to use for the girder_worker tmp_root.  This must be '
         'reachable by the girder and worker docker containers.  It cannot be '
         'a top-level directory.')
+    parser.add_argument(
+        '--workerconf', '--workercfg',
+        help='Mount a local file as /usr/local/lib/python3.7/site-packages/'
+        'girder_worker/worker.local.cfg.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
     # Should we add an optional url or host value for rmq and mongo?

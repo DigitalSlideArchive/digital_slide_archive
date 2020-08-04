@@ -8,4 +8,4 @@ _build*
 .vagrant
 ansible/roles/girder.girder
 ansible/roles/girder.mongodb
-ansible/sample.cfg
+ansible/sample*.cfg
