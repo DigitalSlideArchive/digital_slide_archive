@@ -447,10 +447,9 @@ def container_start_worker(client, env, key='worker', rmq='docker', **kwargs):
         }
         config['binds'].extend(docker_mounts())
         if kwargs.get('workerconf'):
-            config['binds'] = [
+            config['binds'].append(
                 kwargs['workerconf'] +
-                ':/usr/local/lib/python3.7/site-packages/girder_worker/worker.local.cfg:ro',
-            ]
+                ':/opt/girder_worker/girder_worker/worker.local.cfg')
         config_mounts(kwargs.get('mount'), config)
         if rmq == 'docker':
             config['links'][ImageList['rabbitmq']['name']] = 'rabbitmq'
@@ -1019,8 +1018,8 @@ if __name__ == '__main__':   # noqa
         'a top-level directory.')
     parser.add_argument(
         '--workerconf', '--workercfg',
-        help='Mount a local file as /usr/local/lib/python3.7/site-packages/'
-        'girder_worker/worker.local.cfg.')
+        help='Mount a local file as /opt/girder_worker/girder_worker/'
+        'worker.local.cfg.  This needs to be writable.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
     # Should we add an optional url or host value for rmq and mongo?
