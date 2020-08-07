@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
     end
     config.vm.provision "AnsibleStep", type: "ansible_local" do |ansible|
       ansible.playbook = "ansible/vagrant.yml"
+      ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
       ansible.galaxy_role_file = "ansible/requirements.yml"
       ansible.provisioning_path = "/vagrant"
       ansible.install_mode = "pip"
