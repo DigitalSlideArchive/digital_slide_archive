@@ -31,3 +31,7 @@ Double check which version of pip is installed; Ubuntu 18.04 still defaults to p
 If your version is older than 19.0, upgrade pip to a more recent version
 
    sudo pip install --upgrade pip
+
+### Can install pip either for the whole system or for your local user account
+    pip install --upgrade pip --user
+
