@@ -16,11 +16,11 @@ Following main docker install info from https://docs.docker.com/engine/install/c
 
 
 
-The current user needs to be a member of the docker group::
+The current user needs to be a member of the docker group:
 
     sudo usermod -aG docker `id -u -n`
 
-After which, you will need re-evaluate group membership::
+After which, you will need re-evaluate group membership:
 
     newgrp docker
 
