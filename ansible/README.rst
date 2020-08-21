@@ -37,7 +37,7 @@ If your version is older than 19.0, upgrade pip to a more recent version
 
    sudo pip install --upgrade pip
 
-As of 6/30/20 this isntalled version 20.1.1 on Ubuntu 18.04.
+As of 6/30/20 this installed version 20.1.1 on Ubuntu 18.04.
 
 
 Install the python docker module::
