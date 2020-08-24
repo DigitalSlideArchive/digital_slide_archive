@@ -21,6 +21,8 @@ RUN mkdir -p /fuse --mode=a+rwx
 
 # By using --no-cache-dir the Docker image is smaller
 RUN pip install --pre --no-cache-dir \
+    # We don't work with the beta of celery 5
+    'celery<5' \
     # histomicui installs all of our absolutely required packages \
     histomicsui \
     # large_image[all] adds all tile sources and memcached support \
