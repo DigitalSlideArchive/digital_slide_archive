@@ -209,7 +209,9 @@ jobs:
           command: pip install -U pip requests
       - run:
           name: Install modules needed for testing
-          command: pip install girder-client
+          # diskcache<5 is requried for Python 2.7.  It would probably be
+          # better to install python3 in this container.
+          command: pip install girder-client 'diskcache<5'
       - run:
           name: Wait for girder to respond and be configured
           command: |
