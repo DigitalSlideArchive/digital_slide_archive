@@ -2,19 +2,24 @@
 
 The installation instructions are similar to ubuntu, but the Centos 7 AWS image requires slightly different package names.
 
+I am using the "CentOS 7 (x86_64) - with Updates HVM" AMI Image, and set up a t2.large (2 CPUS/8 GBS) and added 256GB of local storage.
+
+
+
 ## Update system and install any new packages and docker
 
 Following main docker install info from https://docs.docker.com/engine/install/centos/  
 
-    sudo yum update
-    sudo yum upgrade -y
-    sudo yum install git
-
     sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-    sudo yum install docker-ce docker-ce-cli containerd.io -y
+    sudo yum install epel-release
+    sudo yum update -y
+
+    sudo yum install git epel-release  docker-ce docker-ce-cli containerd.io -y
+    sudo yum install python3-pip
+    # Need to start the docker service
     sudo systemctl start docker
 
-
+   
 
 The current user needs to be a member of the docker group:
 
