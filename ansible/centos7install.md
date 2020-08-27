@@ -40,3 +40,16 @@ If your version is older than 19.0, upgrade pip to a more recent version
 ### Can install pip either for the whole system or for your local user account
     pip install --upgrade pip --user
 
+
+## If installing the NCI Seer Pediatric Pilot version of the DSA
+
+### Install docker-compose
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+
+    cd ~ 
+    git clone https://github.com/DigitalSlideArchive/NCI-SEER-Pediatric-WSI-Pilot.git
+    cd NCI-SEER-Pediatric-WSI-Pilot
+    cd devops/nciseer/
+
+
