@@ -197,9 +197,16 @@ jobs:
           command: docker exec dsa_girder bash -lc 'tox -e flake8,lintclient'
   docker-compose:
     working_directory: ~/project
-    machine: true
+    machine:
+      image: circleci/classic:201808-01
     steps:
       - checkout
+      - run:
+          name: Use Python 3.7
+          command: |
+            pyenv versions
+            pyenv global 3.7.0
+            pip --version
       - run:
           name: Run docker-compose up
           command: bash -c 'CURRENT_UID=$(id -u):$(id -g) docker-compose up -d'
@@ -209,9 +216,7 @@ jobs:
           command: pip install -U pip requests
       - run:
           name: Install modules needed for testing
-          # diskcache<5 is requried for Python 2.7.  It would probably be
-          # better to install python3 in this container.
-          command: pip install girder-client 'diskcache<5'
+          command: pip install girder-client six
       - run:
           name: Wait for girder to respond and be configured
           command: |
