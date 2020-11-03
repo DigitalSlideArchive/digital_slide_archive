@@ -78,6 +78,8 @@ RUN sudo apt-get update && \
     python3.7-dev python3.7-venv \
     # Python 3.8 \
     python3.8-dev python3.8-venv \
+    # Python 3.9 \
+    python3.9-dev python3.9-venv \
     # For full testing, add python 3.5 \
     python3.5 python3.5-venv \
     && \
@@ -86,6 +88,7 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3.5 get-pip.py && \
     python3.7 get-pip.py && \
     python3.8 get-pip.py && \
+    python3.9 get-pip.py && \
     rm get-pip.py && \
     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
