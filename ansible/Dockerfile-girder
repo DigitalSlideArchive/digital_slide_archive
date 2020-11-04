@@ -19,7 +19,7 @@ RUN apt-get update && \
     fuse \
     # Install packages for routing to mongodb \
     iptables dnsutils \
-    # Install some additional packages for convenience when testing with bash
+    # Install some additional packages for convenience when testing with bash \
     iputils-ping telnet-ssl tmux less \
     && \
     apt-get remove -y python3-apt && \
@@ -68,9 +68,9 @@ RUN ansible-galaxy install -r requirements.yml -p /home/ubuntu/digital_slide_arc
 
 RUN sudo apt-get update && \
     sudo apt-get install -y --no-install-recommends \
-    # Needed for ansible's creation of python virtualenv
+    # Needed for ansible's creation of python virtualenv \
     python3-venv \
-    # Needed to build some python modules
+    # Needed to build some python modules \
     gcc \
     # Convenience when updating from previous versions \
     mongodb-clients \

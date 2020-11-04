@@ -19,7 +19,7 @@ RUN apt-get update && \
     fuse \
     # Install packages for routing to mongodb \
     iptables dnsutils \
-    # Install some additional packages for convenience when testing with bash
+    # Install some additional packages for convenience when testing with bash \
     iputils-ping telnet-ssl tmux less \
     && \
     apt-get remove -y python3-apt && \
