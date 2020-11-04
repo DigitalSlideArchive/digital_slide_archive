@@ -91,7 +91,7 @@ Annotations represent a significant time investment for the users who generate t
 <div class="doc-main-section" markdown="1">
 ## 2. Processing annotations and mask images
 
-Theme text: The DSA database stores annotations in an (x,y) coordinate list format. For many processing tasks like training machine learning algorithms or measuring interobserver agreement a mask or label image representation is easier to work with. Similarly, the outputs of many algorithms are label or mask images that need to be converted to coordinates for visualization in HistomicsUI. In the following examples we illustrate how to convert between the coordinate list and image formats. We also demonstrate how to merge annotations that are split by tiled processing of whole-slide images.
+The DSA database stores annotations in an (x,y) coordinate list format. For many processing tasks like training machine learning algorithms or measuring interobserver agreement a mask or label image representation is easier to work with. Similarly, the outputs of many algorithms are label or mask images that need to be converted to coordinates for visualization in HistomicsUI. In the following examples we illustrate how to convert between the coordinate list and image formats. We also demonstrate how to merge annotations that are split by tiled processing of whole-slide images.
 </div>
 
 <div class="doc-sub-section columns is-variable is-3">
@@ -147,7 +147,7 @@ Tiled analysis of whole-slide images can break up large structures like tissue r
 <div class="column is-8" markdown="1">
 ## 3. Image analysis with HistomicsTK
 
-Theme text: HistomicsTK provides fundamental image analysis capabilities that developers can use in building complex digital pathology workflows. The HistomicsTK package is pip-installable and can be used as a stand-alone python library, or as a girder plugin for running image analysis jobs from the HistomicsUI interface. In the following examples we illustrate how HistomicsTK and the large_image library can be used for image analysis tasks and how to work with local image datasets or data hosted on remote DSA installations.
+HistomicsTK provides fundamental image analysis capabilities that developers can use in building complex digital pathology workflows. The HistomicsTK package is pip-installable and can be used as a stand-alone python library, or as a girder plugin for running image analysis jobs from the HistomicsUI interface. In the following examples we illustrate how HistomicsTK and the large_image library can be used for image analysis tasks and how to work with local image datasets or data hosted on remote DSA installations.
 </div>
 <div class="doc-image column is-4" markdown="1">
 ![](../assets/img/documentation/saliency_results.png)
