@@ -91,9 +91,9 @@
 - name: Install large_image tasks
   pip:
     executable: pip3
-    name: "/opt/large_image/tasks[worker]"
+    chdir: /opt/large_image
     extra_args: "--find-links https://girder.github.io/large_image_wheels"
-    editable: true
+    requirements: "requirements-worker.txt"
     state: present
 
 - name: Clone slicer_cli_web

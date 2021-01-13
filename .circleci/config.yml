@@ -239,7 +239,7 @@ jobs:
               fi
   docs:
     docker:
-      - image: circleci/ruby:latest
+      - image: circleci/ruby:2
     steps:
       - checkout
       - run:
