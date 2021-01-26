@@ -1,6 +1,7 @@
 [celery]
 app_main=girder_worker
 broker=amqp://guest:guest@{{ mq_private_ip }}/
+backend=rpc://guest:guest@{{ mq_private_ip }}/
 
 [girder_worker]
 

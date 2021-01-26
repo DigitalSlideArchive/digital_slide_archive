@@ -127,7 +127,7 @@
       path: system/setting
       parameters:
         key: worker.backend
-        value: "amqp://guest:guest@{{ mq_private_ip }}/"
+        value: "rpc://guest:guest@{{ mq_private_ip }}/"
 
 - name: Set worker api url setting
   girder:
