@@ -2,6 +2,7 @@ FROM ubuntu:18.04
 LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
 
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -qy tzdata && \
     apt-get install --yes --no-install-recommends software-properties-common && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
