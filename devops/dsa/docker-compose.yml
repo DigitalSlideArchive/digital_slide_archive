@@ -51,7 +51,7 @@ services:
     #   - "27017"
   memcached:
     image: memcached
-    command: -m 4096
+    command: -m 4096 --max-item-size 8M
     restart: unless-stopped
     # Uncomment to allow access to memcached from outside of the docker network
     # ports:
