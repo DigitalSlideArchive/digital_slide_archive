@@ -285,7 +285,11 @@ def container_start_memcached(client, env, key='memcached', memcached='docker', 
             }
             params = {
                 'image': image,
-                'command': ['memcached', '-m', str(kwargs.get('cache', 1024))],
+                'command': [
+                    'memcached',
+                    '-m', str(kwargs.get('cache', 1024)),
+                    '--max-item-size', '8M',
+                ],
                 'detach': True,
                 'hostname': key,
                 'name': name,
