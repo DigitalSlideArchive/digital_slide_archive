@@ -14,6 +14,18 @@ commands:
           command: |
             docker load -i /tmp/workspace/dsa_girder.tar
             docker load -i /tmp/workspace/dsa_worker.tar
+  usecommondocker:
+    description: "Make built common docker available"
+    steps:
+      - run:
+          name: Install dependencies
+          command: pip install ansible requests docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Load archived docker images
+          command: |
+            docker load -i /tmp/workspace/dsa_common.tar
   startcontainers:
     description: Start containers for tests.
     steps:
@@ -215,8 +227,18 @@ jobs:
             pip --version
       - run:
           name: Run docker-compose up
-          command: bash -c 'CURRENT_UID=$(id -u):$(id -g) docker-compose up -d'
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose up --build -d'
           working_directory: ./devops/dsa
+      - run:
+          name: Archive docker images
+          command: |
+            docker save -o dsa_common.tar dsarchive/dsa_common:latest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./dsa_common.tar
+      - store_artifacts:
+          path: ./dsa_common.tar
       - run:
           name: Update modules
           command: pip install -U pip requests
@@ -234,7 +256,7 @@ jobs:
           command: sudo chmod a+xwr /var/run/docker.sock
       - run:
           name: Test the instance
-          command: python ansible/utils/cli_test.py dsarchive/histomicstk:latest --user=admin --password=password --test
+          command: python devops/dsa/utils/cli_test.py dsarchive/histomicstk:latest --user=admin --password=password --test
   publish-docker:
     working_directory: ~/project
     machine:
@@ -242,17 +264,21 @@ jobs:
     steps:
       - checkout
       - usedockers
+      - usecommondocker
       - run:
           name: Publish images to Docker Hub
           command: |
               echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
               docker push dsarchive/dsa_worker:latest
               docker push dsarchive/dsa_girder:latest
+              docker push dsarchive/dsa_common:latest
               if [[ $CIRCLE_TAG =~ ^v.*$ ]]; then
               docker tag dsarchive/dsa_worker:latest "dsarchive/dsa_worker:$CIRCLE_TAG"
               docker tag dsarchive/dsa_girder:latest "dsarchive/dsa_girder:$CIRCLE_TAG"
+              docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$CIRCLE_TAG"
               docker push "dsarchive/dsa_worker:$CIRCLE_TAG"
               docker push "dsarchive/dsa_girder:$CIRCLE_TAG"
+              docker push "dsarchive/dsa_common:$CIRCLE_TAG"
               fi
   docs:
     docker:
@@ -435,3 +461,4 @@ workflows:
             - test-py37
             - test-py38
             - test-py39
+            - docker-compose

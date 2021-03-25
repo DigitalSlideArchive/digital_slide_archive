@@ -26,7 +26,7 @@ Installation
 
 See `here <./ansible>`_ for installation instructions.
 
-There is also a minimal `docker-compose example <./devops/dsa>`_.
+There is also a complete `docker-compose example <./devops/dsa>`_.
 
 For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
 

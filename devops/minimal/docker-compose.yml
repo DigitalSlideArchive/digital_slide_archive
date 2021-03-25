@@ -1,0 +1,22 @@
+---
+version: '3'
+services:
+  girder:
+    image: dsarchive/dsa_minimal
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${DSA_PORT:-8080}:8080"
+    volumes:
+      - assetstore:/assetstore
+    depends_on:
+      - mongodb
+  mongodb:
+    image: "mongo:latest"
+    restart: unless-stopped
+    command: --nojournal
+    volumes:
+      - db:/data/db
+volumes:
+  assetstore:
+  db:

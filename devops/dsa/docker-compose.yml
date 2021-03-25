@@ -2,43 +2,130 @@
 version: '3'
 services:
   girder:
-    build: .
+    image: dsarchive/dsa_common
+    build: ../..
+    # Instead of privileged mode, fuse can use:
+    # devices:
+    #   - /dev/fuse:/dev/fuse
+    # security_opt:
+    #   - apparmor:unconfined
+    # cap_add:
+    #   - SYS_ADMIN
+    # but these may be somewhat host specific, so we default to privileged.  If
+    # the docker daemon is being run with --no-new-privileges, fuse may not
+    # work.
     privileged: true
-    # Set CURRENT_UID to your user id (e.g., `CURRENT_UID=$(id -u):$(id -g)`)
-    # so that assetstores and logs are owned by yourself.
-    user: ${CURRENT_UID}
+    # Set DSA_USER to a user id that is part of the docker group (e.g.,
+    # `DSA_USER=$(id -u):$(id -g)`).  This makes files in assetstores and logs
+    # owned by that user and provides permissions to manage docker
+    environment:
+      DSA_USER: ${DSA_USER:-}
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
       - "${DSA_PORT:-8080}:8080"
-    environment:
-      - GIRDER_CONFIG=/conf/girder.local.conf
-    command: bash -c 'python /conf/girder_config.py && girder mount /fuse && girder serve'
     volumes:
+      # Needed to use slicer_cli_web to run docker containers
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
       # Default assetstore
       - ./assetstore:/assetstore
-      # Location of girder.local.conf and girder_config.py
-      - .:/conf
+      # Location of girder.cfg
+      - ./girder.cfg:/etc/girder.cfg
+      # Location of provision.py
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
       # Location to store logs
       - ./logs:/logs
-      # Needed to use slicer_cli_web to run docker containers.  These really
-      # should be based on the DOCKER_* environment variables as well.
-      - /usr/bin/docker:/usr/bin/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Needed to mount remote assetstores as if they were filesystems (i.e.,
-      # to work fully with S3)
-      - /etc/passwd:/etc/passwd:ro
+
+      # For local development, uncomment the set of mounts associated with the
+      # local source files.  Adding the editable egg directories first allows
+      # allow mounting source files from the host without breaking the internal
+      # data.
+
+      # - /opt/girder/girder.egg-info
+      # - /opt/girder/clients/python/girder_client.egg-info
+      # - ../../../girder:/opt/girder
+
+      # - /opt/girder_worker/girder_worker.egg-info
+      # - ../../../../girder_worker:/opt/girder_worker
+
+      # - /opt/girder_worker_utils/girder_worker_utils.egg-info
+      # - ../../../../girder_worker_utils:/opt/girder_worker_utils
+
+      # - /opt/HistomicsUI/histomicsui.egg-info
+      # - ../../../HistomicsUI:/opt/HistomicsUI
+
+      # - /opt/slicer_cli_web/girder_slicer_cli_web.egg-info
+      # - ../../../slicer_cli_web:/opt/slicer_cli_web
+
+      # - /opt/large_image/girder_annotation/girder_large_image_annotation.egg-info
+      # - /opt/large_image/girder/girder_large_image.egg-info
+      # - /opt/large_image/sources/bioformats/large_image_source_bioformats.egg-info
+      # - /opt/large_image/sources/openslide/large_image_source_openslide.egg-info
+      # - /opt/large_image/sources/ometiff/large_image_source_ometiff.egg-info
+      # - /opt/large_image/sources/pil/large_image_source_pil.egg-info
+      # - /opt/large_image/sources/test/large_image_source_test.egg-info
+      # - /opt/large_image/sources/dummy/large_image_source_dummy.egg-info
+      # - /opt/large_image/sources/tiff/large_image_source_tiff.egg-info
+      # - /opt/large_image/sources/mapnik/large_image_source_mapnik.egg-info
+      # - /opt/large_image/sources/openjpeg/large_image_source_openjpeg.egg-info
+      # - /opt/large_image/sources/gdal/large_image_source_gdal.egg-info
+      # - /opt/large_image/sources/nd2/large_image_source_nd2.egg-info
+      # - /opt/large_image/large_image.egg-info
+      # - /opt/large_image/utilities/converter/large_image_converter.egg-info
+      # - /opt/large_image/utilities/tasks/large_image_tasks.egg-info
+      # - ../../../large_image:/opt/large_image
+
       # Add additional mounts here to get access to existing files on your
       # system.  Also add them to the worker container to reduce copying.
     depends_on:
       - mongodb
       - memcached
       - rabbitmq
+    # The command does:
+    # - Ensures that the main process runs as the DSA_USER and is part of both
+    #   that group and the docker group.  This is done by:
+    #   - adding a user with the DSA_USER's id; this user is named ubuntu if it
+    #     doesn't exist.
+    #   - adds a group with the DSA_USER's group id.
+    #   - adds the user to the user group.
+    #   - adds a group with the docker group id.
+    #   - adds the user to the docker group.
+    # - Use iptables to make some services appear as if they are on localhost
+    #   (as well as on the docker network).  This is done to allow tox tests to
+    #   run.
+    # - Run subsequent commands as the DSA_USER.  This sets some paths based on
+    #   what is expected in the Docker so that the current python environment
+    #   and the devops/dsa/utils are available.
+    # - Provision the Girder instance.  This sets values in the database, such
+    #   as creating an admin user if there isn't one.  See the provision.py
+    #   script for the details.
+    # - If possible, set up a girder mount.  This allows file-like access of
+    #   girder resources.  It requires the host to have fuse installed and
+    #   the docker container to be run with enough permissions to use fuse.
+    # - Start the main girder process.
+    command: bash -c '
+      if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
+      adduser -uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
+      addgroup -gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
+      addgroup -gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $$(stat -c "%g" /var/run/docker.sock)) 2>/dev/null;
+      sysctl -w net.ipv4.conf.eth0.route_localnet=1;
+      iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017;
+      iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 11211 -j DNAT --to-destination `dig +short memcached`:11211;
+      iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE;
+      su $$(id -nu $${DSA_USER%%:*}) -c "
+      PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
+      python /opt/digital_slide_archive/devops/dsa/provision.py &&
+      (girder mount /fuse || true) &&
+      girder serve --dev
+      "'
   mongodb:
     image: "mongo:latest"
-    # Set CURRENT_UID to your user id (e.g., `CURRENT_UID=$(id -u):$(id -g)`)
+    # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
     # so that database files and logs are owned by yourself.
-    user: ${CURRENT_UID}
+    user: ${DSA_USER:-PLEASE SET DSA_USER}
     restart: unless-stopped
     command: --nojournal --logpath /var/log/mongodb/mongodb.log
     volumes:
@@ -63,21 +150,37 @@ services:
     # ports:
     #   - "5672"
   worker:
-    build: .
-    privileged: true
-    # Set CURRENT_UID to your user id (e.g., `CURRENT_UID=$(id -u):$(id -g)`)
-    # so that logs and temp files are owned by yourself.
-    user: ${CURRENT_UID}
+    image: dsarchive/dsa_common
+    build: ../..
+    # Set DSA_USER to a user id that is part of the docker group (e.g.,
+    # `DSA_USER=$(id -u):$(id -g)`).  This makes files in assetstores and logs
+    # owned by that user and provides permissions to manage docker
+    environment:
+      DSA_USER: ${DSA_USER:-}
+      TMPDIR:
     restart: unless-stopped
-    command: |
-      bash -c "TEMP=${TEMP:-/tmp} python -m girder_worker --concurrency=2 -Ofair --prefetch-multiplier=1 >>/logs/worker.log 2>&1"
     volumes:
+      # Needed to use slicer_cli_web to run docker containers
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
       # Location to store logs
       - ./logs:/logs
-      # Needed to use slicer_cli_web to run docker containers
-      - /usr/bin/docker:/usr/bin/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Needed to allow transferring data to slicer_cli_web docker containuers
-      - ${TEMP:-/tmp}:${TEMP:-/tmp}
+      # Needed to allow transferring data to slicer_cli_web docker containers
+      - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
+      # Add additional mounts here to get access to existing files on your
+      # system if they have the same path as on the girder container.
     depends_on:
       - rabbitmq
+    # See the girder container for an explaination of most of this.
+    # The main command is to run girder_worker
+    command: bash -c '
+      if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
+      adduser -uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
+      addgroup -gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
+      addgroup -gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $$(stat -c "%g" /var/run/docker.sock)) 2>/dev/null;
+      su $$(id -nu $${DSA_USER%%:*}) -c "
+      PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
+      TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=2 -Ofair --prefetch-multiplier=1 >>/logs/worker.log 2>&1
+      "'

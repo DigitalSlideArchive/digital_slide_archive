@@ -2,16 +2,16 @@
 Digital Slide Archive via Docker Compose
 ========================================
 
-This directory contains a docker-compose set up for the Digital Slide Archive.  It is intended to be fully functional while still being close to the minimal configuration necessary.
+This directory contains a complete docker-compose set up for the Digital Slide Archive.  
 
-This does not have optional Girder plugins.  It will require editing the docker-compose.yml file to add mount points for additional data or for exposing additional ports.
+Edit the docker-compose.yml file (or add a docker-compose override file) to add mount points for additional data or for exposing additional ports.
 
 Prerequsities:
 --------------
 
 Before using this, you need both Docker and docker-compose.  See the `official installation instructions <https://docs.docker.com/compose/install>`_.
 
-The docker-compose file assumes certain file paths.  This has been tested on Ubuntu 18.04.  It will probably work on other Linux variants.
+The docker-compose file assumes certain file paths.  This has been tested on Ubuntu 20.04.  It will probably work on other Linux variants.
 
 Get the Digital Slide Archive repository::
 
@@ -22,11 +22,43 @@ Start
 
 To start the Digital Slide Archive::
 
-    CURRENT_UID=$(id -u):$(id -g) docker-compose up
+    DSA_USER=$(id -u):$(id -g) docker-compose up
 
-This uses your current user id so that database files, logs, assetstore files, and temporary files are owned by the current user.  If you omit setting ``CURRENT_UID``, files may be created owned by root.
+This uses your current user id so that database files, logs, assetstore files, and temporary files are owned by the current user.  If you omit setting ``DSA_USER``, files may be created owned by root.
 
 Note that this example does not add any default tasks or sample files.  By default, it creates an ``admin`` user with a password of ``password``.  You can log in with the admin user and use the Slicer CLI Web plugin settings to add default tasks (e.g., ``dsarchive/histomicstk:latest``).
+
+Stop
+----
+
+To stop the Digital Slide Archive::
+
+    docker-compose down -v
+
+The ``-v`` option removes unneeded temporary docker volumes.
+
+Sample Data
+-----------
+
+Sample data can be added after performing ``docker-compose up`` by running::
+
+    python utils/cli_test.py dsarchive/histomicstk:latest
+
+
+Development
+-----------
+
+You can log into the running ``girder`` or ``worker`` containers by typing::
+
+    docker-compose exec girder bash
+
+There are two convenience scripts ``restart_girder.sh`` and ``rebuild_and_restart_girder.sh`` that cab be run in the container.
+
+You can develop source code by mounting the source directory into the container.  See the ``docker-compose.yml`` file for details.
+
+If you need to log into the container as the Girder user, type::
+
+    docker-compose exec --user $(id -u) girder bash
 
 Technical Details
 -----------------
@@ -51,4 +83,9 @@ The Digital Slide Archive relies on several Girder plugins:
 
 - `Slicer CLI Web <https://github.com/girder/slicer_cli_web>`_.  This can run processing tasks in Docker containers.  Tasks report their capabilities via the Slicer CLI standard, listing required and optional inputs and outputs.  These tasks can be selected and configured via Girder and HistomicsUI and then run in a distributed fashion via Girder Worker.
 
-Slicer CLI Web runs tasks in Docker containers and is itself running in a Docker container (in Girder for determining options and Girder Worker to run the task).  In order to allow a process in a docker container to create another docker container, the paths the docker executable and communications sockets are mounted from the host to the docker container.  This requires that the docker container be run in privileged mode.
+Slicer CLI Web runs tasks in Docker containers and is itself running in a Docker container (in Girder for determining options and Girder Worker to run the task).  In order to allow a process in a docker container to create another docker container, the paths the docker executable and communications sockets are mounted from the host to the docker container.
+
+Permissions
+-----------
+
+By default, the girder container is run in Docker privileged mode.  This can be reduced to a small set of permissions (see the docker-compose.yml file for details), but these may vary depending on the host system.  If no extra permissions are granted, or if the docker daemon is started with --no-new-privileges, or if libfuse is not installed on the host system, the internal fuse mount will not be started.  This may prevent full functionality with non-filesystem assestores and with some multiple-file image formats.
