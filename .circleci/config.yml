@@ -399,6 +399,7 @@ workflows:
             - test-py37
             - test-py38
             - test-py39
+            - docker-compose            
           filters:
             tags:
               only: /^v.*/
