@@ -1,0 +1,17 @@
+.git
+*.py[cod]
+__pycache__/
+_build*
+.*.swp
+.*.swo
+.eggs
+.tox
+.vagrant
+ansible/roles/girder.girder
+ansible/roles/girder.mongodb
+ansible/sample*.cfg
+devops/dsa/assetstore
+devops/dsa/db
+devops/dsa/logs
+!**/.gitignore
+
