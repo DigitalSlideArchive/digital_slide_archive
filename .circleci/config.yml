@@ -23,7 +23,7 @@ commands:
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Load archived docker images
+          name: Load archived common docker image
           command: |
             docker load -i /tmp/workspace/dsa_common.tar
   startcontainers:
@@ -264,7 +264,10 @@ jobs:
     steps:
       - checkout
       - usedockers
-      - usecommondocker
+      - run:
+          name: Load archived common docker image
+          command: |
+            docker load -i /tmp/workspace/dsa_common.tar
       - run:
           name: Publish images to Docker Hub
           command: |
