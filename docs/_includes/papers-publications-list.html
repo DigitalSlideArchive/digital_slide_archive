@@ -9,7 +9,9 @@
               {{ publication.DOI_link }}
             </a></p>
             <div class="citation-numbers">
+              {% if publication.PMID %}
               PMID: {{ publication.PMID }} <br>
+              {% endif %}
               DOI: {{ publication.DOI }}
             </div>
           </div>
