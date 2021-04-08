@@ -11,8 +11,18 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 # Papers and Publications list
 # =================================
 publications:
+  - title: User Friendly, Cloud Based, Whole Slide Image Segmentation.
+    full-citation: "Lutnick, Brendon, Avinash Kammardi Shashiprakash, David Manthey, and Pinaki Sarder. 2021. “User Friendly, Cloud Based, Whole Slide Image Segmentation.” In Medical Imaging 2021: Digital Pathology, edited by John E. Tomaszewski and Aaron D. Ward. SPIE."
+    DOI_link: https://doi.org/10.1117/12.2581383
+    link: https://doi.org/10.1117/12.2581383
+    DOI: 10.1117/12.2581383
+  - title: A Distributed System Improves Inter-Observer and AI Concordance in Annotating Interstitial Fibrosis and Tubular Atrophy.
+    full-citation: "Kammardi Shashiprakash, Avinash, Brendon Lutnick, Brandon Ginley, Darshana Govind, Nicholas Lucarelli, Kuang-Yu Jen, Avi Z. Rosenberg, et al. 2021. “A Distributed System Improves Inter-Observer and AI Concordance in Annotating Interstitial Fibrosis and Tubular Atrophy.” In Medical Imaging 2021: Digital Pathology, edited by John E. Tomaszewski and Aaron D. Ward. SPIE."
+    DOI_link: https://doi.org/10.1117/12.2581789
+    link: https://doi.org/10.1117/12.2581789
+    DOI: 10.1117/12.2581789
   - title: Machine-based detection and classification for bone marrow aspirate differential counts - initial development focusing on nonneoplastic cells.
-    full-citation: "Chandradevan, Ramraj, Ahmed A. Aljudi, Bradley R. Drumheller, Nilakshan Kunananthaseelan, Mohamed Amgad, David A. Gutman, Lee A. D. Cooper, and David L. Jaye. “Machine-Based Detection and Classification for Bone Marrow Aspirate Differential Counts: Initial Development Focusing on Nonneoplastic Cells.” Laboratory Investigation 100, no. 1 (September 30, 2019): 98–109. "
+    full-citation: "Chandradevan, Ramraj, Ahmed A. Aljudi, Bradley R. Drumheller, Nilakshan Kunananthaseelan, Mohamed Amgad, David A. Gutman, Lee A. D. Cooper, and David L. Jaye. “Machine-Based Detection and Classification for Bone Marrow Aspirate Differential Counts: Initial Development Focusing on Nonneoplastic Cells.” Laboratory Investigation 100, no. 1 (September 30, 2019): 98–109."
     DOI_link: https://doi.org/10.1038/s41374-019-0325-7
     link: https://www.ncbi.nlm.nih.gov/pubmed/?term=31570774
     PMID: 31570774
