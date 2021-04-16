@@ -20,6 +20,12 @@ Get the Digital Slide Archive repository::
 Start
 -----
 
+To get the most recent built docker images, do::
+
+    docker-compose pull
+
+If you don't pull the images, the main image will be built in preference to pulling.
+
 To start the Digital Slide Archive::
 
     DSA_USER=$(id -u):$(id -g) docker-compose up
