@@ -183,7 +183,7 @@ services:
       # system if they have the same path as on the girder container.
     depends_on:
       - rabbitmq
-    # See the girder container for an explaination of most of this.
+    # See the girder container for an explanation of most of this.
     # The main command is to run girder_worker
     command: bash -c '
       if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
