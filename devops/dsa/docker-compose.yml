@@ -124,18 +124,24 @@ services:
   mongodb:
     image: "mongo:latest"
     # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
-    # so that database files and logs are owned by yourself.
+    # so that database files are owned by yourself.
     user: ${DSA_USER:-PLEASE SET DSA_USER}
     restart: unless-stopped
-    command: --nojournal --logpath /var/log/mongodb/mongodb.log
+    # Using --nojournal means that changes can be lost between the last
+    # checkpoint and an unexpected shutdown, but can substantially reduce
+    # writes.
+    command: --nojournal
     volumes:
       # Location to store database files
       - ./db:/data/db
-      - ./logs:/var/log/mongodb
     # Uncomment to allow access to the database from outside of the docker
     # network.
     # ports:
     #   - "27017"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
   memcached:
     image: memcached
     command: -m 4096 --max-item-size 8M
@@ -143,18 +149,26 @@ services:
     # Uncomment to allow access to memcached from outside of the docker network
     # ports:
     #   - "11211"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
   rabbitmq:
     image: "rabbitmq:latest"
     restart: unless-stopped
     # Uncomment to allow access to rabbitmq from outside of the docker network
     # ports:
     #   - "5672"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
   worker:
     image: dsarchive/dsa_common
     build: ../..
     # Set DSA_USER to a user id that is part of the docker group (e.g.,
-    # `DSA_USER=$(id -u):$(id -g)`).  This makes files in assetstores and logs
-    # owned by that user and provides permissions to manage docker
+    # `DSA_USER=$(id -u):$(id -g)`).  This provides permissions to manage
+    # docker
     environment:
       DSA_USER: ${DSA_USER:-}
       TMPDIR:
@@ -163,15 +177,13 @@ services:
       # Needed to use slicer_cli_web to run docker containers
       - /usr/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
-      # Location to store logs
-      - ./logs:/logs
       # Needed to allow transferring data to slicer_cli_web docker containers
       - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
       # Add additional mounts here to get access to existing files on your
       # system if they have the same path as on the girder container.
     depends_on:
       - rabbitmq
-    # See the girder container for an explaination of most of this.
+    # See the girder container for an explanation of most of this.
     # The main command is to run girder_worker
     command: bash -c '
       if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
@@ -182,5 +194,9 @@ services:
       adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $$(stat -c "%g" /var/run/docker.sock)) 2>/dev/null;
       su $$(id -nu $${DSA_USER%%:*}) -c "
       PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
-      DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=2 -Ofair --prefetch-multiplier=1 >>/logs/worker.log 2>&1
+      DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=2 -Ofair --prefetch-multiplier=1
       "'
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
