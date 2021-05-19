@@ -1,8 +1,8 @@
 import argparse
-import json
 import os
 import sys
 import tempfile
+import yaml
 
 from girder.models.assetstore import Assetstore
 from girder.models.collection import Collection
@@ -84,24 +84,34 @@ def provision(opts):
 
     :param opts: the argparse options.
     """
-    # If there is are no users, create an admin user
-    if User().findOne() is None:
-        User().createUser('admin', 'password', 'Admin', 'Admin', 'admin@nowhere.nil')
+    # If there is are no admin users, create an admin user
+    if User().findOne({'admin': True}) is None:
+        adminParams = dict({
+            'login': 'admin',
+            'password': 'password',
+            'firstName': 'Admin',
+            'lastName': 'Admin',
+            'email': 'admin@nowhere.nil',
+            'public': True,
+        }, **(opts.admin if opts.admin else {}))
+        User().createUser(admin=True, **adminParams)
     adminUser = User().findOne({'admin': True})
 
     # Make sure we have an assetstore
+    assetstoreParams = opts.assetstore or {'name': 'Assetstore', 'root': '/assetstore'}
+    assetstoreCreateMethod = assetstoreParams.pop('method', 'createFilesystemAssetstore')
     if Assetstore().findOne() is None:
-        Assetstore().createFilesystemAssetstore('Assetstore', '/assetstore')
+        getattr(Assetstore(), assetstoreCreateMethod)(**assetstoreParams)
 
     # Make sure we have a demo collection and download some demo files
     if getattr(opts, 'samples', None):
-        sampleFolder = get_sample_data(
+        get_sample_data(
             adminUser,
             getattr(opts, 'sample-collection', 'TCGA collection'),
             getattr(opts, 'sample-folder', 'Sample Images'))
     taskFolder = get_collection_folder(adminUser, 'Tasks', 'Slicer CLI Web Tasks')
     # Show label and macro images, plus tile and internal metadata for all users
-    settings = {
+    settings = dict({
         'worker.broker': 'amqp://guest:guest@rabbitmq',
         'worker.backend': 'rpc://guest:guest@rabbitmq',
         'worker.api_url': 'http://girder:8080/api/v1',
@@ -115,17 +125,28 @@ def provision(opts):
 
 Welcome to the **Digital Slide Archive**.
 
-Developers who want to use the Girder REST API should check out the [interactive web API docs](api/v1).
+Developers who want to use the Girder REST API should check out the
+[interactive web API docs](api/v1).
 
 The [HistomicsUI](histomics) application is enabled.""",
         'slicer_cli_web.task_folder': str(taskFolder['_id']),
-    }
+    }, **(opts.settings or {}))
     for key, value in settings.items():
-        print([key, value, Setting().get(key)])
-        if (getattr(opts, 'force', None) or
+        if (value != '__SKIP__' and (
+                getattr(opts, 'force', None) or
                 Setting().get(key) is None or
-                Setting().get(key) == Setting().getDefault(key)):
+                Setting().get(key) == Setting().getDefault(key))):
             Setting().set(key, value)
+
+
+class YamlAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, yaml.safe_load(values))
 
 
 if __name__ == '__main__':
@@ -141,6 +162,30 @@ if __name__ == '__main__':
         '--sample-collection', default='Sample Images', help='Sample data collection name')
     parser.add_argument(
         '--sample-folder', default='Images', help='Sample data folder name')
+    parser.add_argument(
+        '--admin', action=YamlAction,
+        help='A yaml dictionary of parameters used to create a default admin '
+        'user.  If any of login, password, firstName, lastName, email, or '
+        'public are not specified, some default values are used.')
+    parser.add_argument(
+        '--assetstore', action=YamlAction,
+        help='A yaml dictionary of parameters used to create a default '
+        'assetstore.  This can include "method" which includes the creation '
+        'method, such as "createFilesystemAssetstore" or '
+        '"createS3Assetstore".  Otherwise, this is a list of parameters '
+        'passed to the creation method.  For filesystem assetstores, these '
+        'parameters are name, root, and perms.  For S3 assetstores, these are '
+        'name, bucket, accessKeyId, secret, prefix, service, readOnly, '
+        'region, inferCredentials, and serverSideEncryption.  If unspecified, '
+        'a filesystem assetstore is created.')
+    parser.add_argument(
+        '--settings', action=YamlAction,
+        help='A yaml dictionary of settings to change in the Girder '
+        'database.  This is merged with the default settings dictionary.  '
+        'Settings are only changed if they are their default values or the '
+        'force option is used.  If a setting has a value of "__SKIP__", it '
+        'will not be changed (this can prevent setting a default setting '
+        'option to any value).')
     opts = parser.parse_args(args=sys.argv[1:])
     # This loads plugins, allowing setting validation
     configureServer()
