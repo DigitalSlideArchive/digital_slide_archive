@@ -44,7 +44,7 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3 --version && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
-RUN pip install ansible && \
+RUN pip install 'ansible<4' && \
     # reduce docker volume \
     bash -c 'rm -rf /usr/local/lib/python3.6/dist-packages/ansible/modules/{cloud,windows,storage}' && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
