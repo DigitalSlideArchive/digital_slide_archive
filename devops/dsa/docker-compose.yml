@@ -171,6 +171,7 @@ services:
     # docker
     environment:
       DSA_USER: ${DSA_USER:-}
+      DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
       TMPDIR:
     restart: unless-stopped
     volumes:
@@ -194,7 +195,7 @@ services:
       adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $$(stat -c "%g" /var/run/docker.sock)) 2>/dev/null;
       su $$(id -nu $${DSA_USER%%:*}) -c "
       PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
-      DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=2 -Ofair --prefetch-multiplier=1
+      DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=$${DSA_WORKER_CONCURRENCY:-2} -Ofair --prefetch-multiplier=1
       "'
     logging:
       options:
