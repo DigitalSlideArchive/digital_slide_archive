@@ -80,6 +80,8 @@ Update an installation
     # command-line parameters as you originally used to start the Digital Slide
     # Archive the first time.
     python deploy_docker.py start
+    
+After updating an installation, you may want to remove outdated docker images.  This can be done via ``docker image prune``, but when running the prune command, make sure that it only removes images you no longer need.
 
 Installing via Vagrant
 ----------------------
