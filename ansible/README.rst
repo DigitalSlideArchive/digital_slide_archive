@@ -62,6 +62,8 @@ By default, the deployment places all database, log, and assetstore files in the
 
 A default administrator account is created with the username ``admin`` and password ``password``.  The password can be changed after the first start, or a new administrator account with a different username can be created and the default ``admin`` user deleted.  If you change the administrator user or password, subsequent runs of ``deploy_docker.py`` will require specifying the appropriate user and password or passing the appropriate option to request the username and password on the terminal.
 
+Note that the ``deploy_docker.py`` needs to be run as a regular user, not root.
+
 Update an installation
 ######################
 
