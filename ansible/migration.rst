@@ -3,8 +3,8 @@ Migration Guide
 
 This document is intended to help transition between major versions of the Digital Slide Archive.  The reference deployment of the Digital Slide Archive uses the ``deploy_docker.py`` script.  If you have deployed the software via another means, these instructions will need some adjustments.
 
-From Girder 2.x and the HistomicsTK Respository
------------------------------------------------
+From Girder 2.x and the HistomicsTK Repository
+----------------------------------------------
 
 The Digital Slide Archive deployment was originally included as part of the HistomicsTK repository and used Girder 2.x as the underlying server.  To migrate from a Girder 2.x instance to the version in this repository, no special changes are needed -- just use the current ``deploy_docker.py`` script from this repository.
 
