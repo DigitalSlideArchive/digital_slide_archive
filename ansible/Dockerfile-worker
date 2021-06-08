@@ -83,7 +83,7 @@ RUN mkdir /opt/logs
 
 WORKDIR /opt/girder_worker
 
-# If the environment vairable
+# If the environment variable
 #   HOST_MONGO=true
 # is set, mongodb is added to the /etc/hosts as mapping to the docker host ip
 # address

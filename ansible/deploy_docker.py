@@ -828,7 +828,7 @@ addresses via -l 0.0.0.0).
 
 To determine the current mongo docker version, use a command like
   docker exec dsa_mongodb mongo girder --eval 'db.version()'
-To check if mongo can be upgraded, query the compatability mode via
+To check if mongo can be upgraded, query the compatibility mode via
   docker exec dsa_mongodb mongo girder --eval \\
   'db.adminCommand({getParameter: 1, featureCompatibilityVersion: 1})'
 Mongo can only be upgraded if the compatibility version is the same as the
@@ -950,7 +950,7 @@ if __name__ == '__main__':   # noqa
     parser.add_argument(
         '--memcached', default='docker',
         help='Either use memcached from docker or from host (docker, host, or '
-        'IP adress or hostname of host.')
+        'IP address or hostname of host.')
     parser.add_argument(
         '--mongo', '-m', default='docker',
         choices=['docker', 'host', '3.4', '3.6', '4.0', '4.2', '4.4', 'latest'],
@@ -1000,7 +1000,7 @@ if __name__ == '__main__':   # noqa
     parser.add_argument(
         '--rmq', default='docker',
         help='Either use rabbitmq from docker or from host (docker, host, or '
-        'IP adress or hostname of host.')
+        'IP address or hostname of host.')
     parser.add_argument(
         '--rmqconf', '--rmqcfg',
         help='Mount a local file as /etc/rabbitmq/rabbitmq.conf.')

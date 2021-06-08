@@ -82,4 +82,4 @@ Migration
 
 If you were using these scripts with the Girder 2 / HistomicsTK deployment, they will work in nearly the same manner.  Before, you would have cloned the HistomicsTK repository.  Instead, you'll need to check out this (the digital_slide_archive) repository and the HistomicsUI repository.
 
-All of the Girder plugin and user interface code was moved from the HistomicsTK repository to the HistomicsUI repository.  The exact direcories within the repository are slightly different: the UI (web client) moved from ``web_client`` to ``histomocsui/web_client``.  The server code moved from ``server`` to ``histomicsui`` code.  Tests now use the tox framework rather than cmake.
+All of the Girder plugin and user interface code was moved from the HistomicsTK repository to the HistomicsUI repository.  The exact directories within the repository are slightly different: the UI (web client) moved from ``web_client`` to ``histomocsui/web_client``.  The server code moved from ``server`` to ``histomicsui`` code.  Tests now use the tox framework rather than cmake.
