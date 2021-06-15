@@ -48,7 +48,9 @@ Sample Data
 
 Sample data can be added after performing ``docker-compose up`` by running::
 
-    python utils/cli_test.py dsarchive/histomicstk:latest
+    python utils/cli_test.py dsarchive/histomicstk:latest --test
+
+This downloads the HistomicsTK analysis tools, some sample data, and runs nuclei detection on some of the sample data.    
 
 
 Development

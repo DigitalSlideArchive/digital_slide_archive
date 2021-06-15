@@ -106,11 +106,11 @@ services:
     # - Start the main girder process.
     command: bash -c '
       if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
-      adduser -uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
-      addgroup -gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
-      addgroup -gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $$(stat -c "%g" /var/run/docker.sock)) 2>/dev/null;
+      adduser --uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
+      addgroup --gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null;
+      addgroup --gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $$(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null;
       sysctl -w net.ipv4.conf.eth0.route_localnet=1;
       iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017;
       iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 11211 -j DNAT --to-destination `dig +short memcached`:11211;
@@ -188,11 +188,11 @@ services:
     # The main command is to run girder_worker
     command: bash -c '
       if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
-      adduser -uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
-      addgroup -gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
-      addgroup -gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(id -ng $$(stat -c "%g" /var/run/docker.sock)) 2>/dev/null;
+      adduser --uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
+      addgroup --gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null;
+      addgroup --gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
+      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $$(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null;
       su $$(id -nu $${DSA_USER%%:*}) -c "
       PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
       DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=$${DSA_WORKER_CONCURRENCY:-2} -Ofair --prefetch-multiplier=1
