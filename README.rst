@@ -39,4 +39,4 @@ Docker tasks conforming to the `slicer_cli_web <https://github.com/girder/slicer
 
 Funding
 -------
-This work is funded in part by the `NIH grant U24-CA194362-01 <http://grantome.com/grant/NIH/U24-CA194362-01>`_.
+This work was funded in part by the `NIH grant U24-CA194362-01 <http://grantome.com/grant/NIH/U24-CA194362-01>`_.
