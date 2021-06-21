@@ -4,7 +4,7 @@
 #   --watch-plugin histomicsui
 # to the command line.
 
-# @@Q quotes each parameter.  echo forms a single string that can be added to 
+# @@Q quotes each parameter.  echo forms a single string that can be added to
 # a command without further quoting.
 var=$(echo "${@@Q}")
 

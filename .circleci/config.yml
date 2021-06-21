@@ -402,7 +402,7 @@ workflows:
             - test-py37
             - test-py38
             - test-py39
-            - docker-compose            
+            - docker-compose
           filters:
             tags:
               only: /^v.*/
@@ -417,7 +417,7 @@ workflows:
               ignore:
                 - gh-pages
   # We want to run a build periodically to make sure it still works and to use
-  # all dependant libraries.  To republish dockers sooner, a build can be rerun
+  # all dependent libraries.  To republish dockers sooner, a build can be rerun
   # manually.
   periodic:
     triggers:

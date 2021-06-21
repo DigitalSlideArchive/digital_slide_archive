@@ -5,7 +5,7 @@ The Digital Slide Archive is a system for working with large microscopy images.
 
 - Organize images from a variety of assetstores, such as local file systems and S3.
 
-- Provide user access controls. 
+- Provide user access controls.
 
 - Image annotation and review.
 
@@ -14,7 +14,7 @@ The Digital Slide Archive is a system for working with large microscopy images.
 Website
 -------
 
-See `https://digitalslidearchive.github.io/digital_slide_archive/` for information about the system.
+See `<https://digitalslidearchive.github.io/digital_slide_archive/>`_ for information about the system.
 
 Demo Instance
 -------------

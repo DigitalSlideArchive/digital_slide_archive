@@ -7,7 +7,7 @@
 # $SLICER_CLI_WEB to the slicer_cli_web source repository
 # $HISTOMICS_TESTDATA_FOLDER to a location to store data files
 
-# $DIR will be the folder of this script.  See 
+# $DIR will be the folder of this script.  See
 # https://stackoverflow.com/questions/59895
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink

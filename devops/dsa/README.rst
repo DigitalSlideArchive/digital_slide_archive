@@ -2,7 +2,7 @@
 Digital Slide Archive via Docker Compose
 ========================================
 
-This directory contains a complete docker-compose set up for the Digital Slide Archive.  
+This directory contains a complete docker-compose set up for the Digital Slide Archive.
 
 Edit the docker-compose.yml file (or add a docker-compose override file) to add mount points for additional data or for exposing additional ports.
 
@@ -50,7 +50,7 @@ Sample data can be added after performing ``docker-compose up`` by running::
 
     python utils/cli_test.py dsarchive/histomicstk:latest --test
 
-This downloads the HistomicsTK analysis tools, some sample data, and runs nuclei detection on some of the sample data.    
+This downloads the HistomicsTK analysis tools, some sample data, and runs nuclei detection on some of the sample data.
 
 
 Development
