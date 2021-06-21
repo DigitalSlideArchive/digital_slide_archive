@@ -13,17 +13,17 @@ run:
 
 * ``HISTOMICS_TESTDATA_FOLDER``: Folder where test data will be located on the
   host computer.  Data from this folder can be imported into a filesystem
-  assetstore from the ``/data`` directory.  This defaults to 
+  assetstore from the ``/data`` directory.  This defaults to
   ``~/.histomics_data`` if that directory is present.
 
-* ``HISTOMICS_SOURCE_FOLDER``: If the HistomicsUI repository is available 
+* ``HISTOMICS_SOURCE_FOLDER``: If the HistomicsUI repository is available
   locally, it is mounted into the running docker container to make development
-  easier.  This defaults to a directory located at ``../../HistomicsUI`` in 
+  easier.  This defaults to a directory located at ``../../HistomicsUI`` in
   relation to this README file.
 
-* ``SLICER_CLI_WEB_SOURCE_FOLDER``: If the slicer_cli_web repository is 
+* ``SLICER_CLI_WEB_SOURCE_FOLDER``: If the slicer_cli_web repository is
   available locally, it is mounted into the running docker container to make
-  development easier.  This defaults to a directory located at 
+  development easier.  This defaults to a directory located at
   ``../../slicer_cli_web`` in relation to this README file.
 
 Scripts
@@ -43,7 +43,7 @@ Usage
 Before other commands, it is assumed you have checked out this repository, and, optionally, the HistomicsUI repository::
 
   $ git clone https://github.com:DigitalSlideArchive/digital_slide_archive
-  $ git clone https://github.com:DigitalSlideArchive/HistomicsUI  
+  $ git clone https://github.com:DigitalSlideArchive/HistomicsUI
 
 A typical use case of these scripts is when one develops Digital Slide Archive and HistomicsUI locally on their computer.  It is possible to run everything inside docker containers to simplify deployment. This is typically  done using ``deploy_docker.py`` in the ``ansible`` folder with the command::
 

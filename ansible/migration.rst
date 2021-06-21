@@ -18,7 +18,7 @@ On the current deployment, data is stored, by default, in ``~/.dsa``.  In the Gi
 Mongo
 -----
 
-By default, the latest major version of MongoDB is used.  However, Mongo does not automatically upgrade the database files to work with more than one major version beyond the last update.  For instance, a database created in Mongo 3.4 will work with Mongo 3.6 but not Mongo 4.0. 
+By default, the latest major version of MongoDB is used.  However, Mongo does not automatically upgrade the database files to work with more than one major version beyond the last update.  For instance, a database created in Mongo 3.4 will work with Mongo 3.6 but not Mongo 4.0.
 
 If you have a running instance of the Digital Slide Archive, you can find out what version of Mongo the database is compatible to by issuing the command::
 
@@ -33,4 +33,3 @@ If this isn't the current version of Mongo, you can upgrade the database's compa
 would upgrade to Mongo 4.2.
 
 You can start the Digital Slide Archive with an older version of Mongo by specifying the version on the command line (e.g., ``deploy_docker.py --mongo=3.6``).  If your database is old enough, you might need to move one major version at a time, adjusting the compatibility version each time.
-

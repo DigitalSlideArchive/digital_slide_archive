@@ -32,4 +32,4 @@ To stop the Digital Slide Archive::
 Notes
 -----
 
-All data is stored in Docker volumes.  
+All data is stored in Docker volumes.

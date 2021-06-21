@@ -2,7 +2,7 @@
 Install Digital Slide Archive
 =============================
 
-There are several ways to install the Digital Slide Archive and HistomicsUI.  If you intend to use the interface, use the Docker installation.  If you don't have docker installed, the Vagrant installation is the easiest method. 
+There are several ways to install the Digital Slide Archive and HistomicsUI.  If you intend to use the interface, use the Docker installation.  If you don't have docker installed, the Vagrant installation is the easiest method.
 
 This has been tested on systems with 4 Gb of RAM and 20 Gb of disk space, though it works better with more memory.
 
@@ -32,7 +32,7 @@ After which, you will need re-evaluate group membership::
 Double check which version of pip is installed; Ubuntu 18.04 still defaults to pip version 9.0.1 which is quite old.
 
    pip --version
-   
+
 If your version is older than 19.0, upgrade pip to a more recent version
 
    sudo pip install --upgrade pip
@@ -80,7 +80,7 @@ Update an installation
     # command-line parameters as you originally used to start the Digital Slide
     # Archive the first time.
     python deploy_docker.py start
-    
+
 After updating an installation, you may want to remove outdated docker images.  This can be done via ``docker image prune``, but when running the prune command, make sure that it only removes images you no longer need.
 
 Installing via Vagrant
@@ -110,7 +110,7 @@ Deploy
     vagrant up
 
 The Girder instance can then be accessed at http://localhost:8009. Any image
-placed in the sample_images subdirectory of the directory where 
+placed in the sample_images subdirectory of the directory where
 digital_slide_archive is cloned will be seen in the TCGA collection of Girder.
 
 The front-end UI that allows you to apply analysis modules in HistomicsTK's
