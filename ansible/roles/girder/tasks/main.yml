@@ -1,7 +1,9 @@
 ---
-- name: Get the most recent version of pip
+- name: Get the most recent version of pip and setuptools
   pip:
-    name: pip
+    name:
+      - pip
+      - setuptools
     extra_args: -U
     virtualenv: "{{ girder_virtualenv }}"
     # Implicitly create a Python 3 virtualenv if it doesn't exist

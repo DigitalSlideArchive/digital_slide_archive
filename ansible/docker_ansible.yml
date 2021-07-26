@@ -51,6 +51,3 @@
     mongo_girder_database: girder
     mq_private_ip: rabbitmq
     memcached_url: memcached
-    # I'd rather use python 3.7, but ansible does not work with it without more
-    # fiddling
-    ansible_python_interpreter: python3.6

@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
 
 RUN apt-get update && \
@@ -10,8 +10,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     # Primary tools \
     sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
-    # Python 3.6 \
-    python3.6-dev python3.6-distutils \
+    # Python 3.8 \
+    python3.8-dev python3.8-distutils python3.8-venv \
     # Editors \
     vim nano \
     # Git \
@@ -27,12 +27,13 @@ RUN apt-get update && \
     apt-get install -y python3-apt && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 RUN locale-gen en_US.UTF-8
-# Make Python 3.6 the default to make ansible content
-RUN ln -s "$(which python3.6)" /usr/local/bin/python && \
-    ln -s "$(which python3.6)" /usr/local/bin/python3 && \
-    ln -s "$(which python3.6)" /usr/local/bin/python3m
+# Make Python 3.8 the default to make ansible content
+RUN ln -s "$(which python3.8)" /usr/local/bin/python && \
+    ln -s "$(which python3.8)" /usr/local/bin/python3 && \
+    ln -s "$(which python3.8)" /usr/local/bin/python3m
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
-    python3.6 get-pip.py && \
+    python3 get-pip.py && \
+    python3.8 get-pip.py && \
     rm get-pip.py && \
     which pip && \
     which python && \
@@ -44,11 +45,7 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3 --version && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
-RUN pip install 'ansible<4' && \
-    # reduce docker volume \
-    bash -c 'rm -rf /usr/local/lib/python3.6/dist-packages/ansible/modules/{cloud,windows,storage}' && \
-    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
-    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+RUN pip install --no-cache-dir ansible
 RUN adduser --disabled-password --gecos '' ubuntu && \
     adduser ubuntu sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -75,6 +72,8 @@ RUN sudo apt-get update && \
     gcc \
     # Convenience when updating from previous versions \
     mongodb-clients \
+    # Python 3.6 \
+    python3.6-dev python3.6-venv \
     # Python 3.7 \
     python3.7-dev python3.7-venv \
     # Python 3.8 \
@@ -84,6 +83,7 @@ RUN sudo apt-get update && \
     && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/*
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
+    python3.6 get-pip.py && \
     python3.7 get-pip.py && \
     python3.8 get-pip.py && \
     python3.9 get-pip.py && \
@@ -92,7 +92,7 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
     sudo apt-get install -y --no-install-recommends nodejs && \
-    nodejs --version && \
+    node --version && \
     npm --version && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/*
 
