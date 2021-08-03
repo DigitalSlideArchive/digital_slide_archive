@@ -77,7 +77,7 @@ RUN pip install --no-cache-dir --pre \
 
 # Build the girder web client
 RUN girder build --dev && \
-    # Git rid of unnecessary files to keep the docker image smaller \
+    # Get rid of unnecessary files to keep the docker image smaller \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /tmp/* ~/.npm
 
