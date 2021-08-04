@@ -30,8 +30,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Make sure core packages are up to date
 RUN python --version && \
-    pip install -U pip && \
-    pip install -U tox wheel
+    pip install --no-cache-dir -U pip && \
+    pip install --no-cache-dir -U tox wheel
 
 # Clone packages and pip install what we want to be local
 RUN cd /opt && \
