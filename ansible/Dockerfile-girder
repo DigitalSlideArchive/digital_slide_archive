@@ -45,7 +45,9 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
     python3 --version && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
-RUN pip install --no-cache-dir ansible
+RUN pip install --no-cache-dir ansible && \
+    sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 RUN adduser --disabled-password --gecos '' ubuntu && \
     adduser ubuntu sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
