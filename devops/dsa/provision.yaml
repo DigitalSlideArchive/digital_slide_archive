@@ -1,0 +1,50 @@
+---
+# The provision script can take a yaml file with provision options
+# This is a dictionary of command-line arguments for the provisioning script
+force: False
+samples: False
+sample-collection: Sample Images
+sample-folder: Images
+admin:
+  login: admin
+  password: password
+  firstName: Admin
+  lastName: Admin
+  email: admin@nowhere.nil
+  public: True
+assetstore:
+  method: createFilesystemAssetstore
+  name: Assetstore
+  root: /assetstore
+resources:
+  - model: collection
+    name: Tasks
+    creator: resource:admin
+    public: True
+  - model: folder
+    resourcepath: "collection/Tasks/Slicer CLI Web Tasks"
+    parent: resource:collection/Tasks
+    parentType: collection
+    name: "Slicer CLI Web Tasks"
+    creator: resource:admin
+    public: True
+settings:
+  worker.broker: "amqp://guest:guest@rabbitmq"
+  worker.backend: "rpc://guest:guest@rabbitmq"
+  worker.api_url: "http://girder:8080/api/v1"
+  worker.direct_path: True
+  core.brand_name: "Digital Slide Archive"
+  histomicsui.webroot_path: "histomics"
+  histomicsui.alternate_webroot_path: "histomicstk"
+  homepage.markdown: >
+    # Digital Slide Archive
+    ---
+    ## Bioinformatics Platform
+
+    Welcome to the **Digital Slide Archive**.
+
+    Developers who want to use the Girder REST API should check out the
+    [interactive web API docs](api/v1).
+
+    The [HistomicsUI](histomics) application is enabled.
+  slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"

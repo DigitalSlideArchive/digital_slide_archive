@@ -20,6 +20,8 @@ services:
     # owned by that user and provides permissions to manage docker
     environment:
       DSA_USER: ${DSA_USER:-}
+      # Enable this to automatically use the provisioning yaml
+      # DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
@@ -34,6 +36,8 @@ services:
       - ./girder.cfg:/etc/girder.cfg
       # Location of provision.py
       - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      # - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ./start_girder.sh:/opt/digital_slide_archive/devops/dsa/start_girder.sh
       # Location to store logs
       - ./logs:/logs
 
@@ -82,45 +86,7 @@ services:
       - mongodb
       - memcached
       - rabbitmq
-    # The command does:
-    # - Ensures that the main process runs as the DSA_USER and is part of both
-    #   that group and the docker group.  This is done by:
-    #   - adding a user with the DSA_USER's id; this user is named ubuntu if it
-    #     doesn't exist.
-    #   - adds a group with the DSA_USER's group id.
-    #   - adds the user to the user group.
-    #   - adds a group with the docker group id.
-    #   - adds the user to the docker group.
-    # - Use iptables to make some services appear as if they are on localhost
-    #   (as well as on the docker network).  This is done to allow tox tests to
-    #   run.
-    # - Run subsequent commands as the DSA_USER.  This sets some paths based on
-    #   what is expected in the Docker so that the current python environment
-    #   and the devops/dsa/utils are available.
-    # - Provision the Girder instance.  This sets values in the database, such
-    #   as creating an admin user if there isn't one.  See the provision.py
-    #   script for the details.
-    # - If possible, set up a girder mount.  This allows file-like access of
-    #   girder resources.  It requires the host to have fuse installed and
-    #   the docker container to be run with enough permissions to use fuse.
-    # - Start the main girder process.
-    command: bash -c '
-      if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
-      adduser --uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
-      addgroup --gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null;
-      addgroup --gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $$(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null;
-      sysctl -w net.ipv4.conf.eth0.route_localnet=1;
-      iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017;
-      iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 11211 -j DNAT --to-destination `dig +short memcached`:11211;
-      iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE;
-      su $$(id -nu $${DSA_USER%%:*}) -c "
-      PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
-      python /opt/digital_slide_archive/devops/dsa/provision.py &&
-      (girder mount /fuse || true) &&
-      girder serve --dev
-      "'
+    command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
   mongodb:
     image: "mongo:latest"
     # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
@@ -178,25 +144,15 @@ services:
       # Needed to use slicer_cli_web to run docker containers
       - /usr/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
+      # Allow overriding the start command
+      - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
       # Needed to allow transferring data to slicer_cli_web docker containers
       - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
       # Add additional mounts here to get access to existing files on your
       # system if they have the same path as on the girder container.
     depends_on:
       - rabbitmq
-    # See the girder container for an explanation of most of this.
-    # The main command is to run girder_worker
-    command: bash -c '
-      if [[ -z "$DSA_USER" ]]; then echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"; exit 1; fi;
-      adduser --uid $${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
-      addgroup --gid $${DSA_USER#*:} $$(id -ng $${DSA_USER#*:}) 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null;
-      addgroup --gid $$(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
-      adduser $$(id -nu $${DSA_USER%%:*}) $$(getent group $$(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null;
-      su $$(id -nu $${DSA_USER%%:*}) -c "
-      PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
-      DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=$${DSA_WORKER_CONCURRENCY:-2} -Ofair --prefetch-multiplier=1
-      "'
+    command: /opt/digital_slide_archive/devops/dsa/start_worker.sh
     logging:
       options:
         max-size: "10M"
