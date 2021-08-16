@@ -9,6 +9,7 @@ import tempfile
 import girder.utility.path as path_util
 import girder_client
 import yaml
+from girder.models import getDbConnection
 from girder.models.assetstore import Assetstore
 from girder.models.collection import Collection
 from girder.models.folder import Folder
@@ -289,6 +290,10 @@ if __name__ == '__main__':
         'The yaml file is a dictionary of keys as would be passed to the '
         'command line.')
     parser.add_argument(
+        '--no-mongo-compat', action='store_false', dest='mongo_compat',
+        default=None, help='Do not automatically set the mongo feature '
+        'compatibility version to the current server version.')
+    parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='Increase verbosity')
     opts = parser.parse_args(args=sys.argv[1:])
     logger.addHandler(logging.StreamHandler(sys.stderr))
@@ -297,4 +302,11 @@ if __name__ == '__main__':
     opts = merge_yaml_opts(opts, parser)
     # This loads plugins, allowing setting validation
     configureServer()
+    if getattr(opts, 'mongo_compat', None) is not False:
+        try:
+            db = getDbConnection()
+            db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
+                db.server_info()['version'].split('.')[:2])})
+        except Exception:
+            logger.warning('Could not set mongo feature compatibility version.')
     provision(opts)
