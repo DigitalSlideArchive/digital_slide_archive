@@ -307,6 +307,10 @@ if __name__ == '__main__':
             db = getDbConnection()
             db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
                 db.server_info()['version'].split('.')[:2])})
+            # Also attempt to upgrade old version 2 image sources
+            db.item.update_many(
+                {'largeImage.sourceName': 'svs'},
+                {'$set': {'largeImage.sourceName': 'openslide'}})
         except Exception:
             logger.warning('Could not set mongo feature compatibility version.')
     provision(opts)

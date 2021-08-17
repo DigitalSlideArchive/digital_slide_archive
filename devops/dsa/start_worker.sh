@@ -7,15 +7,16 @@ if [[ -z "$DSA_USER" ]]; then
 fi
 # add a user with the DSA_USER's id; this user is named ubuntu if it doesn't
 # exist.
-adduser --uid ${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
+adduser --uid ${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null
 # add a group with the DSA_USER's group id.
-addgroup --gid ${DSA_USER#*:} $(id -ng ${DSA_USER#*:}) 2>/dev/null;
+addgroup --gid ${DSA_USER#*:} $(id -ng ${DSA_USER#*:}) 2>/dev/null
 # add the user to the user group.
-adduser $(id -nu ${DSA_USER%%:*}) $(getent group ${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null;
+adduser $(id -nu ${DSA_USER%%:*}) $(getent group ${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null
 # add a group with the docker group id.
-addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
+addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null
 # add the user to the docker group.
-adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null;
+adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null
+chmod 777 ${TMPDIR:-/tmp} || true
 # Run subsequent commands as the DSA_USER.  This sets some paths based on what
 # is expected in the Docker so that the current python environment and the
 # devops/dsa/utils are available.  Then it runs girder_worker

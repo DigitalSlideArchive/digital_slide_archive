@@ -2,12 +2,13 @@
 
 import argparse
 import getpass
-import girder_client
 import random
-import six
 import sys
 import tempfile
 import time
+
+import girder_client
+import six
 
 
 def get_girder_client(opts):
@@ -214,7 +215,7 @@ def test_tiles(client, folder, opts):
         }, jsonResp=False)
         region = result.content
         if region[1:4] != b'PNG' or len(region) < 6000:
-            raise Exception('Region didn\'t give expected results')
+            raise Exception('Region did not give expected results')
 
 
 def wait_for_job(client, job):
@@ -260,7 +261,7 @@ if __name__ == '__main__':
         help='The Girder admin username.  If not specified, a prompt is given.')
     parser.add_argument(
         '--no-cli', '--nocli', action='store_true', dest='nocli',
-        help='Don\'t pull and upload the cli; assume it is already present.')
+        help='Do not pull and upload the cli; assume it is already present.')
     parser.add_argument(
         '--no-region', '--noregion', '--whole', action='store_true',
         dest='noregion',
@@ -278,12 +279,16 @@ if __name__ == '__main__':
         help='Use local test data and check that basic functions work.')
     parser.add_argument(
         '--no-test', action='store_false', dest='test',
-        help='Don\'t download test data and don\'t run checks.')
+        help='Do not download test data and do not run checks.')
     parser.add_argument(
         '--test-id', dest='testid', help='The ID of the item to test.')
     parser.add_argument(
         '--test-arg', '--arg', '--testarg', dest='testarg', action='append',
         help='Test arguments.  These should be of the form <key>=<value>.')
+    parser.add_argument(
+        '--only-data', '--data', action='store_const', dest='test',
+        const='data',
+        help='Download test data, but do not run CLI.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
     args = parser.parse_args()
@@ -295,4 +300,5 @@ if __name__ == '__main__':
     if args.test:
         folder = get_test_data(client, vars(args))
         test_tiles(client, folder, vars(args))
-        test_cli(client, folder, vars(args))
+        if args.test != 'data':
+            test_cli(client, folder, vars(args))
