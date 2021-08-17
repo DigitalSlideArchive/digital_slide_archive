@@ -7,21 +7,21 @@ if [[ -z "$DSA_USER" ]]; then
 fi
 # add a user with the DSA_USER's id; this user is named ubuntu if it doesn't
 # exist.
-adduser --uid ${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null;
+adduser --uid ${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null
 # add a group with the DSA_USER's group id.
-addgroup --gid ${DSA_USER#*:} $(id -ng ${DSA_USER#*:}) 2>/dev/null;
+addgroup --gid ${DSA_USER#*:} $(id -ng ${DSA_USER#*:}) 2>/dev/null
 # add the user to the user group.
-adduser $(id -nu ${DSA_USER%%:*}) $(getent group ${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null;
+adduser $(id -nu ${DSA_USER%%:*}) $(getent group ${DSA_USER#*:} | cut "-d:" -f1) 2>/dev/null
 # add a group with the docker group id.
-addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null;
+addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null
 # add the user to the docker group.
-adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null;
+adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null
 # Use iptables to make some services appear as if they are on localhost (as
 # well as on the docker network).  This is done to allow tox tests to run.
-sysctl -w net.ipv4.conf.eth0.route_localnet=1;
-iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017;
-iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 11211 -j DNAT --to-destination `dig +short memcached`:11211;
-iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE;
+sysctl -w net.ipv4.conf.eth0.route_localnet=1
+iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017
+iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 11211 -j DNAT --to-destination `dig +short memcached`:11211
+iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE
 # Run subsequent commands as the DSA_USER.  This sets some paths based on what
 # is expected in the Docker so that the current python environment and the
 # devops/dsa/utils are available.  Then:
