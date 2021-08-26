@@ -305,12 +305,18 @@ if __name__ == '__main__':
     if getattr(opts, 'mongo_compat', None) is not False:
         try:
             db = getDbConnection()
+        except Exception:
+            logger.warning('Could not connect to mongo.')
+        try:
             db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
                 db.server_info()['version'].split('.')[:2])})
+        except Exception:
+            logger.warning('Could not set mongo feature compatibility version.')
+        try:
             # Also attempt to upgrade old version 2 image sources
-            db.item.update_many(
+            db.girder.item.update_many(
                 {'largeImage.sourceName': 'svs'},
                 {'$set': {'largeImage.sourceName': 'openslide'}})
         except Exception:
-            logger.warning('Could not set mongo feature compatibility version.')
+            logger.warning('Could not update old source names.')
     provision(opts)
