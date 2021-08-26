@@ -260,23 +260,7 @@
       public: yes
     state: present
   register: sample_images_folder
-  when: (vagrant is defined) or (docker is defined)
-  tags: data_import
-
-- name: Import sample images into filesystem assetstore
-  girder:
-    port: "{{ girder_socket_port|string }}"
-    scheme: "{{ girder_socket_scheme }}"
-    username: "{{ girder_admin_user }}"
-    password: "{{ girder_admin_password }}"
-    post:
-      path: "assetstore/{{ assetstore_list['gc_return'][0]['_id'] }}/import"
-      parameters:
-        importPath: /vagrant/sample_images
-        destinationType: folder
-        destinationId: "{{ sample_images_folder['gc_return']['_id'] }}"
-        fileExcludeRegex: "\\.gitignore"
-  when: vagrant is defined
+  when: docker is defined
   tags: data_import
 
 - name: Ensure the existence of the Tasks collection
@@ -289,7 +273,7 @@
       name: Tasks
       public: yes
     state: present
-  when: (vagrant is defined) or (docker is defined)
+  when: docker is defined
   register: tasks_collection
 
 - name: Ensure the existence of the Slicer CLI Web Tasks folder
@@ -305,7 +289,7 @@
       public: yes
     state: present
   register: slicer_cli_tasks_folder
-  when: (vagrant is defined) or (docker is defined)
+  when: docker is defined
 
 - name: Set the slicer_cli_web default folder
   girder:
@@ -318,7 +302,7 @@
       parameters:
         key: slicer_cli_web.task_folder
         value: "{{ slicer_cli_tasks_folder['gc_return']['_id'] }}"
-  when: (vagrant is defined) or (docker is defined)
+  when: docker is defined
 
 - name: Update from version 2.x as needed
   shell: >

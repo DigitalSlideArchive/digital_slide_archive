@@ -37,7 +37,7 @@
     update_cache: yes
     install_recommends: no
   become: true
-  when: (vagrant is defined) or (docker is defined)
+  when: docker is defined
 
 - name: Upgrade system packages
   apt:
@@ -46,7 +46,7 @@
     update_cache: yes
     install_recommends: no
   become: true
-  when: (vagrant is defined) or (docker is defined)
+  when: docker is defined
 
 - name: Install pycurl and apt-transport-https package in order to use the apt_repository module and install from https
   apt:
@@ -56,22 +56,6 @@
     install_recommends: no
     state: present
   become: true
-
-- name: Install mongo shell on vagrant
-  apt:
-    name:
-      - mongodb-org-shell
-    install_recommends: no
-    state: present
-  become: true
-  when: vagrant is defined
-
-- name: Start mongo service on vagrant
-  service:
-    name: mongod
-    state: started
-  become: true
-  when: vagrant is defined
 
 - name: Install packages needed for girder plugins
   apt:
@@ -115,23 +99,10 @@
   become: true
   when: docker is defined
 
-- name: Fetch python3-distutils on vagrant
+- name: Fetch python3-distutils
   apt:
     name:
       - python3-distutils
     install_recommends: no
     state: present
-  become: true
-
-- name: Fetch pip on vagrant
-  get_url:
-    url: https://bootstrap.pypa.io/get-pip.py
-    dest: /tmp
-  when: vagrant is defined
-
-- name: Install pip on vagrant
-  shell: >-
-    python3 /tmp/get-pip.py
-    pip --upgrade pip
-  when: vagrant is defined
   become: true
