@@ -76,9 +76,11 @@ RUN pip install --no-cache-dir --pre \
     girder-xtk-demo
 
 # Build the girder web client
-RUN girder build --dev && \
+RUN NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=warn NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true \
+    girder build --dev && \
     # Get rid of unnecessary files to keep the docker image smaller \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    find /opt -name package-lock.json -exec rm -f {} \+ && \
     rm -rf /tmp/* ~/.npm
 
 # Install phantomjs for testing
