@@ -11,6 +11,11 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 # Papers and Publications list
 # =================================
 publications:
+  - title: "PodoSighter: A Cloud-Based Tool for Label-Free Podocyte Detection in Kidney Whole Slide Images"
+    full-citation: "Govind, Darshana, Jan Becker, Jeffrey Miecznikowski, Avi Rosenberg, Julien Dang, Pierre Louis Tharaux, Rabi Yacoub, et al. 2021. “PodoSighter: A Cloud-Based Tool for Label-Free Podocyte Detection in Kidney Whole Slide Images.” Journal of the American Society of Nephrology, September, ASN.2021050630."
+    DOI_link: https://doi.org/10.1681/asn.2021050630
+    link: https://doi.org/10.1681/asn.2021050630
+    DOI: 10.1681/asn.2021050630
   - title: User Friendly, Cloud Based, Whole Slide Image Segmentation.
     full-citation: "Lutnick, Brendon, Avinash Kammardi Shashiprakash, David Manthey, and Pinaki Sarder. 2021. “User Friendly, Cloud Based, Whole Slide Image Segmentation.” In Medical Imaging 2021: Digital Pathology, edited by John E. Tomaszewski and Aaron D. Ward. SPIE."
     DOI_link: https://doi.org/10.1117/12.2581383
