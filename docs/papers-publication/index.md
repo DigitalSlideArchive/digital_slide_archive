@@ -11,6 +11,11 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 # Papers and Publications list
 # =================================
 publications:
+  - title: "Explainable Nucleus Classification Using Decision Tree Approximation of Learned Embeddings"
+    full-citation: "Amgad, Mohamed, LameesA Atteya, Hagar Hussein, Kareem Hosny Mohammed, Ehab Hafiz, Maha A T Elsebaie, Pooya Mobadersany, et al. 2021. “Explainable Nucleus Classification Using Decision Tree Approximation of Learned Embeddings.” Edited by Jinbo Xu. Bioinformatics, September."
+    DOI_link: https://doi.org/10.1093/bioinformatics/btab670
+    link: https://doi.org/10.1093/bioinformatics/btab670
+    DOI: 10.1093/bioinformatics/btab670
   - title: "PodoSighter: A Cloud-Based Tool for Label-Free Podocyte Detection in Kidney Whole Slide Images"
     full-citation: "Govind, Darshana, Jan Becker, Jeffrey Miecznikowski, Avi Rosenberg, Julien Dang, Pierre Louis Tharaux, Rabi Yacoub, et al. 2021. “PodoSighter: A Cloud-Based Tool for Label-Free Podocyte Detection in Kidney Whole Slide Images.” Journal of the American Society of Nephrology, September, ASN.2021050630."
     DOI_link: https://doi.org/10.1681/asn.2021050630
