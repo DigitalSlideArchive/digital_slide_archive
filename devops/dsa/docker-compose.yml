@@ -125,6 +125,8 @@ services:
     # Uncomment to allow access to rabbitmq from outside of the docker network
     # ports:
     #   - "5672"
+    volumes:
+      - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
     logging:
       options:
         max-size: "10M"
