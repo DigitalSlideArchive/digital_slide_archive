@@ -7,7 +7,6 @@ import sys
 import tempfile
 
 import girder.utility.path as path_util
-import girder_client
 import yaml
 from girder.models import getDbConnection
 from girder.models.assetstore import Assetstore
@@ -19,7 +18,6 @@ from girder.models.upload import Upload
 from girder.models.user import User
 from girder.utility.model_importer import ModelImporter
 from girder.utility.server import configureServer
-from girder_large_image.models.image_item import ImageItem
 
 logger = logging.getLogger(__name__)
 # See http://docs.python.org/3.3/howto/logging.html#configuring-logging-for-a-library
@@ -49,6 +47,9 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
     :param folderName: the folder name where the data will bed aded.
     :returns: the folder where the sample data is located.
     """
+    import girder_client
+    from girder_large_image.models.image_item import ImageItem
+
     folder = get_collection_folder(adminUser, collName, folderName)
     remote = girder_client.GirderClient(apiUrl='https://data.kitware.com/api/v1')
     remoteFolder = remote.resourceLookup('/collection/HistomicsTK/Deployment test images')
@@ -163,30 +164,34 @@ def provision(opts):
             adminUser,
             getattr(opts, 'sample-collection', 'TCGA collection'),
             getattr(opts, 'sample-folder', 'Sample Images'))
-    taskFolder = get_collection_folder(adminUser, 'Tasks', 'Slicer CLI Web Tasks')
+    if getattr(opts, 'use_defaults', None) is not False:
+        taskFolder = get_collection_folder(adminUser, 'Tasks', 'Slicer CLI Web Tasks')
     if opts.resources:
         provision_resources(opts.resources, adminUser)
     # Show label and macro images, plus tile and internal metadata for all users
-    settings = dict({
-        'worker.broker': 'amqp://guest:guest@rabbitmq',
-        'worker.backend': 'rpc://guest:guest@rabbitmq',
-        'worker.api_url': 'http://girder:8080/api/v1',
-        'worker.direct_path': True,
-        'core.brand_name': 'Digital Slide Archive',
-        'histomicsui.webroot_path': 'histomics',
-        'histomicsui.alternate_webroot_path': 'histomicstk',
-        'homepage.markdown': """# Digital Slide Archive
----
-## Bioinformatics Platform
+    if getattr(opts, 'use_defaults', None) is not False:
+        settings = dict({
+            'worker.broker': 'amqp://guest:guest@rabbitmq',
+            'worker.backend': 'rpc://guest:guest@rabbitmq',
+            'worker.api_url': 'http://girder:8080/api/v1',
+            'worker.direct_path': True,
+            'core.brand_name': 'Digital Slide Archive',
+            'histomicsui.webroot_path': 'histomics',
+            'histomicsui.alternate_webroot_path': 'histomicstk',
+            'homepage.markdown': """# Digital Slide Archive
+    ---
+    ## Bioinformatics Platform
 
-Welcome to the **Digital Slide Archive**.
+    Welcome to the **Digital Slide Archive**.
 
-Developers who want to use the Girder REST API should check out the
-[interactive web API docs](api/v1).
+    Developers who want to use the Girder REST API should check out the
+    [interactive web API docs](api/v1).
 
-The [HistomicsUI](histomics) application is enabled.""",
-        'slicer_cli_web.task_folder': str(taskFolder['_id']),
-    }, **(opts.settings or {}))
+    The [HistomicsUI](histomics) application is enabled.""",
+            'slicer_cli_web.task_folder': str(taskFolder['_id']),
+        }, **(opts.settings or {}))
+    else:
+        settings = dict({}, **(opts.settings or {}))
     for key, value in settings.items():
         if (value != '__SKIP__' and (
                 getattr(opts, 'force', None) or
@@ -293,6 +298,10 @@ if __name__ == '__main__':
         '--no-mongo-compat', action='store_false', dest='mongo_compat',
         default=None, help='Do not automatically set the mongo feature '
         'compatibility version to the current server version.')
+    parser.add_argument(
+        '--no-defaults', action='store_false', dest='use_defaults',
+        default=None, help='Do not use default settings; start with a minimal '
+        'number of parameters.')
     parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='Increase verbosity')
     opts = parser.parse_args(args=sys.argv[1:])
