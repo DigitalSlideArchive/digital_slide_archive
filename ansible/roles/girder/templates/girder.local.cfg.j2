@@ -2,6 +2,7 @@
 server.socket_host = "0.0.0.0"
 server.socket_port = {{ girder_socket_port }}
 server.thread_pool = 100
+server.max_request_body_size = 1073741824
 
 [database]
 uri = "mongodb://{{ mongo_private_ip }}:27017/{{ mongo_girder_database }}?socketTimeoutMS=3600000"
