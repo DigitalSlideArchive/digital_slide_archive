@@ -154,9 +154,12 @@ def provision(opts):
 
     # Make sure we have an assetstore
     assetstoreParams = opts.assetstore or {'name': 'Assetstore', 'root': '/assetstore'}
-    assetstoreCreateMethod = assetstoreParams.pop('method', 'createFilesystemAssetstore')
+    if not isinstance(assetstoreParams, list):
+        assetstoreParams = [assetstoreParams]
     if Assetstore().findOne() is None:
-        getattr(Assetstore(), assetstoreCreateMethod)(**assetstoreParams)
+        for params in assetstoreParams:
+            method = params.pop('method', 'createFilesystemAssetstore')
+            getattr(Assetstore(), method)(**params)
 
     # Make sure we have a demo collection and download some demo files
     if getattr(opts, 'samples', None):
@@ -261,9 +264,9 @@ if __name__ == '__main__':
         'public are not specified, some default values are used.')
     parser.add_argument(
         '--assetstore', action=YamlAction,
-        help='A yaml dictionary of parameters used to create a default '
-        'assetstore.  This can include "method" which includes the creation '
-        'method, such as "createFilesystemAssetstore" or '
+        help='A yaml dictionary (or list of dictionaries) of parameters used to '
+        'create a default assetstore.  This can include "method" which includes '
+        'the creation method, such as "createFilesystemAssetstore" or '
         '"createS3Assetstore".  Otherwise, this is a list of parameters '
         'passed to the creation method.  For filesystem assetstores, these '
         'parameters are name, root, and perms.  For S3 assetstores, these are '
