@@ -63,7 +63,7 @@ RUN cd /opt && \
 RUN cd /opt && \
     git clone https://github.com/DigitalSlideArchive/HistomicsUI && \
     cd /opt/HistomicsUI && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir -e .[analysis]
 
 # Install additional girder plugins
 RUN pip install --no-cache-dir --pre \
