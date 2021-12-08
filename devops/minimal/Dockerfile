@@ -14,7 +14,7 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
     chmod +x /usr/bin/tini
 
 RUN pip install \
-    histomicsui[analysis] \
+    histomicsui \
     large_image[sources] \
     girder-homepage \
     --find-links https://girder.github.io/large_image_wheels
