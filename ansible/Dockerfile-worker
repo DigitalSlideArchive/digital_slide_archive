@@ -7,9 +7,11 @@ RUN apt-get update && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --yes --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade && \
+    apt-get remove -y python3-apt && \
     apt-get install -y --no-install-recommends \
     # Primary tools \
     sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
+    python3-apt \
     # Python 3.8 \
     python3.8-dev python3.8-distutils python3.8-venv \
     # Editors \
@@ -23,8 +25,6 @@ RUN apt-get update && \
     # Install some additional packages for convenience when testing with bash \
     iputils-ping telnet-ssl tmux less \
     && \
-    apt-get remove -y python3-apt && \
-    apt-get install -y python3-apt && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 RUN locale-gen en_US.UTF-8
 # Make Python 3.8 the default to make ansible content
@@ -32,8 +32,10 @@ RUN ln -s "$(which python3.8)" /usr/local/bin/python && \
     ln -s "$(which python3.8)" /usr/local/bin/python3 && \
     ln -s "$(which python3.8)" /usr/local/bin/python3m
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
-    python3 get-pip.py && \
-    python3.8 get-pip.py && \
+    # As of 2021-12-20, the SETUPTOOLS_USE_DISTUTILS flag is needed to \
+    # install pip \
+    SETUPTOOLS_USE_DISTUTILS=stdlib python3 get-pip.py && \
+    SETUPTOOLS_USE_DISTUTILS=stdlib python3.8 get-pip.py && \
     rm get-pip.py && \
     which pip && \
     which python && \
