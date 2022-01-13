@@ -46,7 +46,7 @@ RUN cd /opt && \
     pip install --no-cache-dir -e .
 
 RUN cd /opt && \
-    git clone https://github.com/girder/girder_worker -b nvidia-device-requests && \
+    git clone https://github.com/girder/girder_worker && \
     cd /opt/girder_worker && \
     pip install --no-cache-dir -e .[girder,worker]
 
