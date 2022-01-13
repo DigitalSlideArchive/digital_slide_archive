@@ -3,5 +3,5 @@ girder_version: master
 slicer_cli_web_version: master
 histomicsui_version: master
 large_image_version: master
-girder_worker_version: master
+girder_worker_version: nvidia-device-requests
 girder_worker_utils_version: master
