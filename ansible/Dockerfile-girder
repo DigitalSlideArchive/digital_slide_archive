@@ -87,10 +87,11 @@ RUN sudo apt-get update && \
     && \
     sudo rm -rf /var/lib/apt/lists/* /tmp/*
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
-    SETUPTOOLS_USE_DISTUTILS=stdlib python3.6 get-pip.py && \
     SETUPTOOLS_USE_DISTUTILS=stdlib python3.7 get-pip.py && \
     SETUPTOOLS_USE_DISTUTILS=stdlib python3.8 get-pip.py && \
     SETUPTOOLS_USE_DISTUTILS=stdlib python3.9 get-pip.py && \
+    curl --silent https://bootstrap.pypa.io/pip/3.6/get-pip.py -O && \
+    SETUPTOOLS_USE_DISTUTILS=stdlib python3.6 get-pip.py && \
     rm get-pip.py && \
     sudo find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     sudo find / -xdev -name __pycache__ -type d -exec rm -r {} \+

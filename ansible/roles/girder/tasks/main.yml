@@ -3,7 +3,7 @@
   pip:
     name:
       - pip
-      - setuptools
+      - 'setuptools<60.6.0'
     extra_args: -U
     virtualenv: "{{ girder_virtualenv }}"
     # Implicitly create a Python 3 virtualenv if it doesn't exist
