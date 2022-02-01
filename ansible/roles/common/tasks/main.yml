@@ -1,4 +1,11 @@
 ---
+- name: Get the most recent version of pip
+  pip:
+    name:
+      - pip
+      - 'setuptools<60.6.0'
+    extra_args: -U
+
 - name: Ensure the girder group exists
   group:
     name: "{{ girder_exec_group }}"
