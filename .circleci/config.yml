@@ -42,7 +42,7 @@ jobs:
   build:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - run:
@@ -71,7 +71,7 @@ jobs:
   test-cli:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - usedockers
@@ -93,7 +93,7 @@ jobs:
     # This tests injecting a custom config file and proxy path locations
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - usedockers
@@ -141,7 +141,7 @@ jobs:
   test-girder-build:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - usedockers
@@ -167,7 +167,7 @@ jobs:
   test-histomicsui:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - usedockers
@@ -179,14 +179,14 @@ jobs:
   docker-compose:
     working_directory: ~/project
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - run:
-          name: Use Python 3.7
+          name: Use Python 3.9
           command: |
             pyenv versions
-            pyenv global 3.7.0
+            pyenv global 3.9.7
             pip --version
       - run:
           name: Run docker-compose up
@@ -223,7 +223,7 @@ jobs:
   publish-docker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - usedockers
