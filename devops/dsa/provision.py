@@ -47,7 +47,11 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
     :param folderName: the folder name where the data will bed aded.
     :returns: the folder where the sample data is located.
     """
-    import girder_client
+    try:
+        import girder_client
+    except ImportError:
+        logger.error('girder_client is unavailable.  Cannot get sample data.')
+        return
     from girder_large_image.models.image_item import ImageItem
 
     folder = get_collection_folder(adminUser, collName, folderName)
