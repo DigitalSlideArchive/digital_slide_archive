@@ -33,3 +33,5 @@ Notes
 -----
 
 All data is stored in Docker volumes.
+
+If you use a non-filesystem assetstore, you'll need to expand from this minimal example to have full functionality, such as using ``girder mount`` to allow some images to be viewed.
