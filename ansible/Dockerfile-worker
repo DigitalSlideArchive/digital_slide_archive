@@ -32,10 +32,8 @@ RUN ln -s "$(which python3.8)" /usr/local/bin/python && \
     ln -s "$(which python3.8)" /usr/local/bin/python3 && \
     ln -s "$(which python3.8)" /usr/local/bin/python3m
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py -O && \
-    # As of 2021-12-20, the SETUPTOOLS_USE_DISTUTILS flag is needed to \
-    # install pip \
-    SETUPTOOLS_USE_DISTUTILS=stdlib python3 get-pip.py && \
-    SETUPTOOLS_USE_DISTUTILS=stdlib python3.8 get-pip.py && \
+    python3 get-pip.py && \
+    python3.8 get-pip.py && \
     rm get-pip.py && \
     which pip && \
     which python && \
