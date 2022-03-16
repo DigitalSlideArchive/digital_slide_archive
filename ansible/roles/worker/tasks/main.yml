@@ -44,7 +44,7 @@
 
 - name: Clone girder_worker
   git:
-    repo: git://github.com/girder/girder_worker.git
+    repo: https://github.com/girder/girder_worker.git
     dest: /opt/girder_worker
     accept_hostkey: yes
     force: yes
@@ -68,7 +68,7 @@
 
 - name: Clone girder_worker_utils
   git:
-    repo: git://github.com/girder/girder_worker_utils.git
+    repo: https://github.com/girder/girder_worker_utils.git
     dest: /opt/girder_worker_utils
     accept_hostkey: yes
     version: "{{ girder_worker_utils_version }}"
@@ -82,7 +82,7 @@
 
 - name: Clone large_image
   git:
-    repo: git://github.com/girder/large_image.git
+    repo: https://github.com/girder/large_image.git
     dest: /opt/large_image
     accept_hostkey: yes
     force: yes
@@ -98,7 +98,7 @@
 
 - name: Clone slicer_cli_web
   git:
-    repo: git://github.com/girder/slicer_cli_web.git
+    repo: https://github.com/girder/slicer_cli_web.git
     dest: /opt/slicer_cli_web
     accept_hostkey: yes
     version: "{{ slicer_cli_web_version }}"
