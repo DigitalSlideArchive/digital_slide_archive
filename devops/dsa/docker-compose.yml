@@ -14,7 +14,7 @@ services:
     # but these may be somewhat host specific, so we default to privileged.  If
     # the docker daemon is being run with --no-new-privileges, fuse may not
     # work.
-    # See also https://github.com/docker/for-linux/issues/321 for possible 
+    # See also https://github.com/docker/for-linux/issues/321 for possible
     # methods to avoid both privileged mode and cap_add SYS_ADMIN.
     privileged: true
     # Set DSA_USER to a user id that is part of the docker group (e.g.,

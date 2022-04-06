@@ -3,21 +3,11 @@
 import argparse
 import logging
 import os
+import subprocess
 import sys
 import tempfile
 
-import girder.utility.path as path_util
 import yaml
-from girder.models import getDbConnection
-from girder.models.assetstore import Assetstore
-from girder.models.collection import Collection
-from girder.models.folder import Folder
-from girder.models.item import Item
-from girder.models.setting import Setting
-from girder.models.upload import Upload
-from girder.models.user import User
-from girder.utility.model_importer import ModelImporter
-from girder.utility.server import configureServer
 
 logger = logging.getLogger(__name__)
 # See http://docs.python.org/3.3/howto/logging.html#configuring-logging-for-a-library
@@ -25,6 +15,9 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 
 def get_collection_folder(adminUser, collName, folderName):
+    from girder.models.collection import Collection
+    from girder.models.folder import Folder
+
     if Collection().findOne({'lowerName': collName.lower()}) is None:
         logger.info('Create collection %s', collName)
         Collection().createCollection(collName, adminUser)
@@ -52,6 +45,8 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
     except ImportError:
         logger.error('girder_client is unavailable.  Cannot get sample data.')
         return
+    from girder.models.item import Item
+    from girder.models.upload import Upload
     from girder_large_image.models.image_item import ImageItem
 
     folder = get_collection_folder(adminUser, collName, folderName)
@@ -96,6 +91,8 @@ def value_from_resource(value, adminUser):
     :returns: the original value it is not a resource, or the string id of the
         resource.
     """
+    import girder.utility.path as path_util
+
     if str(value) == 'resourceid:admin':
         value = str(adminUser['_id'])
     elif str(value).startswith('resourceid:'):
@@ -117,6 +114,8 @@ def provision_resources(resources, adminUser):
     :param resources: a list of resources to add.
     :param adminUser: the admin user to use for provisioning.
     """
+    from girder.utility.model_importer import ModelImporter
+
     for entry in resources:
         entry = {k: value_from_resource(v, adminUser) for k, v in entry.items()}
         modelName = entry.pop('model')
@@ -137,12 +136,56 @@ def provision_resources(resources, adminUser):
         createFunc(**entry)
 
 
+def get_slicer_images(imageList, adminUser):
+    """
+    Load a list of cli docker images into the system.
+
+    :param imageList: a list of docker images.
+    :param adminUser: an admin user for permissions.
+    """
+    from girder.models.setting import Setting
+    from girder_jobs.constants import JobStatus
+    from girder_jobs.models.job import Job
+    from slicer_cli_web.config import PluginSettings
+    from slicer_cli_web.docker_resource import DockerResource
+    from slicer_cli_web.image_job import jobPullAndLoad
+
+    logger.info('Pulling and installing slicer_cli images: %r', imageList)
+    job = Job().createLocalJob(
+        module='slicer_cli_web.image_job',
+        function='jobPullAndLoad',
+        kwargs={
+            'nameList': imageList,
+            'folder': Setting().get(PluginSettings.SLICER_CLI_WEB_TASK_FOLDER),
+        },
+        title='Pulling and caching docker images',
+        type=DockerResource.jobType,
+        user=adminUser,
+        public=True,
+        asynchronous=True
+    )
+    job = Job().save(job)
+    # Run this synchronously
+    jobPullAndLoad(job)
+    job = Job().load(id=job['_id'], user=adminUser, includeLog=True)
+    if 'log' in job:
+        logger.info('Result:\n' + ''.join(job['log']))
+    else:
+        logger.warning('Job record: %r', job)
+    if job['status'] != JobStatus.SUCCESS:
+        raise Exception('Failed to pull and load images')
+
+
 def provision(opts):
     """
     Provision the instance.
 
     :param opts: the argparse options.
     """
+    from girder.models.assetstore import Assetstore
+    from girder.models.setting import Setting
+    from girder.models.user import User
+
     # If there is are no admin users, create an admin user
     if User().findOne({'admin': True}) is None:
         adminParams = dict({
@@ -207,6 +250,35 @@ def provision(opts):
             value = value_from_resource(value, adminUser)
             logger.info('Setting %s to %r', key, value)
             Setting().set(key, value)
+    if (getattr(opts, 'use_defaults', None) is not False and
+            not getattr(opts, 'slicer-cli-image', None)):
+        setattr(opts, 'slicer-cli-image', ['dsarchive/histomicstk:latest'])
+    if getattr(opts, 'slicer-cli-image', None):
+        get_slicer_images(getattr(opts, 'slicer-cli-image', None), adminUser)
+
+
+def preprovision(opts):
+    """
+    Preprovision the instance.  This includes installing python modules with
+    pip and rebulding the girder client if desired.
+
+
+    :param opts: the argparse options.
+    """
+    if len(getattr(opts, 'pip', [])):
+        for entry in opts.pip:
+            cmd = 'pip install %s' % entry
+            logger.info('Installing: %s', cmd)
+            subprocess.check_call(cmd, shell=True)
+    if getattr(opts, 'rebuild-client', None):
+        cmd = 'girder build'
+        if not str(getattr(opts, 'rebuild-client', None)).lower().startswith('prod'):
+            cmd += ' --dev'
+        logger.info('Rebuilding girder client: %s', cmd)
+        cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
+               'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
+               'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
+        subprocess.check_call(cmd, shell=True)
 
 
 def merge_yaml_opts(opts, parser):
@@ -268,10 +340,10 @@ if __name__ == '__main__':
         'public are not specified, some default values are used.')
     parser.add_argument(
         '--assetstore', action=YamlAction,
-        help='A yaml dictionary (or list of dictionaries) of parameters used to '
-        'create a default assetstore.  This can include "method" which includes '
-        'the creation method, such as "createFilesystemAssetstore" or '
-        '"createS3Assetstore".  Otherwise, this is a list of parameters '
+        help='A yaml dictionary (or list of dictionaries) of parameters used '
+        'to create a default assetstore.  This can include "method" which '
+        'includes the creation method, such as "createFilesystemAssetstore" '
+        'or "createS3Assetstore".  Otherwise, this is a list of parameters '
         'passed to the creation method.  For filesystem assetstores, these '
         'parameters are name, root, and perms.  For S3 assetstores, these are '
         'name, bucket, accessKeyId, secret, prefix, service, readOnly, '
@@ -293,7 +365,7 @@ if __name__ == '__main__':
         'appropriate create(resource) function.  A value of '
         '"resource:<path>" is converted to the resource document with that '
         'resource path.  "resource:admin" uses the default admin, '
-        '"resourceid:<path" is the string id for the resource path.')
+        '"resourceid:<path>" is the string id for the resource path.')
     parser.add_argument(
         '--yaml',
         help='Specify parameters for this script in a yaml file.  If no value '
@@ -310,29 +382,60 @@ if __name__ == '__main__':
         default=None, help='Do not use default settings; start with a minimal '
         'number of parameters.')
     parser.add_argument(
+        '--pip', action='append', help='A list of modules to pip install.  If '
+        'any are specified that include girder client plugins, also specify '
+        '--rebuild-client.  Each specified value is passed to pip install '
+        'directly, so additional options are needed, these can be added (such '
+        'as --find-links).  The actual values need to be escaped '
+        'appropriately for a bash shell.')
+    parser.add_argument(
+        '--rebuild-client', action='store_true', default=False,
+        help='Rebuild the girder client.')
+    parser.add_argument(
+        '--slicer-cli-image', action='append', default=False,
+        help='Install slicer_cli images.')
+    parser.add_argument(
+        '--pre', dest='portion', action='store_const', const='pre',
+        help='Only do preprovisioning (install optional python modules and '
+        'optionally build the girder client).')
+    parser.add_argument(
+        '--main', dest='portion', action='store_const', const='main',
+        help='Only do main provisioning.')
+    parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='Increase verbosity')
     opts = parser.parse_args(args=sys.argv[1:])
     logger.addHandler(logging.StreamHandler(sys.stderr))
     logger.setLevel(max(1, logging.WARNING - 10 * opts.verbose))
     logger.debug('Parsed arguments: %r', opts)
     opts = merge_yaml_opts(opts, parser)
-    # This loads plugins, allowing setting validation
-    configureServer()
-    if getattr(opts, 'mongo_compat', None) is not False:
-        try:
-            db = getDbConnection()
-        except Exception:
-            logger.warning('Could not connect to mongo.')
-        try:
-            db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
-                db.server_info()['version'].split('.')[:2])})
-        except Exception:
-            logger.warning('Could not set mongo feature compatibility version.')
-        try:
-            # Also attempt to upgrade old version 2 image sources
-            db.girder.item.update_many(
-                {'largeImage.sourceName': 'svs'},
-                {'$set': {'largeImage.sourceName': 'openslide'}})
-        except Exception:
-            logger.warning('Could not update old source names.')
-    provision(opts)
+    # Run provisioning that has to happen before configuring the server.
+    if getattr(opts, 'portion', None) in {'pre', None}:
+        preprovision(opts)
+        if getattr(opts, 'portion', None) == 'pre':
+            sys.exit(0)
+    if getattr(opts, 'portion', None) in {'main', None}:
+        # This loads plugins, allowing setting validation.  We want the import
+        # to be after the preprovision step.
+        from girder.utility.server import configureServer
+
+        configureServer()
+        if getattr(opts, 'mongo_compat', None) is not False:
+            from girder.models import getDbConnection
+
+            try:
+                db = getDbConnection()
+            except Exception:
+                logger.warning('Could not connect to mongo.')
+            try:
+                db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
+                    db.server_info()['version'].split('.')[:2])})
+            except Exception:
+                logger.warning('Could not set mongo feature compatibility version.')
+            try:
+                # Also attempt to upgrade old version 2 image sources
+                db.girder.item.update_many(
+                    {'largeImage.sourceName': 'svs'},
+                    {'$set': {'largeImage.sourceName': 'openslide'}})
+            except Exception:
+                logger.warning('Could not update old source names.')
+        provision(opts)

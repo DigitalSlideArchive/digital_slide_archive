@@ -97,3 +97,48 @@ Permissions
 -----------
 
 By default, the girder container is run in Docker privileged mode.  This can be reduced to a small set of permissions (see the docker-compose.yml file for details), but these may vary depending on the host system.  If no extra permissions are granted, or if the docker daemon is started with --no-new-privileges, or if libfuse is not installed on the host system, the internal fuse mount will not be started.  This may prevent full functionality with non-filesystem assestores and with some multiple-file image formats.
+
+Customizing
+-----------
+
+Since this uses standard docker-compose, you can customize the process by creating a ``docker-compose.overide.yml`` file in the same directory (or a yaml file of any name and use appropriate ``docker-compose -f docker-compose.yml -f <my yaml file> <command>`` command).  Further, if you mount a provisioning yaml file into the docker image, you can customize settings, plugins, resources, and other options.
+
+See the ``docker-compose.yml`` and ``provision.yaml`` files for details. 
+
+Example
+~~~~~~~
+
+To add some additional girder plugins and mount additional directories for assetstores, you can do something like this:
+
+``docker-compose.overide.yml``::
+
+    ---
+    version: '3'
+    services:
+      girder:
+        environment:
+          # Specify that we want to use the provisioning file
+          DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+        volumes:
+          # Mount the local provisioning file into the container
+          - ./provision.local.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+          # Also expose a local data mount into the container
+          - /mnt/data:/mnt/data
+
+``provision.local.yaml``::
+
+    ---
+    # Load some sample data
+    samples: True
+    # A list of additional pip modules to install
+    pip:
+      - girder-oauth
+      - girder-ldap
+    # rebuild the girder web client since we installe some additional plugins
+    rebuild-client: True
+    # List slicer-cli-images to pull and load
+    slicer-cli-image:
+      - dsarchive/histomicstk:latest
+      - girder/slicer_cli_web:small
+
+

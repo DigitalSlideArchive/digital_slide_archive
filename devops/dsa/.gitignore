@@ -1,3 +1,4 @@
 assetstore/
 db/
 logs/
+*.local.*
