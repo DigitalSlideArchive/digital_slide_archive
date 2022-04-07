@@ -19,15 +19,19 @@ def get_girder_client(opts):
         url.
     :returns: the girder client.
     """
+    token = opts.get('token')
     username = opts.get('username')
     password = opts.get('password')
-    if not username:
+    if not username and not token:
         username = six.moves.input('Admin login: ')
-    if not password:
+    if not password and not token:
         password = getpass.getpass('Password for %s: ' % (
             username if username else 'default admin user'))
     client = girder_client.GirderClient(apiUrl=opts['apiurl'])
-    client.authenticate(username, password)
+    if token:
+        client.setToken(token)
+    else:
+        client.authenticate(username, password)
     return client
 
 
@@ -52,32 +56,33 @@ def get_test_data(client, opts):  # noqa
         folder = None
     if not folder:
         folder = client.createFolder(collection['_id'], folderName, parentType='collection')
-    if opts.get('test') != 'local':
-        remote = girder_client.GirderClient(apiUrl='https://data.kitware.com/api/v1')
-        remoteFolder = remote.resourceLookup('/collection/HistomicsTK/Deployment test images')
-        for item in remote.listItem(remoteFolder['_id']):
-            localPath = '/collection/%s/%s/%s' % (collName, folderName, item['name'])
-            try:
-                localItem = client.resourceLookup(localPath)
-            except Exception:
-                localItem = None
-            if localItem:
-                client.delete('item/%s' % localItem['_id'])
-            localItem = client.createItem(folder['_id'], item['name'])
-            for remoteFile in remote.listFile(item['_id']):
-                with tempfile.NamedTemporaryFile() as tf:
-                    fileName = tf.name
-                    tf.close()
-                    sys.stdout.write('Downloading %s' % remoteFile['name'])
-                    sys.stdout.flush()
-                    remote.downloadFile(remoteFile['_id'], fileName)
-                    sys.stdout.write(' .')
-                    sys.stdout.flush()
-                    client.uploadFileToItem(
-                        localItem['_id'], fileName, filename=remoteFile['name'],
-                        mimeType=remoteFile['mimeType'])
-                    sys.stdout.write('.\n')
-                    sys.stdout.flush()
+    remote = girder_client.GirderClient(apiUrl='https://data.kitware.com/api/v1')
+    remoteFolder = remote.resourceLookup('/collection/HistomicsTK/Deployment test images')
+    for item in remote.listItem(remoteFolder['_id']):
+        localPath = '/collection/%s/%s/%s' % (collName, folderName, item['name'])
+        try:
+            localItem = client.resourceLookup(localPath)
+        except Exception:
+            localItem = None
+        if localItem:
+            if opts.get('test') == 'local':
+                continue
+            client.delete('item/%s' % localItem['_id'])
+        localItem = client.createItem(folder['_id'], item['name'])
+        for remoteFile in remote.listFile(item['_id']):
+            with tempfile.NamedTemporaryFile() as tf:
+                fileName = tf.name
+                tf.close()
+                sys.stdout.write('Downloading %s' % remoteFile['name'])
+                sys.stdout.flush()
+                remote.downloadFile(remoteFile['_id'], fileName)
+                sys.stdout.write(' .')
+                sys.stdout.flush()
+                client.uploadFileToItem(
+                    localItem['_id'], fileName, filename=remoteFile['name'],
+                    mimeType=remoteFile['mimeType'])
+                sys.stdout.write('.\n')
+                sys.stdout.flush()
     for item in list(client.listItem(folder['_id'])):
         if '.anot' in item['name']:
             sys.stdout.write('Deleting %s\n' % item['name'])
@@ -260,6 +265,10 @@ if __name__ == '__main__':
         '--username', '--user',
         help='The Girder admin username.  If not specified, a prompt is given.')
     parser.add_argument(
+        '--token',
+        help='A Girder admin authentication token.  If specified, username '
+        'and password are ignored')
+    parser.add_argument(
         '--no-cli', '--nocli', action='store_true', dest='nocli',
         help='Do not pull and upload the cli; assume it is already present.')
     parser.add_argument(
@@ -276,7 +285,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--test-local', '--local-test', '--local', action='store_const',
         dest='test', const='local',
-        help='Use local test data and check that basic functions work.')
+        help='Use local test data and check that basic functions work.  If '
+        'local data is not present, it is downloaded.')
     parser.add_argument(
         '--no-test', action='store_false', dest='test',
         help='Do not download test data and do not run checks.')
