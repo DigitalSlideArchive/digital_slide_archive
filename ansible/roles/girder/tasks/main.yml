@@ -133,6 +133,19 @@
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 
+- name: Clone import-tracker
+  git:
+    repo: https://github.com/DigitalSlideArchive/import-tracker.git
+    dest: /opt/import-tracker
+    accept_hostkey: yes
+
+- name: Install import-tracker
+  pip:
+    name: "/opt/import-tracker"
+    editable: true
+    virtualenv: "{{ girder_virtualenv }}"
+    state: present
+
 - name: Clone large_image
   git:
     repo: https://github.com/girder/large_image.git

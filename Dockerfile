@@ -51,6 +51,11 @@ RUN cd /opt && \
     pip install --no-cache-dir -e .[girder,worker]
 
 RUN cd /opt && \
+    git clone https://github.com/DigitalSlideArchive/import-tracker.git && \
+    cd /opt/import-tracker && \
+    pip install --no-cache-dir -e .
+
+RUN cd /opt && \
     git clone https://github.com/girder/slicer_cli_web && \
     cd /opt/slicer_cli_web && \
     pip install --no-cache-dir -e .
