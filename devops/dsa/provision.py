@@ -260,12 +260,11 @@ def provision(opts):
 def preprovision(opts):
     """
     Preprovision the instance.  This includes installing python modules with
-    pip and rebulding the girder client if desired.
-
+    pip and rebuilding the girder client if desired.
 
     :param opts: the argparse options.
     """
-    if len(getattr(opts, 'pip', [])):
+    if getattr(opts, 'pip', None) and len(opts.pip):
         for entry in opts.pip:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
