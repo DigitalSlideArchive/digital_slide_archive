@@ -24,7 +24,9 @@ Demo Instance
 Installation
 ------------
 
-See `here <./ansible>`_ for installation instructions.
+For installation instructions, see the complete `docker-compose example <./devops/dsa>`_.
+
+There is an older method that doesn't use docker-compose.  See `here <./ansible>`_.
 
 There is also a complete `docker-compose example <./devops/dsa>`_.
 
