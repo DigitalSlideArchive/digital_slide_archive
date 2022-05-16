@@ -28,8 +28,6 @@ For installation instructions, see the complete `docker-compose example <./devop
 
 There is an older method that doesn't use docker-compose.  See `here <./ansible>`_.
 
-There is also a complete `docker-compose example <./devops/dsa>`_.
-
 For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
 
 There is a `migration guide <./ansible/migration.rst>`_  from the Girder 2 version.
