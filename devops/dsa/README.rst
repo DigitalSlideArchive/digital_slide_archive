@@ -20,6 +20,10 @@ Get the Digital Slide Archive repository::
 Start
 -----
 
+Change to the appropriate directory::
+
+    cd digital_slide_archive/devops/dsa/
+
 To get the most recent built docker images, do::
 
     docker-compose pull
@@ -32,7 +36,7 @@ To start the Digital Slide Archive::
 
 This uses your current user id so that database files, logs, assetstore files, and temporary files are owned by the current user.  If you omit setting ``DSA_USER``, files may be created owned by root.
 
-Note that this example does not add any default tasks or sample files.  By default, it creates an ``admin`` user with a password of ``password``.  You can log in with the admin user and use the Slicer CLI Web plugin settings to add default tasks (e.g., ``dsarchive/histomicstk:latest``).
+The girder instance can now be accessed at http://localhost:8080. By default, it creates an ``admin`` user with a password of ``password``. Note that this example does not add any default tasks or sample files.  You can log in with the admin user and use the Slicer CLI Web plugin settings to add default tasks (e.g., ``dsarchive/histomicstk:latest``).
 
 Stop
 ----
@@ -103,7 +107,7 @@ Customizing
 
 Since this uses standard docker-compose, you can customize the process by creating a ``docker-compose.overide.yml`` file in the same directory (or a yaml file of any name and use appropriate ``docker-compose -f docker-compose.yml -f <my yaml file> <command>`` command).  Further, if you mount a provisioning yaml file into the docker image, you can customize settings, plugins, resources, and other options.
 
-See the ``docker-compose.yml`` and ``provision.yaml`` files for details. 
+See the ``docker-compose.yml`` and ``provision.yaml`` files for details.
 
 Example
 ~~~~~~~
@@ -140,5 +144,3 @@ To add some additional girder plugins and mount additional directories for asset
     slicer-cli-image:
       - dsarchive/histomicstk:latest
       - girder/slicer_cli_web:small
-
-
