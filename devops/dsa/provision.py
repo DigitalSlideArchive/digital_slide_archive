@@ -176,7 +176,7 @@ def get_slicer_images(imageList, adminUser):
         raise Exception('Failed to pull and load images')
 
 
-def provision(opts):
+def provision(opts):  # noqa
     """
     Provision the instance.
 
@@ -252,10 +252,14 @@ def provision(opts):
             logger.info('Setting %s to %r', key, value)
             Setting().set(key, value)
     if (getattr(opts, 'use_defaults', None) is not False and
-            not getattr(opts, 'slicer-cli-image', None)):
+            not getattr(opts, 'slicer-cli-image', None) and
+            getattr(opts, 'portion', None) in {'main', }):
         setattr(opts, 'slicer-cli-image', ['dsarchive/histomicstk:latest'])
     if getattr(opts, 'slicer-cli-image', None):
-        get_slicer_images(getattr(opts, 'slicer-cli-image', None), adminUser)
+        try:
+            get_slicer_images(getattr(opts, 'slicer-cli-image', None), adminUser)
+        except Exception:
+            logger.info('Cannot fetch slicer-cli-images.')
 
 
 def preprovision(opts):
