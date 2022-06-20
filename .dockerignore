@@ -13,4 +13,5 @@ ansible/sample*.cfg
 devops/dsa/assetstore
 devops/dsa/db
 devops/dsa/logs
+devops/singularity-minimal
 !**/.gitignore

@@ -19,7 +19,26 @@ RUN apt-get update && \
     # Needed for su command
     # sudo \
     && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+
+# Install docker command line tools.  If docker is unavailable, this will do no
+# harm.  If the host system isn't ubuntu, this should still allow debug.
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list >/dev/null && \
+    ls -al /etc/apt/sources.list.d && \
+    cat /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    docker-ce-cli \
+    && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /usr/bin/tini && \
     chmod +x /usr/bin/tini

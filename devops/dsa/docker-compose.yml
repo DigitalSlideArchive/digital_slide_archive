@@ -30,7 +30,6 @@ services:
       - "${DSA_PORT:-8080}:8080"
     volumes:
       # Needed to use slicer_cli_web to run docker containers
-      - /usr/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
       # Default assetstore
       - ./assetstore:/assetstore
@@ -146,7 +145,6 @@ services:
     restart: unless-stopped
     volumes:
       # Needed to use slicer_cli_web to run docker containers
-      - /usr/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
       # Allow overriding the start command
       - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
