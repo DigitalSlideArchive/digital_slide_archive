@@ -230,15 +230,15 @@ def provision(opts):  # noqa
             'histomicsui.alternate_webroot_path': 'histomicstk',
             'histomicsui.delete_annotations_after_ingest': True,
             'homepage.markdown': """# Digital Slide Archive
-    ---
-    ## Bioinformatics Platform
+---
+## Bioinformatics Platform
 
-    Welcome to the **Digital Slide Archive**.
+Welcome to the **Digital Slide Archive**.
 
-    Developers who want to use the Girder REST API should check out the
-    [interactive web API docs](api/v1).
+Developers who want to use the Girder REST API should check out the
+[interactive web API docs](api/v1).
 
-    The [HistomicsUI](histomics) application is enabled.""",
+The [HistomicsUI](histomics) application is enabled.""",
             'slicer_cli_web.task_folder': str(taskFolder['_id']),
         }, **(opts.settings or {}))
     else:
