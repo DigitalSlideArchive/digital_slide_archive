@@ -126,6 +126,9 @@ services:
     # Uncomment to allow access to rabbitmq from outside of the docker network
     # ports:
     #   - "5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-}
     volumes:
       - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
     logging:
@@ -146,6 +149,11 @@ services:
     volumes:
       # Needed to use slicer_cli_web to run docker containers
       - /var/run/docker.sock:/var/run/docker.sock
+      # Modify the worker.local.cfg to specify a different rabbitmq server and
+      # then enable this mount.  On the rabbitmq server, make sure you add a
+      # non-guest default user and use that both in the worker and in the main
+      # girder settings.
+      # - ./worker.local.cfg:/opt/girder_worker/girder_worker/worker.local.cfg
       # Allow overriding the start command
       - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
       # Needed to allow transferring data to slicer_cli_web docker containers
