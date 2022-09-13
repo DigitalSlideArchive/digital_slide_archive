@@ -57,7 +57,7 @@ settings:
   histomicsui.webroot_path: "histomics"
   histomicsui.alternate_webroot_path: "histomicstk"
   histomicsui.delete_annotations_after_ingest: True
-  homepage.markdown: >
+  homepage.markdown: |
     # Digital Slide Archive
     ---
     ## Bioinformatics Platform
