@@ -30,7 +30,7 @@ There is an older method that doesn't use docker-compose.  See `here <./ansible>
 
 For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
 
-There is a `migration guide <./ansible/migration.rst>`_  from the Girder 2 version.
+There is a `migration guide <./ansible/migration.rst>`_  from the Girder 2 version and from the ``deploy_docker.py`` script.
 
 Adding Docker Tasks
 -------------------
