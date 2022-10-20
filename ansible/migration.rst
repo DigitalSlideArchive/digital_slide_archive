@@ -1,7 +1,30 @@
 Migration Guide
 ===============
 
-This document is intended to help transition between major versions of the Digital Slide Archive.  The reference deployment of the Digital Slide Archive uses the ``deploy_docker.py`` script.  If you have deployed the software via another means, these instructions will need some adjustments.
+This document is intended to help transition between major versions of the Digital Slide Archive.  The original reference deployment of the Digital Slide Archive uses the ``deploy_docker.py`` script.  It is now preferred to use ``docker-compose``.  If you have deployed the software via another means, these instructions will need some adjustments.
+
+From deploy_docker.py to docker-compose
+---------------------------------------
+
+The ``deploy_docker.py`` script was developed prior to docker-compose handling all of the desired features.  If you are using command line options on ``deploy_docker.py``, you will need to figure out how each of those translates to the docker-compose notation.  For the default deployment without any command line options, you can switch by doing::
+
+    chown -R $(id -u):$(id -g) ~/.dsa
+
+The, add ``docker-compose.override.yml`` to the ``devops/dsa`` directory, replacing ``/home/ubuntu`` with the resolution of ``~``::
+
+    ---
+    version: '3'
+    services:
+      girder:
+        volumes:
+          - /home/ubuntu/.dsa/assetstore:/opt/digital_slide_archive/assetstore
+          - /home/ubuntu/.dsa/logs:/logs
+      mongodb:
+        volumes:
+          - /home/ubuntu/.dsa/db:/data/db
+
+Now, from the ``devops/dsa`` directory, ``docker-compose`` will work.
+
 
 From Girder 2.x and the HistomicsTK Repository
 ----------------------------------------------

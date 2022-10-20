@@ -1,5 +1,5 @@
 ---
-girder_version: master
+girder_version: 0c17c9f8d9b60d8228c7409016362c13628d8a66
 slicer_cli_web_version: master
 histomicsui_version: master
 large_image_version: master
