@@ -1,0 +1,148 @@
+---
+version: '3'
+name: dsa
+services:
+  girder:
+    profiles:
+      - server
+    image: dsarchive/dsa_common
+    build: ../..
+    # Instead of privileged mode, fuse can use:
+    # devices:
+    #   - /dev/fuse:/dev/fuse
+    # security_opt:
+    #   - apparmor:unconfined
+    # cap_add:
+    #   - SYS_ADMIN
+    # but these may be somewhat host specific, so we default to privileged.  If
+    # the docker daemon is being run with --no-new-privileges, fuse may not
+    # work.
+    # See also https://github.com/docker/for-linux/issues/321 for possible
+    # methods to avoid both privileged mode and cap_add SYS_ADMIN.
+    privileged: true
+    # Set DSA_USER to a user id that is part of the docker group (e.g.,
+    # `DSA_USER=$(id -u):$(id -g)`).  This makes files in assetstores and logs
+    # owned by that user and provides permissions to manage docker
+    environment:
+      DSA_USER: ${DSA_USER:-}
+      # Enable this to automatically use the provisioning yaml
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+      DSA_WORKER_API_URL: ${DSA_WORKER_API_URL:-}
+    restart: unless-stopped
+    # Set DSA_PORT to expose the interface on another port (default 8080).
+    ports:
+      - "${DSA_PORT:-8080}:8080"
+    volumes:
+      # Needed to use slicer_cli_web to run docker containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Default assetstore
+      - ../dsa/assetstore:/assetstore
+      # Location of girder.cfg
+      - ../dsa/girder.cfg:/etc/girder.cfg
+      # Location of provision.py
+      - ../dsa/provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      # - ../dsa/provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ../dsa/start_girder.sh:/opt/digital_slide_archive/devops/dsa/start_girder.sh
+      # Location to store logs
+      - ../dsa/logs:/logs
+
+
+      # Add additional mounts here to get access to existing files on your
+      # system.  Also add them to the worker container to reduce copying.
+    depends_on:
+      - mongodb
+      - memcached
+      - rabbitmq
+    command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
+  mongodb:
+    profiles:
+      - server
+    image: "mongo:latest"
+    # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
+    # so that database files are owned by yourself.
+    user: ${DSA_USER:-PLEASE SET DSA_USER}
+    restart: unless-stopped
+    # Using --nojournal means that changes can be lost between the last
+    # checkpoint and an unexpected shutdown, but can substantially reduce
+    # writes.
+    command: --nojournal
+    volumes:
+      # Location to store database files
+      - ../dsa/db:/data/db
+    # Uncomment to allow access to the database from outside of the docker
+    # network.
+    # ports:
+    #   - "27017"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+  memcached:
+    profiles:
+      - server
+    image: memcached
+    command: -m 4096 --max-item-size 8M
+    restart: unless-stopped
+    # Uncomment to allow access to memcached from outside of the docker network
+    # ports:
+    #   - "11211"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+  rabbitmq:
+    profiles:
+      - server
+    image: "rabbitmq:latest"
+    restart: unless-stopped
+    # Allow access to rabbitmq from outside of the docker network
+    ports:
+      - "5672:5672"
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER:-girder}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-girder1234}
+    volumes:
+      - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    command: "bash -c '(until rabbitmqctl await_startup; do sleep 1; done; rabbitmqctl add_user \"${RABBITMQ_USER:-girder}\" \"${RABBITMQ_PASS:-girder1234}\" 2>/dev/null ; rabbitmqctl set_permissions -p / \"${RABBITMQ_USER:-girder}\" \".*\" \".*\" \".*\") & rabbitmq-server'"
+
+  worker:
+    profiles:
+      - worker
+    image: dsarchive/dsa_common
+    build: ../..
+    # Set DSA_USER to a user id that is part of the docker group (e.g.,
+    # `DSA_USER=$(id -u):$(id -g)`).  This provides permissions to manage
+    # docker
+    environment:
+      DSA_USER: ${DSA_USER:-}
+      DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
+      RABBITMQ_USER: ${RABBITMQ_USER:-girder}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-girder1234}
+      DSA_RABBITMQ_HOST: ${DSA_RABBITMQ_HOST:-rabbitmq}
+      TMPDIR:
+    restart: unless-stopped
+    volumes:
+      # Needed to use slicer_cli_web to run docker containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Location of provision.py
+      - ../dsa/provision_worker.py:/opt/digital_slide_archive/devops/dsa/provision_worker.py
+      # Modify the worker.local.cfg to specify a different rabbitmq server and
+      # then enable this mount.  On the rabbitmq server, make sure you add a
+      # non-guest default user and use that both in the worker and in the main
+      # girder settings.
+      - ./worker.local.cfg:/opt/girder_worker/girder_worker/worker.local.cfg
+      # Allow overriding the start command
+      - ../dsa/start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
+      # Needed to allow transferring data to slicer_cli_web docker containers
+      - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
+      # Add additional mounts here to get access to existing files on your
+      # system if they have the same path as on the girder container.
+    command: /opt/digital_slide_archive/devops/dsa/start_worker.sh
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"

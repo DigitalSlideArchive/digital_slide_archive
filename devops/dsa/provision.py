@@ -243,9 +243,10 @@ The [HistomicsUI](histomics) application is enabled.""",
         }, **(opts.settings or {}))
     else:
         settings = dict({}, **(opts.settings or {}))
+    force = getattr(opts, 'force', None) or []
     for key, value in settings.items():
         if (value != '__SKIP__' and (
-                getattr(opts, 'force', None) or
+                force is True or key in force or
                 Setting().get(key) is None or
                 Setting().get(key) == Setting().getDefault(key))):
             value = value_from_resource(value, adminUser)
@@ -283,6 +284,30 @@ def preprovision(opts):
                'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
                'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
         subprocess.check_call(cmd, shell=True)
+
+
+def merge_environ_opts(opts):
+    """
+    Merge environment options, overriding other settings.
+
+    :param opts: the options parsed from the command line.
+    :return opts: the modified options.
+    """
+    for key, value in os.environ.items():
+        if not value or not value.strip():
+            continue
+        if key == 'DSA_WORKER_API_URL':
+            key = 'worker.api_url'
+        elif key.startswith('DSA_SETTING_'):
+            key = key.split('DSA_SETTING_', 1)[1]
+        else:
+            continue
+        opts.settings[key] = value
+        if not opts.force:
+            opts.force = {key}
+        elif opts.force is not True:
+            opts.force.add(key)
+    return opts
 
 
 def merge_yaml_opts(opts, parser):
@@ -357,9 +382,10 @@ if __name__ == '__main__':
         '--settings', action=YamlAction,
         help='A yaml dictionary of settings to change in the Girder '
         'database.  This is merged with the default settings dictionary.  '
-        'Settings are only changed if they are their default values or the '
-        'force option is used.  If a setting has a value of "__SKIP__", it '
-        'will not be changed (this can prevent setting a default setting '
+        'Settings are only changed if they are their default values, the '
+        'force option is used, or they are specified by an environment '
+        'variable.  If a setting has a value of "__SKIP__", it will not be '
+        'changed (this can prevent setting a default setting '
         'option to any value).')
     parser.add_argument(
         '--resources', action=YamlAction,
@@ -412,6 +438,8 @@ if __name__ == '__main__':
     logger.setLevel(max(1, logging.WARNING - 10 * opts.verbose))
     logger.debug('Parsed arguments: %r', opts)
     opts = merge_yaml_opts(opts, parser)
+    opts = merge_environ_opts(opts)
+    logger.debug('Merged arguments: %r', opts)
     # Run provisioning that has to happen before configuring the server.
     if getattr(opts, 'portion', None) in {'pre', None}:
         preprovision(opts)
