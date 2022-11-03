@@ -138,7 +138,7 @@ To add some additional girder plugins and mount additional directories for asset
     pip:
       - girder-oauth
       - girder-ldap
-    # rebuild the girder web client since we installe some additional plugins
+    # rebuild the girder web client since we install some additional plugins
     rebuild-client: True
     # List slicer-cli-images to pull and load
     slicer-cli-image:
