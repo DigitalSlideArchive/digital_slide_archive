@@ -28,7 +28,7 @@ Example
 
 Suppose we have a server at ``dsa-server.kitware.com`` on port 8080 and workers at ``dsa-worker1.kitware.com`` and ``dsa-worker2.kitware.com``, then we could start the server with the command::
 
-    DSA_WORKER_API_URL=https://dsa-server.kitware.com:8080/api/v1 DSA_USER=$(id -u):$(id -g) docker-compose --profile server -p dsa-worker up -d
+    DSA_WORKER_API_URL=https://dsa-server.kitware.com:8080/api/v1 DSA_USER=$(id -u):$(id -g) docker-compose --profile server up -d
 
 Each worker gets started the same way::
 
