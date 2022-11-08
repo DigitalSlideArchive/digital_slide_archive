@@ -2,18 +2,20 @@
 
 import argparse
 import collections
-import docker
+import configparser
 import getpass
 import gzip
+import io
 import json
 import os
-import six
-import socket
+import shlex
 import sys
 import tarfile
 import time
 import uuid
 from distutils.version import LooseVersion
+
+import docker
 
 if not (LooseVersion('1.9') <= LooseVersion(getattr(docker, '__version__', docker.version))):
     raise Exception('docker or docker-py must be >= version 1.9')
@@ -97,7 +99,7 @@ def containers_provision(**kwargs):  # noqa
     username = kwargs.get('username')
     password = kwargs.get('password')
     if username == '':
-        username = six.moves.input('Admin login: ')
+        username = input('Admin login: ')
     if password == '':
         password = getpass.getpass('Password for %s: ' % (
             username if username else 'default admin user'))
@@ -124,8 +126,8 @@ def containers_provision(**kwargs):  # noqa
 
     ansible_command = (
         'ansible-playbook -i inventory/local docker_ansible.yml '
-        '--extra-vars=' + six.moves.shlex_quote(json.dumps(extra_vars)))
-    exec_command = 'bash -c ' + six.moves.shlex_quote(
+        '--extra-vars=' + shlex.quote(json.dumps(extra_vars)))
+    exec_command = 'bash -c ' + shlex.quote(
         'cd /home/ubuntu/digital_slide_archive/ansible && ' + ansible_command)
     tries = 1
     while True:
@@ -135,7 +137,7 @@ def containers_provision(**kwargs):  # noqa
             try:
                 for output in client.exec_start(cmd.get('Id'), stream=True):
                     print(convert_to_text(output).strip())
-            except socket.error:
+            except OSError:
                 pass
             cmd = client.exec_inspect(cmd.get('Id'))
             if not cmd['ExitCode']:
@@ -538,9 +540,9 @@ def convert_to_text(value):
     :param value: a value that is either a text or binary string.
     :returns value: a text value.
     """
-    if isinstance(value, six.binary_type):
+    if isinstance(value, bytes):
         value = value.decode('utf8')
-    if not isinstance(value, six.text_type):
+    if not isinstance(value, str):
         value = str(value)
     return value
 
@@ -569,8 +571,6 @@ def docker_mounts():
     docker_executable = '/usr/bin/docker'
     if not os.path.exists(docker_executable):
         import shutil
-        if not six.PY3:
-            import shutilwhich  # noqa
         docker_executable = shutil.which('docker')
     mounts = [
         docker_executable + ':/usr/bin/docker',
@@ -653,7 +653,7 @@ def images_build(retry=False, names=None):
 
     if names is None:
         names = ImageList.keys()
-    elif isinstance(names, six.string_types):
+    elif isinstance(names, str):
         names = [names]
     for name in ImageList:
         if not ImageList[name].get('dockerfile') or name not in names:
@@ -695,7 +695,7 @@ def images_repull(**kwargs):
     Repull all docker images.
     """
     client = docker_client()
-    for key, image in six.iteritems(ImageList):
+    for key, image in ImageList.items():
         if 'name' not in image and not kwargs.get('cli'):
             continue
         get_docker_image_and_container(
@@ -724,25 +724,25 @@ def merge_configuration(client, ctn, conf, **kwargs):
         tarData = b''.join([part for part in tarStream])
     # Check if this is actually gzipped and uncompress it
     if tarData[:2] == b'\x1f\x8b':
-        tarData = gzip.GzipFile(fileobj=six.BytesIO(tarData)).read()
-    tarStream = six.BytesIO(tarData)
+        tarData = gzip.GzipFile(fileobj=io.BytesIO(tarData)).read()
+    tarStream = io.BytesIO(tarData)
     tar = tarfile.TarFile(mode='r', fileobj=tarStream)
-    parser = six.moves.configparser.SafeConfigParser()
-    cfgFile = six.StringIO(convert_to_text(tar.extractfile(cfgName).read()))
+    parser = configparser.SafeConfigParser()
+    cfgFile = io.StringIO(convert_to_text(tar.extractfile(cfgName).read()))
     parser.readfp(cfgFile)
     parser.read(conf)
-    output = six.StringIO()
+    output = io.StringIO()
     parser.write(output)
     output = output.getvalue()
     if kwargs.get('verbose') >= 1:
         print(output)
-    if isinstance(output, six.text_type):
+    if isinstance(output, str):
         output = output.encode('utf8')
-    output = six.BytesIO(output)
+    output = io.BytesIO(output)
     output.seek(0, os.SEEK_END)
     outputlen = output.tell()
     output.seek(0)
-    tarOutput = six.BytesIO()
+    tarOutput = io.BytesIO()
     tar = tarfile.TarFile(fileobj=tarOutput, mode='w')
     tarinfo = tarfile.TarInfo(name=cfgName)
     tarinfo.size = outputlen
@@ -788,7 +788,7 @@ def pinned_versions():
     :return: a list of image names with versions.
     """
     pinned = []
-    for image in six.itervalues(ImageList):
+    for image in ImageList.values():
         if 'pinned' in image:
             pinned.append('%s:%s' % (image['tag'], image['pinned']))
     return pinned
@@ -856,7 +856,7 @@ def tag_with_version(key, version=None, **kwargs):
         version = kwargs.get('pinned')
     if version is True:
         version = ImageList[key].get('pinned')
-    if isinstance(version, six.string_types):
+    if isinstance(version, str):
         image = image.split(':', 1)[0] + ':' + version
     if ':' not in image:
         image += ':latest'
@@ -877,7 +877,7 @@ def wait_for_girder(client, ctn, maxWait=3600):
     sys.stdout.flush()
     # This really should be the girder_api_url from the current settings
     girder_api_url = 'http://girder:8080/api/v1'
-    exec_command = 'bash -c ' + six.moves.shlex_quote(
+    exec_command = 'bash -c ' + shlex.quote(
         'curl "%s/system/version"' % girder_api_url)
     while time.time() - starttime < maxWait:
         cmd = client.exec_create(
@@ -896,7 +896,7 @@ def wait_for_girder(client, ctn, maxWait=3600):
     if not output:
         raise Exception('Girder never responded')
     sys.stdout.write(' %s\n' % output.get('release', output.get('apiVersion', None)))
-    sys.stdout.write('Took {} seconds\n'.format(time.time() - starttime))
+    sys.stdout.write(f'Took {time.time() - starttime} seconds\n')
 
 
 if __name__ == '__main__':   # noqa

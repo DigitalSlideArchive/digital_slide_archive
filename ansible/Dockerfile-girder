@@ -8,7 +8,7 @@ RUN apt-get update && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --yes --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade && \
     apt-get remove -y python3-apt && \
-    apt-get install -y --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
     # Primary tools \
     sudo libssl-dev net-tools locales apt-utils curl gnupg2 \
     python3-apt \
