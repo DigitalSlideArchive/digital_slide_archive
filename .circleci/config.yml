@@ -42,7 +42,7 @@ jobs:
   build:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - run:
@@ -50,7 +50,7 @@ jobs:
           command: pip3 install -U pip
       - run:
           name: Install dependencies
-          command: pip3 install ansible requests docker
+          command: pip3 install ansible requests docker six
       - run:
           name: Build the dockers
           command: export TERM=xterm && python3 ansible/deploy_docker.py build
@@ -71,7 +71,7 @@ jobs:
   test-cli:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - usedockers
@@ -93,7 +93,7 @@ jobs:
     # This tests injecting a custom config file and proxy path locations
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - usedockers
@@ -141,7 +141,7 @@ jobs:
   test-girder-build:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - usedockers
@@ -167,7 +167,7 @@ jobs:
   test-histomicsui:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - usedockers
@@ -179,14 +179,14 @@ jobs:
   docker-compose:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - run:
-          name: Use Python 3.9
+          name: Use Python 3.10
           command: |
             pyenv versions
-            pyenv global 3.9.7
+            pyenv global 3.10.6
             pip --version
       - run:
           name: Run docker-compose up
@@ -223,14 +223,14 @@ jobs:
   docker-compose-minimal:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - run:
-          name: Use Python 3.9
+          name: Use Python 3.10
           command: |
             pyenv versions
-            pyenv global 3.9.7
+            pyenv global 3.10.6
             pip --version
       - run:
           name: Run docker-compose up
@@ -243,7 +243,7 @@ jobs:
   publish-docker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2022.10.1
     steps:
       - checkout
       - usedockers

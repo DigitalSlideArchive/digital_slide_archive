@@ -4,7 +4,6 @@ import argparse
 import getpass
 import girder_client
 import random
-import six
 import sys
 import tempfile
 import time
@@ -21,7 +20,7 @@ def get_girder_client(opts):
     username = opts.get('username')
     password = opts.get('password')
     if not username:
-        username = six.moves.input('Admin login: ')
+        username = input('Admin login: ')
     if not password:
         password = getpass.getpass('Password for %s: ' % (
             username if username else 'default admin user'))

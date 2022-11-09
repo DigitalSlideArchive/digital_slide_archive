@@ -97,7 +97,9 @@ services:
     # Using --nojournal means that changes can be lost between the last
     # checkpoint and an unexpected shutdown, but can substantially reduce
     # writes.
-    command: --nojournal
+    #   Limiting maxConns reduces the amount of shared memory demanded by
+    # mongo.  Remove this limit or increase the host vm.max_map_count value.
+    command: --nojournal --maxConns 1000
     volumes:
       # Location to store database files
       - ./db:/data/db
