@@ -16,6 +16,7 @@ RUN apt-get update && \
     tmux \
     # For developer convenience \
     nano \
+    jq \
     # Needed for su command
     # sudo \
     && \
