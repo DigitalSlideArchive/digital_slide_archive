@@ -64,6 +64,8 @@ cache_memcached_password = None
 enabled = True
 
 [histomicsui]
-# If restrict_downloads is True, only logged-in users can access download and
-# tiles/images endpoints.
-restrict_downloads = True
+# If restrict_downloads is True, only logged-in users can access download
+# and tiles/images endpoints.  If this is a number, file and item download
+# endpoints can be used by anonymous users for files up to the specified
+# size in bytes.  This setting does not affect logged-in users.
+restrict_downloads = 100000
