@@ -83,7 +83,9 @@ RUN cd /opt && \
 RUN cd /opt && \
     git clone https://github.com/girder/large_image && \
     cd /opt/large_image && \
-    pip install --no-cache-dir --find-links https://girder.github.io/large_image_wheels -e .[memcached] -rrequirements-dev.txt
+    pip install --no-cache-dir --find-links https://girder.github.io/large_image_wheels -e .[memcached] -rrequirements-dev.txt && \
+    # Reduice docker size by de-duplicating some libraries that get installed \
+    rdfind -minsize 1048576 -makehardlinks true -makeresultsfile false /opt/venv
 
 RUN cd /opt && \
     git clone https://github.com/DigitalSlideArchive/HistomicsUI && \
