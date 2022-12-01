@@ -97,6 +97,7 @@ RUN pip install --no-cache-dir --pre \
     girder-homepage \
     girder-ldap \
     girder-resource-path-tools \
+    girder-user-quota \
     girder-virtual-folders \
     girder-xtk-demo
 
