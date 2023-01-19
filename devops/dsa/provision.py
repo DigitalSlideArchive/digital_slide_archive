@@ -212,37 +212,11 @@ def provision(opts):  # noqa
     if getattr(opts, 'samples', None):
         get_sample_data(
             adminUser,
-            getattr(opts, 'sample-collection', 'TCGA collection'),
-            getattr(opts, 'sample-folder', 'Sample Images'))
-    if getattr(opts, 'use_defaults', None) is not False:
-        taskFolder = get_collection_folder(adminUser, 'Tasks', 'Slicer CLI Web Tasks')
+            getattr(opts, 'sample-collection', 'Samples'),
+            getattr(opts, 'sample-folder', 'Images'))
     if opts.resources:
         provision_resources(opts.resources, adminUser)
-    # Show label and macro images, plus tile and internal metadata for all users
-    if getattr(opts, 'use_defaults', None) is not False:
-        settings = dict({
-            'worker.broker': 'amqp://guest:guest@rabbitmq',
-            'worker.backend': 'rpc://guest:guest@rabbitmq',
-            'worker.api_url': 'http://girder:8080/api/v1',
-            'worker.direct_path': True,
-            'core.brand_name': 'Digital Slide Archive',
-            'histomicsui.webroot_path': 'histomics',
-            'histomicsui.alternate_webroot_path': 'histomicstk',
-            'histomicsui.delete_annotations_after_ingest': True,
-            'homepage.markdown': """# Digital Slide Archive
----
-## Bioinformatics Platform
-
-Welcome to the **Digital Slide Archive**.
-
-Developers who want to use the Girder REST API should check out the
-[interactive web API docs](api/v1).
-
-The [HistomicsUI](histomics) application is enabled.""",
-            'slicer_cli_web.task_folder': str(taskFolder['_id']),
-        }, **(opts.settings or {}))
-    else:
-        settings = dict({}, **(opts.settings or {}))
+    settings = dict({}, **(opts.settings or {}))
     force = getattr(opts, 'force', None) or []
     for key, value in settings.items():
         if (value != '__SKIP__' and (
@@ -252,10 +226,6 @@ The [HistomicsUI](histomics) application is enabled.""",
             value = value_from_resource(value, adminUser)
             logger.info('Setting %s to %r', key, value)
             Setting().set(key, value)
-    if (getattr(opts, 'use_defaults', None) is not False and
-            not getattr(opts, 'slicer-cli-image', None) and
-            getattr(opts, 'portion', None) in {'main', }):
-        setattr(opts, 'slicer-cli-image', ['dsarchive/histomicstk:latest'])
     if getattr(opts, 'slicer-cli-image', None):
         try:
             get_slicer_images(getattr(opts, 'slicer-cli-image', None), adminUser)
@@ -327,12 +297,80 @@ def merge_yaml_opts(opts, parser):
     if not yamlfile or not os.path.exists(yamlfile):
         return opts
     defaults = parser.parse_args(args=[])
+    if getattr(opts, 'use-defaults', None) is not False:
+        defaults = merge_default_opts(defaults)
     yamlopts = yaml.safe_load(open(yamlfile).read())
     for key, value in yamlopts.items():
+        key = key.replace('_', '-')
         if getattr(opts, key, None) is None or getattr(
                 opts, key, None) == getattr(defaults, key, None):
             setattr(opts, key, value)
     logger.debug('Arguments after adding yaml: %r', opts)
+    return opts
+
+
+def merge_default_opts(opts):
+    """
+    Add the defaults to the options.
+
+    :param opts: the options parsed from the command line.
+    :return opts: the modified options.
+    """
+    settings = dict({}, **(opts.settings or {}))
+    settings.update({
+        'worker.broker': 'amqp://guest:guest@rabbitmq',
+        'worker.backend': 'rpc://guest:guest@rabbitmq',
+        'worker.api_url': 'http://girder:8080/api/v1',
+        'worker.direct_path': True,
+        'core.brand_name': 'Digital Slide Archive',
+        'histomicsui.webroot_path': 'histomics',
+        'histomicsui.alternate_webroot_path': 'histomicstk',
+        'histomicsui.delete_annotations_after_ingest': True,
+        'homepage.markdown': """# Digital Slide Archive
+---
+## Bioinformatics Platform
+
+Welcome to the **Digital Slide Archive**.
+
+Developers who want to use the Girder REST API should check out the
+[interactive web API docs](api/v1).
+
+The [HistomicsUI](histomics) application is enabled.""",
+        'slicer_cli_web.task_folder': 'resourceid:collection/Tasks/Slicer CLI Web Tasks',
+    })
+    opts.settings = settings
+    if getattr(opts, 'slicer-cli-image', None) is None:
+        setattr(opts, 'slicer-cli-image', ['dsarchive/histomicstk:latest'])
+    if getattr(opts, 'assetstore', None) is None:
+        opts.assetstore = {
+            'name': 'Assetstore',
+            'root': '/assetstore',
+            'method': 'createFilesystemAssetstore',
+        }
+    if getattr(opts, 'admin', None) is None:
+        opts.admin = {
+            'login': 'admin',
+            'password': 'password',
+            'firstName': 'Admin',
+            'lastName': 'Admin',
+            'email': 'admin@nowhere.nil',
+            'public': True,
+        }
+    resources = opts.resources or []
+    resources.extend([{
+        'model': 'collection',
+        'name': 'Tasks',
+        'creator': 'resource:admin',
+        'public': True,
+    }, {
+        'model': 'folder',
+        'parent': 'resource:collection/Tasks',
+        'parentType': 'collection',
+        'name': 'Slicer CLI Web Tasks',
+        'creator': 'resource:admin',
+        'public': True,
+    }])
+    opts.resources = resources
     return opts
 
 
@@ -359,14 +397,17 @@ if __name__ == '__main__':
         '--samples', '--data', '--sample-data',
         action='store_true', help='Download sample data')
     parser.add_argument(
-        '--sample-collection', default='Sample Images', help='Sample data collection name')
+        '--sample-collection', dest='sample-collection',  default='Samples',
+        help='Sample data collection name')
     parser.add_argument(
-        '--sample-folder', default='Images', help='Sample data folder name')
+        '--sample-folder', dest='sample-folder', default='Images',
+        help='Sample data folder name')
     parser.add_argument(
         '--admin', action=YamlAction,
         help='A yaml dictionary of parameters used to create a default admin '
         'user.  If any of login, password, firstName, lastName, email, or '
-        'public are not specified, some default values are used.')
+        'public are not specified, some default values are used.  If any '
+        'admin user already exists, no modifications are made.')
     parser.add_argument(
         '--assetstore', action=YamlAction,
         help='A yaml dictionary (or list of dictionaries) of parameters used '
@@ -404,11 +445,11 @@ if __name__ == '__main__':
         'The yaml file is a dictionary of keys as would be passed to the '
         'command line.')
     parser.add_argument(
-        '--no-mongo-compat', action='store_false', dest='mongo_compat',
-        default=None, help='Do not automatically set the mongo feature '
+        '--no-mongo-compat', action='store_false', dest='mongo-compat',
+        default=True, help='Do not automatically set the mongo feature '
         'compatibility version to the current server version.')
     parser.add_argument(
-        '--no-defaults', action='store_false', dest='use_defaults',
+        '--no-defaults', action='store_false', dest='use-defaults',
         default=None, help='Do not use default settings; start with a minimal '
         'number of parameters.')
     parser.add_argument(
@@ -419,10 +460,10 @@ if __name__ == '__main__':
         'as --find-links).  The actual values need to be escaped '
         'appropriately for a bash shell.')
     parser.add_argument(
-        '--rebuild-client', action='store_true', default=False,
-        help='Rebuild the girder client.')
+        '--rebuild-client', dest='rebuild-client', action='store_true',
+        default=False, help='Rebuild the girder client.')
     parser.add_argument(
-        '--slicer-cli-image', action='append', default=False,
+        '--slicer-cli-image', dest='slicer-cli-image', action='append',
         help='Install slicer_cli images.')
     parser.add_argument(
         '--pre', dest='portion', action='store_const', const='pre',
@@ -433,13 +474,21 @@ if __name__ == '__main__':
         help='Only do main provisioning.')
     parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='Increase verbosity')
+    parser.add_argument(
+        '--dry-run', '-n', dest='dry-run', action='store_true',
+        help='Report merged options but do not actually apply them')
     opts = parser.parse_args(args=sys.argv[1:])
     logger.addHandler(logging.StreamHandler(sys.stderr))
     logger.setLevel(max(1, logging.WARNING - 10 * opts.verbose))
     logger.debug('Parsed arguments: %r', opts)
+    if getattr(opts, 'use-defaults', None) is not False:
+        opts = merge_default_opts(opts)
     opts = merge_yaml_opts(opts, parser)
     opts = merge_environ_opts(opts)
     logger.debug('Merged arguments: %r', opts)
+    if getattr(opts, 'dry-run'):
+        print(yaml.dump({k: v for k, v in vars(opts).items() if v is not None}))
+        sys.exit(0)
     # Run provisioning that has to happen before configuring the server.
     if getattr(opts, 'portion', None) in {'pre', None}:
         preprovision(opts)
@@ -451,7 +500,7 @@ if __name__ == '__main__':
         from girder.utility.server import configureServer
 
         configureServer()
-        if getattr(opts, 'mongo_compat', None) is not False:
+        if getattr(opts, 'mongo-compat', None) is not False:
             from girder.models import getDbConnection
 
             try:
