@@ -3,13 +3,13 @@
 # This is a dictionary of command-line arguments for the provisioning script
 force: False
 samples: False
-sample-collection: Sample Images
+sample-collection: Samples
 sample-folder: Images
-# Set use_defaults to False to skip default settings
-use_defaults: True
+# Set use-defaults to False to skip default settings
+use-defaults: True
 # Set mongo_compat to False to not automatically set the mongo feature
 # compatibility version to the current server version.
-mongo_compat: True
+mongo-compat: True
 # A list of additional pip modules to install; if any are girder plugins with
 # client-side code, also specify rebuild-client.
 # pip:
@@ -42,7 +42,6 @@ resources:
     creator: resource:admin
     public: True
   - model: folder
-    resourcepath: "collection/Tasks/Slicer CLI Web Tasks"
     parent: resource:collection/Tasks
     parentType: collection
     name: "Slicer CLI Web Tasks"
@@ -57,7 +56,7 @@ settings:
   histomicsui.webroot_path: "histomics"
   histomicsui.alternate_webroot_path: "histomicstk"
   histomicsui.delete_annotations_after_ingest: True
-  homepage.markdown: |
+  homepage.markdown: |-
     # Digital Slide Archive
     ---
     ## Bioinformatics Platform
@@ -70,5 +69,5 @@ settings:
     The [HistomicsUI](histomics) application is enabled.
   slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
 # List slicer-cli-images to pull and load
-# slicer-cli-image:
-#   - dsarchive/histomicstk:latest
+slicer-cli-image:
+  - dsarchive/histomicstk:latest

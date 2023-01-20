@@ -22,8 +22,7 @@ services:
     # owned by that user and provides permissions to manage docker
     environment:
       DSA_USER: ${DSA_USER:-}
-      # Enable this to automatically use the provisioning yaml
-      # DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
@@ -37,7 +36,7 @@ services:
       - ./girder.cfg:/etc/girder.cfg
       # Location of provision.py
       - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
-      # - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
       - ./start_girder.sh:/opt/digital_slide_archive/devops/dsa/start_girder.sh
       # Location to store logs
       - ./logs:/logs

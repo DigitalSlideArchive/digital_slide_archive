@@ -189,6 +189,14 @@ jobs:
             pyenv global 3.10.6
             pip --version
       - run:
+          name: Check provisioning defaults match
+          command: |
+            pip install pyyaml
+            python ./devops/dsa/provision.py --dry-run > /tmp/defaults.yaml
+            python ./devops/dsa/provision.py --dry-run --no-defaults --yaml=devops/dsa/provision.yaml > /tmp/provfile.yaml
+            diff /tmp/defaults.yaml /tmp/provfile.yaml && true
+            if [[ $(diff /tmp/defaults.yaml /tmp/provfile.yaml | tail -n '+5') ]]; then false; fi
+      - run:
           name: Run docker-compose up
           command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose up --build -d'
           working_directory: ./devops/dsa
