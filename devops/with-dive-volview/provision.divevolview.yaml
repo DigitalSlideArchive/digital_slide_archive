@@ -1,0 +1,22 @@
+---
+# The provision script can take a yaml file with provision options
+# This is a dictionary of command-line arguments for the provisioning script
+force: False
+samples: True
+pip:
+  - git+https://github.com/PaulHax/girder_volview
+  - git+https://github.com/BryonLewis/dive-dsa.git@dsa-install#subdirectory=server
+rebuild-client: True
+settings:
+  worker.broker: "amqp://guest:guest@rabbitmq"
+  worker.backend: "rpc://guest:guest@rabbitmq"
+  worker.api_url: "http://girder:8080/api/v1"
+  worker.direct_path: True
+# List slicer-cli-images to pull and load
+slicer-cli-image:
+  - dsarchive/histomicstk:latest
+worker:
+  pip:
+    - git+https://github.com/BryonLewis/dive-dsa.git@dsa-install#subdirectory=server
+  shell:
+    - wget -O ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz && mkdir /tmp/ffextracted && tar -xvf ffmpeg.tar.xz -C /tmp/ffextracted --strip-components 1 && cp /tmp/ffextracted/ffmpeg /opt/venv/bin && cp /tmp/ffextracted/ffprobe /opt/venv/bin

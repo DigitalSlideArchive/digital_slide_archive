@@ -1,0 +1,13 @@
+---
+version: '3'
+services:
+  girder:
+    volumes:
+      - ../with-dive-volview/provision.divevolview.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ../dsa/girder.local.cfg:/etc/girder.cfg
+
+  worker:
+    environment:
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+    volumes:
+      - ../with-dive-volview/provision.divevolview.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
