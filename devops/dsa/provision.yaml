@@ -71,3 +71,20 @@ settings:
 # List slicer-cli-images to pull and load
 slicer-cli-image:
   - dsarchive/histomicstk:latest
+# The worker can specify parameters for provisioning
+# worker-rabbitmq-host: girder:8080
+worker-rabbitmq-user: guest
+worker-rabbitmq-pass: guest
+worker-config: /opt/girder_worker/girder_worker/worker.local.cfg
+# These have precendence over the top level values
+worker:
+  # rabbitmq-host: girder:8080
+  # rabbitmq-user: guest
+  # rabbitmq-pass: guest
+  # config: /opt/girder_worker/girder_worker/worker.local.cfg
+  # Install additional pip packages in the worker
+  # pip:
+  #   - package_one
+  # Run additional shell commands in the worker before start
+  # shell:
+  #   - ls
