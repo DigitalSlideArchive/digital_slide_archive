@@ -4,7 +4,6 @@ services:
   girder:
     volumes:
       - ../with-dive-volview/provision.divevolview.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
-      - ../dsa/girder.local.cfg:/etc/girder.cfg
 
   worker:
     environment:
