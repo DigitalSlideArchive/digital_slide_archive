@@ -17,7 +17,11 @@ addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null
 # add the user to the docker group.
 adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null
 chmod 777 ${TMPDIR:-/tmp} || true
-python3 /opt/digital_slide_archive/devops/dsa/provision_worker.py
+echo ==== Pre-Provisioning ===
+python3 /opt/digital_slide_archive/devops/dsa/provision.py --worker-pre
+echo ==== Provisioning === &&
+python3 /opt/digital_slide_archive/devops/dsa/provision.py --worker-main
+echo ==== Starting Worker === &&
 # Run subsequent commands as the DSA_USER.  This sets some paths based on what
 # is expected in the Docker so that the current python environment and the
 # devops/dsa/utils are available.  Then it runs girder_worker

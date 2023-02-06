@@ -145,6 +145,7 @@ services:
     environment:
       DSA_USER: ${DSA_USER:-}
       DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
       TMPDIR:
     restart: unless-stopped
     volumes:
