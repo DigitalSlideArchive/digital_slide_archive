@@ -155,6 +155,7 @@ services:
       # non-guest default user and use that both in the worker and in the main
       # girder settings.
       # - ./worker.local.cfg:/opt/girder_worker/girder_worker/worker.local.cfg
+      - ./provision_worker.py:/opt/digital_slide_archive/devops/dsa/provision_worker.py
       # Allow overriding the start command
       - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
       # Needed to allow transferring data to slicer_cli_web docker containers

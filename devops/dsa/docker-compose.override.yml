@@ -1,0 +1,16 @@
+version: '3'
+services:
+  girder:
+    environment:
+      # Specify that we want to use the provisioning file
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+    volumes:
+      # Mount the local provisioning file into the container
+      - ./provision.local.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+  worker:
+    environment:
+      # Specify that we want to use the provisioning file
+      DSA_PROVISION_WORKER_YAML: ${DSA_PROVISION_WORKER_YAML:-/opt/digital_slide_archive/devops/dsa/provision.worker.yaml}
+    volumes:
+      # Mount the local provisioning file into the container
+      - ./provision.local.worker.yaml:/opt/digital_slide_archive/devops/dsa/provision.worker.yaml
