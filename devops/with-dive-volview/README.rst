@@ -6,5 +6,5 @@ This directory contains a docker-compose set up for the Digital Slide Archive wi
 
 You will probably want better container names than docker-compose will choose by default.  A typical command will be::
 
-    DSA_USER=$(id -u):$(id -g) docker-compose -p -f ../dsa/docker-compose.yml -f docker-compose.override.yml dsa-plus up
+    DSA_USER=$(id -u):$(id -g) docker-compose -f ../dsa/docker-compose.yml -f docker-compose.override.yml -p dsa-plus up
 
