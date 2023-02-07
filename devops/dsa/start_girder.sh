@@ -23,9 +23,9 @@ iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destina
 iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 11211 -j DNAT --to-destination `dig +short memcached`:11211
 iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE
 echo 'PATH="/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH"' >> /home/$(id -nu ${DSA_USER%%:*})/.bashrc
-echo ==== Pre-Provisioning === 
+echo ==== Pre-Provisioning ===
 PATH="/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH" \
-python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre 
+python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre
 # Run subsequent commands as the DSA_USER.  This sets some paths based on what
 # is expected in the Docker so that the current python environment and the
 # devops/dsa/utils are available.  Then:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
 import logging
 import os
 import subprocess
@@ -176,6 +177,29 @@ def get_slicer_images(imageList, adminUser):
         raise Exception('Failed to pull and load images')
 
 
+def preprovision(opts):
+    """
+    Preprovision the instance.  This includes installing python modules with
+    pip and rebuilding the girder client if desired.
+
+    :param opts: the argparse options.
+    """
+    if getattr(opts, 'pip', None) and len(opts.pip):
+        for entry in opts.pip:
+            cmd = 'pip install %s' % entry
+            logger.info('Installing: %s', cmd)
+            subprocess.check_call(cmd, shell=True)
+    if getattr(opts, 'rebuild-client', None):
+        cmd = 'girder build'
+        if not str(getattr(opts, 'rebuild-client', None)).lower().startswith('prod'):
+            cmd += ' --dev'
+        logger.info('Rebuilding girder client: %s', cmd)
+        cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
+               'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
+               'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
+        subprocess.check_call(cmd, shell=True)
+
+
 def provision(opts):  # noqa
     """
     Provision the instance.
@@ -233,27 +257,44 @@ def provision(opts):  # noqa
             logger.info('Cannot fetch slicer-cli-images.')
 
 
-def preprovision(opts):
+def preprovision_worker(opts):
     """
-    Preprovision the instance.  This includes installing python modules with
-    pip and rebuilding the girder client if desired.
-
-    :param opts: the argparse options.
+    Preprovision the worker.
     """
-    if getattr(opts, 'pip', None) and len(opts.pip):
-        for entry in opts.pip:
+    settings = dict({}, **(opts.worker or {}))
+    if settings.get('pip') and len(settings['pip']):
+        for entry in settings['pip']:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
             subprocess.check_call(cmd, shell=True)
-    if getattr(opts, 'rebuild-client', None):
-        cmd = 'girder build'
-        if not str(getattr(opts, 'rebuild-client', None)).lower().startswith('prod'):
-            cmd += ' --dev'
-        logger.info('Rebuilding girder client: %s', cmd)
-        cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
-               'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
-               'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
-        subprocess.check_call(cmd, shell=True)
+    if settings.get('shell') and len(settings['shell']):
+        for entry in settings['shell']:
+            cmd = entry
+            logger.info('Running: %s', cmd)
+            subprocess.check_call(cmd, shell=True)
+
+
+def provision_worker(opts):
+    """
+    Provision the worker.  There are a few top-level settings, but others
+    should be in the worker sub-field.
+    """
+    settings = dict({}, **(opts.worker or {}))
+    for key in dir(opts):
+        if key.startswith('worker-'):
+            mainkey = key.split('worker-', 1)[1]
+            if settings.get(mainkey) is None:
+                settings[mainkey] = getattr(opts, key)
+    if not settings.get('rabbitmq-host'):
+        return
+    conf = configparser.ConfigParser()
+    conf.read([settings['config']])
+    conf.set('celery', 'broker', 'amqp://%s:%s@%s/' % (
+        settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
+    conf.set('celery', 'backend', 'rpc://%s:%s@%s/' % (
+        settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
+    with open(settings['config'], 'wt') as fptr:
+        conf.write(fptr)
 
 
 def merge_environ_opts(opts):
@@ -263,6 +304,11 @@ def merge_environ_opts(opts):
     :param opts: the options parsed from the command line.
     :return opts: the modified options.
     """
+    keyDict = {
+        'RABBITMQ_USER': 'worker_rabbitmq_user',
+        'RABBITMQ_PASS': 'worker_rabbitmq_pass',
+        'DSA_RABBITMQ_HOST': 'worker_rabbitmq_host',
+    }
     for key, value in os.environ.items():
         if not value or not value.strip():
             continue
@@ -270,6 +316,8 @@ def merge_environ_opts(opts):
             key = 'worker.api_url'
         elif key.startswith('DSA_SETTING_'):
             key = key.split('DSA_SETTING_', 1)[1]
+        elif key in keyDict:
+            key = keyDict[key]
         else:
             continue
         opts.settings[key] = value
@@ -385,7 +433,7 @@ class YamlAction(argparse.Action):
         setattr(namespace, self.dest, yaml.safe_load(values))
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # noqa
     parser = argparse.ArgumentParser(description='Provision a Digital Slide Archive instance')
     parser.add_argument(
         '--force', action='store_true',
@@ -465,6 +513,31 @@ if __name__ == '__main__':
     parser.add_argument(
         '--slicer-cli-image', dest='slicer-cli-image', action='append',
         help='Install slicer_cli images.')
+
+    parser.add_argument(
+        '--rabbitmq-user', default='guest', dest='worker-rabbitmq-user',
+        help='Worker: RabbitMQ user name.')
+    parser.add_argument(
+        '--rabbitmq-pass', default='guest', dest='worker-rabbitmq-pass',
+        help='Worker: RabbitMQ password.')
+    parser.add_argument(
+        '--rabbitmq-host', dest='worker-rabbitmq-host',
+        help='Worker: RabbitMQ host.')
+    parser.add_argument(
+        '--config', dest='worker-config',
+        default='/opt/girder_worker/girder_worker/worker.local.cfg',
+        help='Worker: Path to the worker config file.')
+    parser.add_argument(
+        '--worker', action=YamlAction,
+        help='A yaml dictionary of worker settings.')
+    parser.add_argument(
+        '--worker-main', dest='portion', action='store_const',
+        const='worker-main',
+        help='Provision a worker, not the main process.')
+    parser.add_argument(
+        '--worker-pre', dest='portion', action='store_const',
+        const='worker-pre',
+        help='Pre-provision a worker, not the main process.')
     parser.add_argument(
         '--pre', dest='portion', action='store_const', const='pre',
         help='Only do preprovisioning (install optional python modules and '
@@ -489,8 +562,15 @@ if __name__ == '__main__':
     if getattr(opts, 'dry-run'):
         print(yaml.dump({k: v for k, v in vars(opts).items() if v is not None}))
         sys.exit(0)
-    # Run provisioning that has to happen before configuring the server.
+    # Worker provisioning
+    if getattr(opts, 'portion', None) == 'worker-pre':
+        preprovision_worker(opts)
+        sys.exit(0)
+    if getattr(opts, 'portion', None) == 'worker-main':
+        provision_worker(opts)
+        sys.exit(0)
     if getattr(opts, 'portion', None) in {'pre', None}:
+        # Run provisioning that has to happen before configuring the server.
         preprovision(opts)
         if getattr(opts, 'portion', None) == 'pre':
             sys.exit(0)
