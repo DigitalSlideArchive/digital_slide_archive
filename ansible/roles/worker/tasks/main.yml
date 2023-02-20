@@ -93,7 +93,7 @@
     executable: pip3
     chdir: /opt/large_image
     extra_args: "--find-links https://girder.github.io/large_image_wheels"
-    requirements: "requirements-worker.txt"
+    requirements: "requirements-dev.txt"
     state: present
 
 - name: Clone slicer_cli_web
