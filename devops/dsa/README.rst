@@ -64,7 +64,7 @@ You can log into the running ``girder`` or ``worker`` containers by typing::
 
     docker-compose exec girder bash
 
-There are two convenience scripts ``restart_girder.sh`` and ``rebuild_and_restart_girder.sh`` that cab be run in the container.
+There are two convenience scripts ``restart_girder.sh`` and ``rebuild_and_restart_girder.sh`` that can be run in the container.
 
 You can develop source code by mounting the source directory into the container.  See the ``docker-compose.yml`` file for details.
 
