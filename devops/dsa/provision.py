@@ -189,6 +189,11 @@ def preprovision(opts):
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
             subprocess.check_call(cmd, shell=True)
+    if getattr(opts, 'shell', None) and len(opts.shell):
+        for entry in opts.shell:
+            cmd = entry
+            logger.info('Running: %s', cmd)
+            subprocess.check_call(cmd, shell=True)
     if getattr(opts, 'rebuild-client', None):
         cmd = 'girder build'
         if not str(getattr(opts, 'rebuild-client', None)).lower().startswith('prod'):
