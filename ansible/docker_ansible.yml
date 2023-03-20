@@ -14,8 +14,12 @@
     - role: girder.girder
       version: master
       # This no longer works due to a change in the Girder ansible role
-      # girder_development_mode: true
-      girder_version: "latest"
+      #   girder_development_mode: true
+      # girder_verison of latest installs in --pre mode, which is unfortunate
+      # because it installs everything in pre mode.  "release" installs the
+      # latest point release.  We then install the pre-release in the main
+      # script
+      girder_version: "release"
       girder_web: false
       girder_daemonize: false
       become: true

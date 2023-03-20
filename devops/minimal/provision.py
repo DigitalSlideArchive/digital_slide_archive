@@ -189,6 +189,11 @@ def preprovision(opts):
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
             subprocess.check_call(cmd, shell=True)
+    if getattr(opts, 'shell', None) and len(opts.shell):
+        for entry in opts.shell:
+            cmd = entry
+            logger.info('Running: %s', cmd)
+            subprocess.check_call(cmd, shell=True)
     if getattr(opts, 'rebuild-client', None):
         cmd = 'girder build'
         if not str(getattr(opts, 'rebuild-client', None)).lower().startswith('prod'):
@@ -515,16 +520,16 @@ if __name__ == '__main__':  # noqa
         help='Install slicer_cli images.')
 
     parser.add_argument(
-        '--rabbitmq-user', default='guest', dest='worker_rabbitmq_user',
+        '--rabbitmq-user', default='guest', dest='worker-rabbitmq-user',
         help='Worker: RabbitMQ user name.')
     parser.add_argument(
-        '--rabbitmq-pass', default='guest', dest='worker_rabbitmq_pass',
+        '--rabbitmq-pass', default='guest', dest='worker-rabbitmq-pass',
         help='Worker: RabbitMQ password.')
     parser.add_argument(
-        '--rabbitmq-host', dest='worker_rabbitmq_host',
+        '--rabbitmq-host', dest='worker-rabbitmq-host',
         help='Worker: RabbitMQ host.')
     parser.add_argument(
-        '--config', dest='worker_config',
+        '--config', dest='worker-config',
         default='/opt/girder_worker/girder_worker/worker.local.cfg',
         help='Worker: Path to the worker config file.')
     parser.add_argument(

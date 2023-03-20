@@ -187,7 +187,7 @@
       - girder-user-quota
       - girder-virtual-folders
       - girder-xtk-demo
-    extra_args: "--pre"
+    # extra_args: "--pre"
     virtualenv: "{{ girder_virtualenv }}"
     state: present
 

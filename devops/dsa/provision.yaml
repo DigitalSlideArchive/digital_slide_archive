@@ -17,6 +17,9 @@ mongo-compat: True
 #   - girder-ldap
 # rebuild-client may be False, True (for dev mode), or "production"
 rebuild-client: False
+# Run additional shell commands before start
+# shell:
+#   - ls
 # Default admin user if there are no admin users
 admin:
   login: admin
@@ -76,7 +79,7 @@ slicer-cli-image:
 worker-rabbitmq-user: guest
 worker-rabbitmq-pass: guest
 worker-config: /opt/girder_worker/girder_worker/worker.local.cfg
-# These have precendence over the top level values
+# These have precedence over the top level values
 worker:
   # rabbitmq-host: girder:8080
   # rabbitmq-user: guest
