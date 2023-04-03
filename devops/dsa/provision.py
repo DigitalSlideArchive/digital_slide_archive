@@ -151,6 +151,9 @@ def get_slicer_images(imageList, adminUser):
     from slicer_cli_web.docker_resource import DockerResource
     from slicer_cli_web.image_job import jobPullAndLoad
 
+    imageList = [entry for entry in imageList if entry and len(entry)]
+    if not len(imageList):
+        return
     logger.info('Pulling and installing slicer_cli images: %r', imageList)
     job = Job().createLocalJob(
         module='slicer_cli_web.image_job',

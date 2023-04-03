@@ -30,4 +30,4 @@ COPY provision.py .
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
-CMD python provision.py --sample-data && girder serve --database mongodb://mongodb:27017/girder
+CMD python provision.py --sample-data --slicer-cli-image= && girder serve --database mongodb://mongodb:27017/girder
