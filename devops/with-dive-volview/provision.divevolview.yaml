@@ -1,6 +1,7 @@
 ---
 pip:
   - git+https://github.com/PaulHax/girder_volview
+  - git+https://github.com/girder/girder-volview-dicomrt
   - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
 rebuild-client: True
 settings:
@@ -11,6 +12,7 @@ settings:
 # List slicer-cli-images to pull and load
 slicer-cli-image:
   - dsarchive/histomicstk:latest
+  - ghcr.io/girder/girder-volview-dicomrt/worker-volview-dicomrt:latest
 worker:
   pip:
     - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
