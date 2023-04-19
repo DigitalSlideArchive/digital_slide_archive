@@ -3,6 +3,11 @@ pip:
   - git+https://github.com/PaulHax/girder_volview
   - git+https://github.com/girder/girder-volview-dicomrt
   - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
+# both girder-dicom-viewer and girder-xtk-demo can be used to view radiology
+# data, but volview does a better job.  girder-archive-access extends
+# girder-dicom-viewer to let it read zip files
+shell:
+  - pip uninstall -y girder-dicom-viewer girder-xtk-demo girder-archive-access
 rebuild-client: True
 settings:
   worker.broker: "amqp://guest:guest@rabbitmq"
