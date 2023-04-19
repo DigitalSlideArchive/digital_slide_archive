@@ -248,6 +248,48 @@ jobs:
           name: Wait for girder to respond and be configured
           command: |
             for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+  docker-compose-external-worker:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2004:2022.10.1
+    steps:
+      - checkout
+      - run:
+          name: Use Python 3.10
+          command: |
+            pyenv versions
+            pyenv global 3.10.6
+            pip --version
+      - run:
+          name: Run docker-compose up
+          command: |
+            bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose --profile server up --build -d'
+            bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose --profile worker up --build -d'
+          working_directory: ./devops/external-worker
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+  docker-compose-with-dive-volview:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2004:2022.10.1
+    steps:
+      - checkout
+      - run:
+          name: Use Python 3.10
+          command: |
+            pyenv versions
+            pyenv global 3.10.6
+            pip --version
+      - run:
+          name: Run docker-compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose  -f ../dsa/docker-compose.yml -f docker-compose.override.yml -p dsa-plus up --build -d'
+          working_directory: ./devops/with-dive-volview
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   publish-docker:
     working_directory: ~/project
     machine:
@@ -355,6 +397,20 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - docker-compose-with-dive-volview:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - docker-compose-external-worker:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
       - publish-docker:
           requires:
             - test-cli
@@ -402,6 +458,8 @@ workflows:
             - build
       - docker-compose
       - docker-compose-minimal
+      - docker-compose-with-dive-volview
+      - docker-compose-external-worker
       - docs
       - publish-docker:
           requires:
