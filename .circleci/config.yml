@@ -175,7 +175,7 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa_girder bash -lc 'tox -e flake8,lintclient,py36,py37,py38,py39,py310'
+            docker exec dsa_girder bash -lc 'tox -e flake8,lintclient,py37,py38,py39,py310,py311'
   docker-compose:
     working_directory: ~/project
     machine:
