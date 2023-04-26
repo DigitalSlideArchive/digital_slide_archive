@@ -39,6 +39,9 @@ assetstore:
 # path.  "resource:admin" uses the default admin, "resourceid:<path>" is the
 # string id for the resource path, and "resourceid:admin" is the string if for
 # default admin.
+#   You can add metadata to a resource.  The default key is meta.  If
+# metadata_update is False, metadata will not be set if any metadata
+# already exists.
 resources:
   - model: collection
     name: Tasks
@@ -50,6 +53,10 @@ resources:
     name: "Slicer CLI Web Tasks"
     creator: resource:admin
     public: True
+    # metadata:
+    #   sample_key: sample_value
+    # metadata_key: meta
+    # metadata_update: True
 settings:
   worker.broker: "amqp://guest:guest@rabbitmq"
   worker.backend: "rpc://guest:guest@rabbitmq"
