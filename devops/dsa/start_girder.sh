@@ -16,6 +16,9 @@ adduser $(id -nu ${DSA_USER%%:*}) $(getent group ${DSA_USER#*:} | cut "-d:" -f1)
 addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null
 # add the user to the docker group.
 adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null
+# Try to increase permissions for the docker socket; this helps this work on
+# OSX where the users don't translate
+chmod 777 /var/run/docker.sock 2>/dev/null || true
 # Use iptables to make some services appear as if they are on localhost (as
 # well as on the docker network).  This is done to allow tox tests to run.
 sysctl -w net.ipv4.conf.eth0.route_localnet=1

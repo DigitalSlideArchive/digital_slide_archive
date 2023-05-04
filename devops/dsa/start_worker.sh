@@ -16,6 +16,9 @@ adduser $(id -nu ${DSA_USER%%:*}) $(getent group ${DSA_USER#*:} | cut "-d:" -f1)
 addgroup --gid $(stat -c "%g" /var/run/docker.sock) docker 2>/dev/null
 # add the user to the docker group.
 adduser $(id -nu ${DSA_USER%%:*}) $(getent group $(stat -c "%g" /var/run/docker.sock) | cut "-d:" -f1) 2>/dev/null
+# Try to increase permissions for the docker socket; this helps this work on
+# OSX where the users don't translate
+chmod 777 /var/run/docker.sock 2>/dev/null || true
 chmod 777 ${TMPDIR:-/tmp} || true
 echo ==== Pre-Provisioning ===
 python3 /opt/digital_slide_archive/devops/dsa/provision.py --worker-pre
