@@ -8,7 +8,6 @@ import tempfile
 import time
 
 import girder_client
-import six
 
 
 def get_girder_client(opts):
@@ -23,7 +22,7 @@ def get_girder_client(opts):
     username = opts.get('username')
     password = opts.get('password')
     if not username and not token:
-        username = six.moves.input('Admin login: ')
+        username = input('Admin login: ')
     if not password and not token:
         password = getpass.getpass('Password for %s: ' % (
             username if username else 'default admin user'))

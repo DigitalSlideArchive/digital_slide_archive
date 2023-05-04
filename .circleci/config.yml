@@ -9,7 +9,7 @@ commands:
           command: pip3 install -U pip
       - run:
           name: Install dependencies
-          command: pip3 install requests docker
+          command: pip3 install requests docker 'urllib3<2'
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -25,7 +25,7 @@ commands:
           command: pip3 install -U pip
       - run:
           name: Install dependencies
-          command: pip3 install requests docker
+          command: pip3 install requests docker 'urllib3<2'
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -50,7 +50,7 @@ jobs:
           command: pip3 install -U pip
       - run:
           name: Install dependencies
-          command: pip3 install ansible requests docker six
+          command: pip3 install ansible requests docker six 'urllib3<2'
       - run:
           name: Build the dockers
           command: export TERM=xterm && python3 ansible/deploy_docker.py build
@@ -212,7 +212,7 @@ jobs:
           path: ./dsa_common.tar
       - run:
           name: Update modules
-          command: pip install -U pip requests
+          command: pip install -U pip requests 'urllib3<2'
       - run:
           name: Install modules needed for testing
           command: pip install girder-client six
