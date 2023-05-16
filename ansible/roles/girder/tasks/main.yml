@@ -179,8 +179,10 @@
 - name: Install Girder plugins
   pip:
     name:
-      - girder-archive-access
-      - girder-dicom-viewer
+      # girder-archive-access and girder-dicom-viewer use a library that has
+      # issues
+      # - girder-archive-access
+      # - girder-dicom-viewer
       - girder-homepage
       - girder-ldap
       - girder-resource-path-tools
