@@ -93,9 +93,9 @@ RUN cd /opt && \
     pip install --no-cache-dir -e .[analysis]
 
 # Install additional girder plugins
-RUN pip install --no-cache-dir --pre \
-    girder-archive-access \
-    girder-dicom-viewer \
+RUN pip install --no-cache-dir \
+    # girder-archive-access \
+    # girder-dicom-viewer \
     girder-homepage \
     girder-ldap \
     girder-resource-path-tools \
