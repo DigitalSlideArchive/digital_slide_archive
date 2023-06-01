@@ -38,7 +38,7 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
 
     :param adminUser: a user to create and modify collections and folders.
     :param collName: the collection name where the data will be added.
-    :param folderName: the folder name where the data will bed aded.
+    :param folderName: the folder name where the data will be added.
     :returns: the folder where the sample data is located.
     """
     try:
@@ -120,6 +120,9 @@ def provision_resources(resources, adminUser):
     for entry in resources:
         entry = {k: value_from_resource(v, adminUser) for k, v in entry.items()}
         modelName = entry.pop('model')
+        metadata = entry.pop('metadata', None)
+        metadata_update = entry.pop('metadata_update', True)
+        metadata_key = entry.pop('metadata_key', 'meta')
         model = ModelImporter.model(modelName)
         key = 'name' if model != 'user' else 'login'
         query = {}
@@ -131,10 +134,21 @@ def provision_resources(resources, adminUser):
                 entry[ownerKey], dict) and '_id' in entry[ownerKey]:
             query[ownerKey + 'Id'] = entry[ownerKey]['_id']
         if query and model.findOne(query):
-            continue
-        createFunc = getattr(model, 'create%s' % modelName.capitalize())
-        logger.info('Creating %s (%r)', modelName, entry)
-        createFunc(**entry)
+            result = model.findOne(query)
+        else:
+            createFunc = getattr(model, 'create%s' % modelName.capitalize())
+            logger.info('Creating %s (%r)', modelName, entry)
+            result = createFunc(**entry)
+        if isinstance(metadata, dict) and hasattr(model, 'setMetadata'):
+            if metadata_key not in metadata or metadata_update:
+                if metadata_key not in result:
+                    result[metadata_key] = {}
+                result[metadata_key].update(metadata.items())
+                for key in metadata:
+                    if metadata[key] is None:
+                        del result[metadata_key][key]
+                model.validateKeys(result[metadata_key])
+                result = model.save(result)
 
 
 def get_slicer_images(imageList, adminUser):
