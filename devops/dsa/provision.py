@@ -38,7 +38,7 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
 
     :param adminUser: a user to create and modify collections and folders.
     :param collName: the collection name where the data will be added.
-    :param folderName: the folder name where the data will bed aded.
+    :param folderName: the folder name where the data will be added.
     :returns: the folder where the sample data is located.
     """
     try:

@@ -105,7 +105,7 @@ By default, the girder container is run in Docker privileged mode.  This can be 
 Customizing
 -----------
 
-Since this uses standard docker-compose, you can customize the process by creating a ``docker-compose.overide.yml`` file in the same directory (or a yaml file of any name and use appropriate ``docker-compose -f docker-compose.yml -f <my yaml file> <command>`` command).  Further, if you mount a provisioning yaml file into the docker image, you can customize settings, plugins, resources, and other options.
+Since this uses standard docker-compose, you can customize the process by creating a ``docker-compose.override.yml`` file in the same directory (or a yaml file of any name and use appropriate ``docker-compose -f docker-compose.yml -f <my yaml file> <command>`` command).  Further, if you mount a provisioning yaml file into the docker image, you can customize settings, plugins, resources, and other options.
 
 See the ``docker-compose.yml`` and ``provision.yaml`` files for details.
 
@@ -114,7 +114,7 @@ Example
 
 To add some additional girder plugins and mount additional directories for assetstores, you can do something like this:
 
-``docker-compose.overide.yml``::
+``docker-compose.override.yml``::
 
     ---
     version: '3'
