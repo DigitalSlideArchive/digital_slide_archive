@@ -102,7 +102,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-girder}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-girder1234}
     volumes:
-      - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
+      - ../dsa/rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
     logging:
       options:
         max-size: "10M"
