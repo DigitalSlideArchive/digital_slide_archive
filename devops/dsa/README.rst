@@ -6,8 +6,8 @@ This directory contains a complete docker-compose set up for the Digital Slide A
 
 Edit the docker-compose.yml file (or add a docker-compose override file) to add mount points for additional data or for exposing additional ports.
 
-Prerequisites:
---------------
+Prerequisites
+-------------
 
 Before using this, you need both Docker and docker-compose.  See the `official installation instructions <https://docs.docker.com/compose/install>`_.
 
