@@ -17,6 +17,12 @@ commands:
           command: |
             docker load -i /tmp/workspace/dsa_girder.tar
             docker load -i /tmp/workspace/dsa_worker.tar
+  startcontainers:
+    description: Start common docker containers for tests.
+    steps:
+      - run:
+          name: Start containers.
+          command: export TERM=xterm && python3 ansible/deploy_docker.py start --no-cli --no-retry
   usecommondocker:
     description: "Make built common docker available"
     steps:
@@ -32,12 +38,17 @@ commands:
           name: Load archived common docker image
           command: |
             docker load -i /tmp/workspace/dsa_common.tar
-  startcontainers:
+  startcommon:
     description: Start containers for tests.
     steps:
       - run:
-          name: Start containers.
-          command: export TERM=xterm && python3 ansible/deploy_docker.py start --no-cli --no-retry
+          name: Run docker-compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose up -d'
+          working_directory: ./devops/dsa
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
 jobs:
   build:
     working_directory: ~/project
@@ -89,6 +100,17 @@ jobs:
             cat ~/.dsa/logs/worker.log
             echo "=== mount.log ==="
             cat ~/.dsa/logs/mount.log
+  test-cli-common:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2004:2022.10.1
+    steps:
+      - checkout
+      - usecommondocker
+      - startcommon
+      - run:
+          name: Run a cli test
+          command: docker exec dsa-girder-1 bash -c "python /opt/digital_slide_archive/devops/dsa/utils/cli_test.py dsarchive/histomicstk:latest --test --username=admin --password=password"
   test-proxy:
     # This tests injecting a custom config file and proxy path locations
     working_directory: ~/project
@@ -138,6 +160,44 @@ jobs:
             cat ~/.dsa/logs/worker.log
             echo "=== mount.log ==="
             cat ~/.dsa/logs/mount.log
+  test-proxy-common:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2004:2022.10.1
+    steps:
+      - checkout
+      - usecommondocker
+      - run:
+          name: Install nginx
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y nginx
+      - run:
+          name: Start nginx
+          command: |
+            sudo cp .circleci/dsa_proxy.nginx /etc/nginx/sites-available/default
+            sudo service nginx restart
+      - run:
+          name: Run docker-compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose -f docker-compose.yml -f ../../.circleci/docker-compose.proxy.yml up -d'
+          working_directory: ./devops/dsa
+      - run:
+          name: "Wait for girder to be available"
+          command: |
+            for f in `seq 120`; do curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | tac | tac | grep -q 'release' && break; sleep 1; done
+      - run:
+          name: "Check that we can read from the api and static assets in the proxy path locations"
+          # grep -q will close its connection as soon as it finds a match, but
+          # curl with throw an error 23 when that occurs.  Piping through a
+          # program that reads the entire contents avoids this problem.
+          # grepping unquietly first does this.
+          command: |
+            curl --silent 'http://127.0.0.1/dsa/'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/system/version'
+            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' | head || true
+            curl --silent 'http://127.0.0.1/dsa/' | grep '/dsa/static/built/plugins/large_image' | grep -q '/dsa/static/built/plugins/large_image' && echo 'correct references'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | grep 'release' | grep -q 'release' && echo 'reports version'
+            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' | grep 'createRenderer' | grep -q 'createRenderer' && echo 'can reach geojs'
   test-girder-build:
     working_directory: ~/project
     machine:
@@ -164,6 +224,17 @@ jobs:
           command: |
             docker logs dsa_girder
             docker logs dsa_worker
+  test-girder-build-common:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2004:2022.10.1
+    steps:
+      - checkout
+      - usecommondocker
+      - startcommon
+      - run:
+          name: Ensure that we can rebuild girder
+          command: docker exec dsa-girder-1 bash -lc 'girder build'
   test-histomicsui:
     working_directory: ~/project
     machine:
@@ -176,6 +247,18 @@ jobs:
           name: Ensure that we can run tests
           command: |
             docker exec dsa_girder bash -lc 'tox -e flake8,lintclient,py37,py38,py39,py310,py311'
+  test-histomicsui-common:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2004:2022.10.1
+    steps:
+      - checkout
+      - usecommondocker
+      - startcommon
+      - run:
+          name: Ensure that we can run tests
+          command: |
+            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=2 tox -e flake8,lintclient,py37,py311'
   docker-compose:
     working_directory: ~/project
     machine:
@@ -219,8 +302,8 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
-            for f in `seq 60`; do if curl --silent 'http://localhost:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent 'http://127.0.0.1:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
       - run:
           name: Grant permissions to docker socket.
           # This is better done by adding the user in the docker container to the group, but that complicates the docker-compose example.
@@ -247,7 +330,7 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   docker-compose-external-worker:
     working_directory: ~/project
     machine:
@@ -269,7 +352,7 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   docker-compose-with-dive-volview:
     working_directory: ~/project
     machine:
@@ -289,7 +372,7 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://localhost:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   publish-docker:
     working_directory: ~/project
     machine:
@@ -356,9 +439,27 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - test-cli-common:
+          requires:
+            - docker-compose
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
       - test-proxy:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-proxy-common:
+          requires:
+            - docker-compose
           filters:
             tags:
               only: /^v.*/
@@ -374,9 +475,27 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - test-girder-build-common:
+          requires:
+            - docker-compose
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
       - test-histomicsui:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-histomicsui-common:
+          requires:
+            - docker-compose
           filters:
             tags:
               only: /^v.*/
@@ -417,6 +536,9 @@ workflows:
             - test-girder-build
             - test-histomicsui
             - docker-compose
+            - test-cli-common
+            - test-girder-build-common
+            - test-histomicsui-common
           filters:
             tags:
               only: /^v.*/
@@ -457,6 +579,18 @@ workflows:
           requires:
             - build
       - docker-compose
+      - test-cli-common:
+          requires:
+            - docker-compose
+      - test-proxy-common:
+          requires:
+            - docker-compose
+      - test-girder-build-common:
+          requires:
+            - docker-compose
+      - test-histomicsui-common:
+          requires:
+            - docker-compose
       - docker-compose-minimal
       - docker-compose-with-dive-volview
       - docker-compose-external-worker
@@ -467,3 +601,6 @@ workflows:
             - test-girder-build
             - test-histomicsui
             - docker-compose
+            - test-cli-common
+            - test-girder-build-common
+            - test-histomicsui-common

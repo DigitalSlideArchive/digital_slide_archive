@@ -1,0 +1,6 @@
+---
+version: '3'
+services:
+  girder:
+    volumes:
+      - ../../.circleci/dsa_proxy.cfg:/etc/girder.cfg
