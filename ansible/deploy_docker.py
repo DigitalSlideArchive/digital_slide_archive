@@ -1026,6 +1026,13 @@ if __name__ == '__main__':   # noqa
         'worker.local.cfg.  This needs to be writable.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
+    print("""This installation script is DEPRECATED.  Using docker compose is now the
+preferred installation method.  Docker compose can do everything this script
+allows, plus is more configurable and more standard.  This script and
+associated docker images and provisioning methods will be removed in the
+future.  If you need help migrating to docker compose, please contact Kitware
+for support options.""")
+
     # Should we add an optional url or host value for rmq and mongo?
     # Should we allow installing git repos in a local directory to make it
     #   easier to develop python and javascript?
