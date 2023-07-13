@@ -315,7 +315,7 @@ def provision_worker(opts):
         settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
     conf.set('celery', 'backend', 'rpc://%s:%s@%s/' % (
         settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
-    with open(settings['config'], 'wt') as fptr:
+    with open(settings['config'], 'w') as fptr:
         conf.write(fptr)
 
 
@@ -467,7 +467,7 @@ if __name__ == '__main__':  # noqa
         '--samples', '--data', '--sample-data',
         action='store_true', help='Download sample data')
     parser.add_argument(
-        '--sample-collection', dest='sample-collection',  default='Samples',
+        '--sample-collection', dest='sample-collection', default='Samples',
         help='Sample data collection name')
     parser.add_argument(
         '--sample-folder', dest='sample-folder', default='Images',

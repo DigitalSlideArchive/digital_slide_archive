@@ -699,7 +699,7 @@ def images_repull(**kwargs):
         if 'name' not in image and not kwargs.get('cli'):
             continue
         get_docker_image_and_container(
-            client, key, 'pull',  version=kwargs.get('pinned'))
+            client, key, 'pull', version=kwargs.get('pinned'))
 
 
 def merge_configuration(client, ctn, conf, **kwargs):
