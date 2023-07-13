@@ -39,7 +39,7 @@ def adjust_ids(user_name):  # noqa
             'uid': line.split(':', 3)[2],
             'gid': line.split(':', 4)[3],
             'home': line.split(':', 6)[5],
-        } for line in open('/etc/passwd', 'rt').readlines()]
+        } for line in open('/etc/passwd').readlines()]
         isTaken = False
         for entry in userlist:
             if entry['user'] == user_name and entry['uid'] == user_uid and entry['gid'] == user_gid:
@@ -55,7 +55,7 @@ def adjust_ids(user_name):  # noqa
             if user_entry:
                 userlist.append(user_entry)
             # Write the /etc/passwd file
-            open('/etc/passwd.tmp', 'wt').write(''.join([
+            open('/etc/passwd.tmp', 'w').write(''.join([
                 ':'.join(entry['parts']) for entry in userlist]))
             os.rename('/etc/passwd.tmp', '/etc/passwd')
             os.system('pwconv')
@@ -65,7 +65,7 @@ def adjust_ids(user_name):  # noqa
         'group': line.split(':', 1)[0],
         'gid': line.split(':', 3)[2],
         'users': line.split(':', 4)[3].strip().split(',')
-    } for line in open('/etc/group', 'rt').readlines()]
+    } for line in open('/etc/group').readlines()]
     docker_entry = None
     # Add the user to existing groups
     for entry in grouplist:
@@ -89,7 +89,7 @@ def adjust_ids(user_name):  # noqa
             group['parts'][3] = user_name + '\n'
             grouplist.append(group)
     # Write the /etc/group file
-    open('/etc/group.tmp', 'wt').write(''.join([
+    open('/etc/group.tmp', 'w').write(''.join([
         ':'.join(entry['parts']) for entry in grouplist]))
     os.rename('/etc/group.tmp', '/etc/group')
     os.system('grpconv')
@@ -137,7 +137,7 @@ def set_hosts():
     hosts.append('%s dockerhost' % hostip)
     changed = True
     if changed:
-        open('/etc/hosts', 'wt').write('\n'.join(hosts) + '\n')
+        open('/etc/hosts', 'w').write('\n'.join(hosts) + '\n')
 
 
 def set_tmp_root():
