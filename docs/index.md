@@ -16,7 +16,7 @@ hero_buttons:
     link: https://github.com/DigitalSlideArchive
 
   - link_text: Installation
-    link: https://github.com/DigitalSlideArchive/digital_slide_archive/blob/master/ansible/README.rst
+    link: https://github.com/DigitalSlideArchive/digital_slide_archive/blob/master/devops/dsa/README.rst
 
 # What is DSA Section
 # =================================
