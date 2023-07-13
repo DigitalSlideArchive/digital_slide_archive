@@ -11,6 +11,11 @@ Installing via Docker
 
 This method should work on any system running Docker.  It has been tested with a variety of Ubuntu and CentOS distributions.
 
+DEPRECATION
+###########
+
+This method uses an older installation method that was created before docker-compose supported all of the features we wanted to use.  The preferred installation with Docker is now `here <../devops/dsa>`_.  There are some variations for different deployment methods in the `devops <../devops>`_ directory.  The installation method listed below still works but should not be used for new deployments.
+
 Prerequisites
 #############
 

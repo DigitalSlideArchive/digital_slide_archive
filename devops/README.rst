@@ -2,6 +2,11 @@
 Digital Slide Archive devops docker scripts
 ===========================================
 
+Installation
+============
+
+See the `devops/dsa <./dsa>`_ folder for the most common installation method.  Other folders in this one contain alternative installations.
+
 Description
 ===========
 
