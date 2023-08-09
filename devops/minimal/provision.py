@@ -135,6 +135,7 @@ def provision_resources(resources, adminUser):
             query[ownerKey + 'Id'] = entry[ownerKey]['_id']
         if query and model.findOne(query):
             result = model.findOne(query)
+            logger.debug('Has %s (%r)', modelName, entry)
         else:
             createFunc = getattr(model, 'create%s' % modelName.capitalize())
             logger.info('Creating %s (%r)', modelName, entry)
@@ -374,7 +375,10 @@ def merge_yaml_opts(opts, parser):
         key = key.replace('_', '-')
         if getattr(opts, key, None) is None or getattr(
                 opts, key, None) == getattr(defaults, key, None):
-            setattr(opts, key, value)
+            if key == 'settings' and getattr(opts, key, None) and isinstance(value, dict):
+                getattr(opts, key).update(value)
+            else:
+                setattr(opts, key, value)
     logger.debug('Arguments after adding yaml: %r', opts)
     return opts
 
