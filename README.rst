@@ -21,6 +21,16 @@ Demo Instance
 
 `http://demo.kitware.com/histomicstk/histomicstk <http://demo.kitware.com/histomicstk/histomicstk#?image=5c74528be62914004b10fd1e>`_.
 
+License
+-----------------------------------------------------------
+
+The Digital Slide Archive is made available under the Apache License, Version 2.0. For more details, see `LICENSE <https://github.com/DigitalSlideArchive/digital_slide_archive/blob/master/LICENSE>`_
+
+Community
+-----------------------------------------------------------
+
+`Discussions <https://github.com/DigitalSlideArchive/digital_slide_archive/discussions>`_ | `Issues <https://github.com/DigitalSlideArchive/digital_slide_archive/issues>`_ | `Contact Us <https://www.kitware.com/contact-us/>`_
+
 Installation
 ------------
 
