@@ -62,10 +62,6 @@ services:
     # so that database files are owned by yourself.
     user: ${DSA_USER:-PLEASE SET DSA_USER}
     restart: unless-stopped
-    # Using --nojournal means that changes can be lost between the last
-    # checkpoint and an unexpected shutdown, but can substantially reduce
-    # writes.
-    command: --nojournal
     volumes:
       # Location to store database files
       - ../dsa/db:/data/db

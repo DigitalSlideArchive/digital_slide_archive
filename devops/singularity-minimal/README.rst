@@ -1,6 +1,6 @@
 Run the following singularity commands::
 
-    singularity run --bind ./db:/data/db docker://mongo:latest --nojournal &
+    singularity run --bind ./db:/data/db docker://mongo:latest &
 
     singularity run --bind ./assetstore:/assetstore --bind ./girder.cfg:/etc/girder.cfg docker://dsarchive/dsa_common bash -c 'python /opt/digital_slide_archive/devops/minimal/provision.py --sample-data && girder serve' &
 
