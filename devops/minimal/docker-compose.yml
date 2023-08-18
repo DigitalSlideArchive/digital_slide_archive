@@ -14,7 +14,6 @@ services:
   mongodb:
     image: "mongo:latest"
     restart: unless-stopped
-    command: --nojournal
     volumes:
       - db:/data/db
 volumes:
