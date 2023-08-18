@@ -615,9 +615,13 @@ if __name__ == '__main__':  # noqa
                 logger.warning('Could not connect to mongo.')
             try:
                 db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
-                    db.server_info()['version'].split('.')[:2])})
+                    db.server_info()['version'].split('.')[:2]), 'confirm': True})
             except Exception:
-                logger.warning('Could not set mongo feature compatibility version.')
+                try:
+                    db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
+                        db.server_info()['version'].split('.')[:2])})
+                except Exception:
+                    logger.warning('Could not set mongo feature compatibility version.')
             try:
                 # Also attempt to upgrade old version 2 image sources
                 db.girder.item.update_many(
