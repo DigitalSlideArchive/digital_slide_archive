@@ -96,6 +96,7 @@ RUN cd /opt && \
 RUN pip install --no-cache-dir \
     # girder-archive-access \
     # girder-dicom-viewer \
+    girder-hashsum-download \
     girder-homepage \
     girder-ldap \
     girder-resource-path-tools \
