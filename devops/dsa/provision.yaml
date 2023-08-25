@@ -15,7 +15,7 @@ mongo-compat: True
 # pip:
 #   - girder-oauth
 #   - girder-ldap
-# rebuild-client may be False, True (for dev mode), or "production"
+# rebuild-client may be False, True (for production mode), or "development"
 rebuild-client: False
 # Run additional shell commands before start
 # shell:
