@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 
 import yaml
 
@@ -159,6 +160,9 @@ def get_slicer_images(imageList, adminUser):
     :param imageList: a list of docker images.
     :param adminUser: an admin user for permissions.
     """
+    import threading
+
+    from girder import logger
     from girder.models.setting import Setting
     from girder_jobs.constants import JobStatus
     from girder_jobs.models.job import Job
@@ -184,12 +188,19 @@ def get_slicer_images(imageList, adminUser):
         asynchronous=True
     )
     job = Job().save(job)
-    # Run this synchronously
-    jobPullAndLoad(job)
-    job = Job().load(id=job['_id'], user=adminUser, includeLog=True)
-    if 'log' in job:
-        logger.info('Result:\n' + ''.join(job['log']))
-    else:
+    t = threading.Thread(target=jobPullAndLoad, args=(job, ))
+    t.start()
+    logpos = 0
+    logger.info('Result:\n')
+    while job['status'] not in {JobStatus.SUCCESS, JobStatus.ERROR, JobStatus.CANCELED}:
+        time.sleep(0.1)
+        job = Job().load(id=job['_id'], user=adminUser, includeLog=True)
+        if 'log' in job:
+            while logpos < len(job['log']):
+                logger.info(job['log'][logpos].rstrip())
+                logpos += 1
+    t.join()
+    if 'log' not in job:
         logger.warning('Job record: %r', job)
     if job['status'] != JobStatus.SUCCESS:
         raise Exception('Failed to pull and load images')
@@ -214,7 +225,7 @@ def preprovision(opts):
             subprocess.check_call(cmd, shell=True)
     if getattr(opts, 'rebuild-client', None):
         cmd = 'girder build'
-        if not str(getattr(opts, 'rebuild-client', None)).lower().startswith('prod'):
+        if str(getattr(opts, 'rebuild-client', None)).lower().startswith('dev'):
             cmd += ' --dev'
         logger.info('Rebuilding girder client: %s', cmd)
         cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
@@ -579,6 +590,12 @@ if __name__ == '__main__':  # noqa
     opts = parser.parse_args(args=sys.argv[1:])
     logger.addHandler(logging.StreamHandler(sys.stderr))
     logger.setLevel(max(1, logging.WARNING - 10 * opts.verbose))
+    try:
+        logger.info('Provision file date: %s; size: %d',
+                    time.ctime(os.path.getmtime(__file__)),
+                    os.path.getsize(__file__))
+    except Exception:
+        pass
     logger.debug('Parsed arguments: %r', opts)
     if getattr(opts, 'use-defaults', None) is not False:
         opts = merge_default_opts(opts)
