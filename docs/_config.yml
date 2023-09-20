@@ -22,7 +22,7 @@ title: Digital Slide Archive
 tagline: Harness the full potential of your digital pathology data
 description: >
   A containerized web-based platform for the analysis, visualization, management and annotation of whole-slide digital pathology imaging data
-url: "https://myawesomeurl.com/"
+url: "https://digitalslidearchive.github.io"
 permalink: pretty
 favicon: /favicon.ico
 baseurl: "/digital_slide_archive/"
