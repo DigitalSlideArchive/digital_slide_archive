@@ -631,6 +631,9 @@ if __name__ == '__main__':  # noqa
             except Exception:
                 logger.warning('Could not connect to mongo.')
             try:
+                # In mongo shell, this is functionally
+                #   db.adminCommand({setFeatureCompatibilityVersion:
+                #     db.version().split('.').slice(0, 2).join('.')})
                 db.admin.command({'setFeatureCompatibilityVersion': '.'.join(
                     db.server_info()['version'].split('.')[:2]), 'confirm': True})
             except Exception:
