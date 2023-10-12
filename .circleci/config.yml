@@ -53,7 +53,7 @@ jobs:
   build:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - run:
@@ -82,7 +82,7 @@ jobs:
   test-cli:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usedockers
@@ -103,7 +103,7 @@ jobs:
   test-cli-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usecommondocker
@@ -115,7 +115,7 @@ jobs:
     # This tests injecting a custom config file and proxy path locations
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usedockers
@@ -163,7 +163,7 @@ jobs:
   test-proxy-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usecommondocker
@@ -201,7 +201,7 @@ jobs:
   test-girder-build:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usedockers
@@ -227,7 +227,7 @@ jobs:
   test-girder-build-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usecommondocker
@@ -238,7 +238,7 @@ jobs:
   test-histomicsui:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usedockers
@@ -246,11 +246,11 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa_girder bash -lc 'tox -e flake8,lintclient,py37,py38,py39,py310,py311'
+            docker exec dsa_girder bash -lc 'tox -e flake8,lintclient,py38,py39,py310,py311'
   test-histomicsui-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usecommondocker
@@ -258,18 +258,18 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=2 tox -e flake8,lintclient,py37,py311'
+            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=2 tox -e flake8,lintclient,py38,py312'
   docker-compose:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - run:
-          name: Use Python 3.10
+          name: Use Python 3.11
           command: |
             pyenv versions
-            pyenv global 3.10.6
+            pyenv global 3.11
             pip --version
       - run:
           name: Check provisioning defaults match
@@ -314,14 +314,14 @@ jobs:
   docker-compose-minimal:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - run:
-          name: Use Python 3.10
+          name: Use Python 3.11
           command: |
             pyenv versions
-            pyenv global 3.10.6
+            pyenv global 3.11
             pip --version
       - run:
           name: Run docker-compose up
@@ -334,14 +334,14 @@ jobs:
   docker-compose-external-worker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - run:
-          name: Use Python 3.10
+          name: Use Python 3.11
           command: |
             pyenv versions
-            pyenv global 3.10.6
+            pyenv global 3.11
             pip --version
       - run:
           name: Run docker-compose up
@@ -356,14 +356,14 @@ jobs:
   docker-compose-with-dive-volview:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - run:
-          name: Use Python 3.10
+          name: Use Python 3.11
           command: |
             pyenv versions
-            pyenv global 3.10.6
+            pyenv global 3.11
             pip --version
       - run:
           name: Run docker-compose up
@@ -376,7 +376,7 @@ jobs:
   publish-docker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2004:2022.10.1
+      image: ubuntu-2204:2023.07.2
     steps:
       - checkout
       - usedockers
