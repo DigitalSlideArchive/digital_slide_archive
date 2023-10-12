@@ -78,8 +78,11 @@ settings:
 
     The [HistomicsUI](histomics) application is enabled.
   slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
-# List slicer-cli-images to pull and load
-slicer-cli-image:
+# List slicer-cli-images to pull, if not present, and load
+# slicer-cli-image:
+#   - dsarchive/histomicstk:latest
+# List slicer-cli-images to always pull, and load
+slicer-cli-image-pull:
   - dsarchive/histomicstk:latest
 # The worker can specify parameters for provisioning
 # worker-rabbitmq-host: girder:8080

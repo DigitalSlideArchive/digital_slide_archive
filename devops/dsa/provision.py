@@ -153,12 +153,13 @@ def provision_resources(resources, adminUser):
                 result = model.save(result)
 
 
-def get_slicer_images(imageList, adminUser):
+def get_slicer_images(imageList, adminUser, alwaysPull=False):
     """
     Load a list of cli docker images into the system.
 
     :param imageList: a list of docker images.
     :param adminUser: an admin user for permissions.
+    :param alwaysPull: true to ask to always pull the latest image.
     """
     import threading
 
@@ -180,6 +181,7 @@ def get_slicer_images(imageList, adminUser):
         kwargs={
             'nameList': imageList,
             'folder': Setting().get(PluginSettings.SLICER_CLI_WEB_TASK_FOLDER),
+            'pull': 'true' if alwaysPull else 'asneeded',
         },
         title='Pulling and caching docker images',
         type=DockerResource.jobType,
@@ -284,6 +286,12 @@ def provision(opts):  # noqa
             value = value_from_resource(value, adminUser)
             logger.info('Setting %s to %r', key, value)
             Setting().set(key, value)
+    if getattr(opts, 'slicer-cli-image-pull', None):
+        try:
+            get_slicer_images(getattr(opts, 'slicer-cli-image-pull', None),
+                              adminUser, alwaysPull=True)
+        except Exception:
+            logger.info('Cannot fetch slicer-cli-images.')
     if getattr(opts, 'slicer-cli-image', None):
         try:
             get_slicer_images(getattr(opts, 'slicer-cli-image', None), adminUser)
@@ -424,8 +432,8 @@ The [HistomicsUI](histomics) application is enabled.""",
         'slicer_cli_web.task_folder': 'resourceid:collection/Tasks/Slicer CLI Web Tasks',
     })
     opts.settings = settings
-    if getattr(opts, 'slicer-cli-image', None) is None:
-        setattr(opts, 'slicer-cli-image', ['dsarchive/histomicstk:latest'])
+    if getattr(opts, 'slicer-cli-image-pull', None) is None:
+        setattr(opts, 'slicer-cli-image-pull', ['dsarchive/histomicstk:latest'])
     if getattr(opts, 'assetstore', None) is None:
         opts.assetstore = {
             'name': 'Assetstore',
@@ -549,7 +557,10 @@ if __name__ == '__main__':  # noqa
         default=False, help='Rebuild the girder client.')
     parser.add_argument(
         '--slicer-cli-image', dest='slicer-cli-image', action='append',
-        help='Install slicer_cli images.')
+        help='Install slicer_cli images, only pulling if not present.')
+    parser.add_argument(
+        '--slicer-cli-image-pull', dest='slicer-cli-image-pull', action='append',
+        help='Install slicer_cli images, always pulling the latest.')
 
     parser.add_argument(
         '--rabbitmq-user', default='guest', dest='worker-rabbitmq-user',
