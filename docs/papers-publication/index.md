@@ -20,36 +20,43 @@ publications:
     full-citation: "Lutnick, Brendon, David Manthey, Jan U. Becker, Brandon Ginley, Katharina Moos, Jonathan E. Zuckerman, Luis Rodrigues, et al. 2022. “A User-Friendly Tool for Cloud-Based Whole Slide Image Segmentation with Examples from Renal Histopathology.” Communications Medicine. Springer Science and Business Media LLC."
     DOI_link: https://doi.org/10.1038/s43856-022-00138-z
     link: https://doi.org/10.1038/s43856-022-00138-z
+    PMID: 35996627
     DOI: 10.1038/s43856-022-00138-z
   - title: "PodoCount: A Robust, Fully Automated, Whole-Slide Podocyte Quantification Tool."
     full-citation: "Santo, Briana A., Darshana Govind, Parnaz Daneshpajouhnejad, Xiaoping Yang, Xiaoxin X. Wang, Komuraiah Myakala, Bryce A. Jones, et al. 2022. “PodoCount: A Robust, Fully Automated, Whole-Slide Podocyte Quantification Tool.” Kidney International Reports. Elsevier BV."
     DOI_link: https://doi.org/10.1016/j.ekir.2022.03.004
     link: https://doi.org/10.1016/j.ekir.2022.03.004
+    PMID: 35694561
     DOI: 10.1016/j.ekir.2022.03.004
   - title: "A Tool for Federated Training of Segmentation Models on Whole Slide Images."
     full-citation: "Lutnick, Brendon, David Manthey, Jan U. Becker, Jonathan E. Zuckerman, Luis Rodrigues, Kuang-Yu Jen, and Pinaki Sarder. 2022. “A Tool for Federated Training of Segmentation Models on Whole Slide Images.” Journal of Pathology Informatics. Elsevier BV."
     DOI_link: https://doi.org/10.1016/j.jpi.2022.100101
     link: https://doi.org/10.1016/j.jpi.2022.100101
+    PMID: 35910077
     DOI: 10.1016/j.jpi.2022.100101
   - title: "Explainable Nucleus Classification Using Decision Tree Approximation of Learned Embeddings"
     full-citation: "Amgad, Mohamed, LameesA Atteya, Hagar Hussein, Kareem Hosny Mohammed, Ehab Hafiz, Maha A T Elsebaie, Pooya Mobadersany, et al. 2021. “Explainable Nucleus Classification Using Decision Tree Approximation of Learned Embeddings.” Edited by Jinbo Xu. Bioinformatics, September."
     DOI_link: https://doi.org/10.1093/bioinformatics/btab670
     link: https://doi.org/10.1093/bioinformatics/btab670
+    PMID: 34586355
     DOI: 10.1093/bioinformatics/btab670
   - title: "PodoSighter: A Cloud-Based Tool for Label-Free Podocyte Detection in Kidney Whole Slide Images"
     full-citation: "Govind, Darshana, Jan Becker, Jeffrey Miecznikowski, Avi Rosenberg, Julien Dang, Pierre Louis Tharaux, Rabi Yacoub, et al. 2021. “PodoSighter: A Cloud-Based Tool for Label-Free Podocyte Detection in Kidney Whole Slide Images.” Journal of the American Society of Nephrology, September, ASN.2021050630."
     DOI_link: https://doi.org/10.1681/asn.2021050630
     link: https://doi.org/10.1681/asn.2021050630
+    PMID: 34479966
     DOI: 10.1681/asn.2021050630
   - title: User Friendly, Cloud Based, Whole Slide Image Segmentation.
     full-citation: "Lutnick, Brendon, Avinash Kammardi Shashiprakash, David Manthey, and Pinaki Sarder. 2021. “User Friendly, Cloud Based, Whole Slide Image Segmentation.” In Medical Imaging 2021: Digital Pathology, edited by John E. Tomaszewski and Aaron D. Ward. SPIE."
     DOI_link: https://doi.org/10.1117/12.2581383
     link: https://doi.org/10.1117/12.2581383
+    PMID: 34366542
     DOI: 10.1117/12.2581383
   - title: A Distributed System Improves Inter-Observer and AI Concordance in Annotating Interstitial Fibrosis and Tubular Atrophy.
     full-citation: "Kammardi Shashiprakash, Avinash, Brendon Lutnick, Brandon Ginley, Darshana Govind, Nicholas Lucarelli, Kuang-Yu Jen, Avi Z. Rosenberg, et al. 2021. “A Distributed System Improves Inter-Observer and AI Concordance in Annotating Interstitial Fibrosis and Tubular Atrophy.” In Medical Imaging 2021: Digital Pathology, edited by John E. Tomaszewski and Aaron D. Ward. SPIE."
     DOI_link: https://doi.org/10.1117/12.2581789
     link: https://doi.org/10.1117/12.2581789
+    PMID: 34366540
     DOI: 10.1117/12.2581789
   - title: Machine-based detection and classification for bone marrow aspirate differential counts - initial development focusing on nonneoplastic cells.
     full-citation: "Chandradevan, Ramraj, Ahmed A. Aljudi, Bradley R. Drumheller, Nilakshan Kunananthaseelan, Mohamed Amgad, David A. Gutman, Lee A. D. Cooper, and David L. Jaye. “Machine-Based Detection and Classification for Bone Marrow Aspirate Differential Counts: Initial Development Focusing on Nonneoplastic Cells.” Laboratory Investigation 100, no. 1 (September 30, 2019): 98–109."
