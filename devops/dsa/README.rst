@@ -144,3 +144,8 @@ To add some additional girder plugins and mount additional directories for asset
     slicer-cli-image:
       - dsarchive/histomicstk:latest
       - girder/slicer_cli_web:small
+
+Database Backup
+---------------
+
+You may want to periodically back up the database.  The standard ``mongodump`` tool can be used for this via a command line ``docker-compose exec mongodb /usr/bin/mongodump --db girder --archive --gzip > dsa_girder.dump.gz``.  Restoring is similar: ``docker-compose exec -T mongodb /usr/bin/mongorestore --db girder --archive --gzip < /tmp/dsa_girder.dump.gz``; you may want to add ``--drop`` as flag to the restore process.  See Mongo's official documentation for details.
