@@ -5,12 +5,32 @@ permalink: /papers-publications/
 # Banner Content
 # =================================
 title: Papers and Publications
-subtitle: We have been involved in these and related research areas for several years
+subtitle: A mix of papers that were published by contributors to the Digital Slide Archive and by unaffiliated researchers who have found the system to be useful in their work.
 hero_image: assets/img/home-callouts/papers_publications.jpg
 
 # Papers and Publications list
 # =================================
 publications:
+  - title: "Accelerating Pharmaceutical R&amp;D with a User-Friendly AI System for Histopathology Image Analysis."
+    full-citation: "Lutnick, Brendon, Albert Juan Ramon, Brandon Ginley, Carlos Csiszer, Alex Kim, Io Flament, Pablo F. Damasceno, et al. 2023. “Accelerating Pharmaceutical R&amp;D with a User-Friendly AI System for Histopathology Image Analysis.” Journal of Pathology Informatics. Elsevier BV."
+    DOI_link: https://doi.org/10.1016/j.jpi.2023.100337
+    link: https://doi.org/10.1016/j.jpi.2023.100337
+    DOI: 10.1016/j.jpi.2023.100337
+  - title: "A User-Friendly Tool for Cloud-Based Whole Slide Image Segmentation with Examples from Renal Histopathology."
+    full-citation: "Lutnick, Brendon, David Manthey, Jan U. Becker, Brandon Ginley, Katharina Moos, Jonathan E. Zuckerman, Luis Rodrigues, et al. 2022. “A User-Friendly Tool for Cloud-Based Whole Slide Image Segmentation with Examples from Renal Histopathology.” Communications Medicine. Springer Science and Business Media LLC."
+    DOI_link: https://doi.org/10.1038/s43856-022-00138-z
+    link: https://doi.org/10.1038/s43856-022-00138-z
+    DOI: 10.1038/s43856-022-00138-z
+  - title: "PodoCount: A Robust, Fully Automated, Whole-Slide Podocyte Quantification Tool."
+    full-citation: "Santo, Briana A., Darshana Govind, Parnaz Daneshpajouhnejad, Xiaoping Yang, Xiaoxin X. Wang, Komuraiah Myakala, Bryce A. Jones, et al. 2022. “PodoCount: A Robust, Fully Automated, Whole-Slide Podocyte Quantification Tool.” Kidney International Reports. Elsevier BV."
+    DOI_link: https://doi.org/10.1016/j.ekir.2022.03.004
+    link: https://doi.org/10.1016/j.ekir.2022.03.004
+    DOI: 10.1016/j.ekir.2022.03.004
+  - title: "A Tool for Federated Training of Segmentation Models on Whole Slide Images."
+    full-citation: "Lutnick, Brendon, David Manthey, Jan U. Becker, Jonathan E. Zuckerman, Luis Rodrigues, Kuang-Yu Jen, and Pinaki Sarder. 2022. “A Tool for Federated Training of Segmentation Models on Whole Slide Images.” Journal of Pathology Informatics. Elsevier BV."
+    DOI_link: https://doi.org/10.1016/j.jpi.2022.100101
+    link: https://doi.org/10.1016/j.jpi.2022.100101
+    DOI: 10.1016/j.jpi.2022.100101
   - title: "Explainable Nucleus Classification Using Decision Tree Approximation of Learned Embeddings"
     full-citation: "Amgad, Mohamed, LameesA Atteya, Hagar Hussein, Kareem Hosny Mohammed, Ehab Hafiz, Maha A T Elsebaie, Pooya Mobadersany, et al. 2021. “Explainable Nucleus Classification Using Decision Tree Approximation of Learned Embeddings.” Edited by Jinbo Xu. Bioinformatics, September."
     DOI_link: https://doi.org/10.1093/bioinformatics/btab670
