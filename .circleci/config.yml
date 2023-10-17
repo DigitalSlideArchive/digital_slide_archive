@@ -246,7 +246,7 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa_girder bash -lc 'tox -e flake8,lintclient,py38,py39,py310,py311'
+            docker exec dsa_girder bash -lc 'tox -e lint,lintclient,py38,py39,py310,py311'
   test-histomicsui-common:
     working_directory: ~/project
     machine:
@@ -258,7 +258,7 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=2 tox -e flake8,lintclient,py38,py312'
+            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=2 tox -e lint,lintclient,py38,py312'
   docker-compose:
     working_directory: ~/project
     machine:
