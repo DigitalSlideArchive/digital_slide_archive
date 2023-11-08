@@ -1,15 +1,20 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.0.6.1)
+    activesupport (7.1.1)
+      base64
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (>= 0.7, < 2)
-      minitest (~> 5.1)
-      tzinfo (~> 1.1)
-      zeitwerk (~> 2.2, >= 2.2.2)
+      connection_pool (>= 2.2.5)
+      drb
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      mutex_m
+      tzinfo (~> 2.0)
     addressable (2.8.5)
       public_suffix (>= 2.0.2, < 6.0)
-    base64 (0.1.1)
+    base64 (0.2.0)
+    bigdecimal (3.1.4)
     bulma-clean-theme (0.13.3)
       jekyll (>= 3.9, < 5.0)
       jekyll-feed (~> 0.15)
@@ -24,8 +29,11 @@ GEM
     colorator (1.1.0)
     commonmarker (0.23.10)
     concurrent-ruby (1.2.2)
+    connection_pool (2.4.1)
     dnsruby (1.70.0)
       simpleidn (~> 0.2.1)
+    drb (2.2.0)
+      ruby2_keywords
     em-websocket (0.5.3)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0)
@@ -38,7 +46,7 @@ GEM
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (3.0.2)
-    ffi (1.15.5)
+    ffi (1.16.3)
     forwardable-extended (2.6.0)
     gemoji (3.0.1)
     github-pages (228)
@@ -220,6 +228,7 @@ GEM
       jekyll-feed (~> 0.9)
       jekyll-seo-tag (~> 2.1)
     minitest (5.20.0)
+    mutex_m (0.2.0)
     nokogiri (1.15.4-x86_64-linux)
       racc (~> 1.4)
     octokit (4.25.1)
@@ -228,7 +237,7 @@ GEM
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
     public_suffix (4.0.7)
-    racc (1.7.1)
+    racc (1.7.3)
     rb-fsevent (0.11.2)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
@@ -249,11 +258,10 @@ GEM
       unf (~> 0.1.4)
     terminal-table (1.8.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
-    thread_safe (0.3.6)
     typhoeus (1.4.0)
       ethon (>= 0.9.0)
-    tzinfo (1.2.11)
-      thread_safe (~> 0.1)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
     tzinfo-data (1.2023.3)
       tzinfo (>= 1.0.0)
     unf (0.1.4)
@@ -261,7 +269,6 @@ GEM
     unf_ext (0.0.8.2)
     unicode-display_width (1.8.0)
     wdm (0.1.1)
-    zeitwerk (2.6.11)
 
 PLATFORMS
   x86_64-linux
@@ -269,7 +276,7 @@ PLATFORMS
 DEPENDENCIES
   bulma-clean-theme
   github-pages
-  tzinfo (~> 1.2)
+  tzinfo
   tzinfo-data
   wdm (~> 0.1.1)
 
