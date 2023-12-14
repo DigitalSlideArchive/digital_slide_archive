@@ -23,6 +23,8 @@ services:
     environment:
       DSA_USER: ${DSA_USER:-}
       DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+      # You can also set girder settings here:
+      # GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
