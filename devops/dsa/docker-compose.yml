@@ -23,6 +23,9 @@ services:
     environment:
       DSA_USER: ${DSA_USER:-}
       DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+      # Mount options can be used to, for instance, add diskcache (e.g.,
+      #  "-o diskcache,diskcache_size_limit=2147483648")
+      DSA_GIRDER_MOUNT_OPTIONS: ${DSA_GIRDER_MOUNT_OPTIONS:-}
       # You can also set girder settings here:
       # GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
     restart: unless-stopped
