@@ -44,7 +44,7 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   echo ==== Provisioning === &&
   python /opt/digital_slide_archive/devops/dsa/provision.py -v --main &&
   echo ==== Creating FUSE mount === &&
-  (girder mount /fuse || true) &&
+  (girder mount ${DSA_GIRDER_MOUNT_OPTIONS%%:-} /fuse || true) &&
   echo ==== Starting Girder === &&
   girder serve --dev
 "
