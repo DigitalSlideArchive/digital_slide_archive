@@ -381,22 +381,31 @@ jobs:
       - checkout
       - usedockers
       - run:
-          name: Load archived common docker image
-          command: |
-            docker load -i /tmp/workspace/dsa_common.tar
-      - run:
           name: Publish images to Docker Hub
           command: |
               echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
               docker push dsarchive/dsa_worker:latest
               docker push dsarchive/dsa_girder:latest
-              docker push dsarchive/dsa_common:latest
               if [[ $CIRCLE_TAG =~ ^v.*$ ]]; then
               docker tag dsarchive/dsa_worker:latest "dsarchive/dsa_worker:$CIRCLE_TAG"
               docker tag dsarchive/dsa_girder:latest "dsarchive/dsa_girder:$CIRCLE_TAG"
-              docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$CIRCLE_TAG"
               docker push "dsarchive/dsa_worker:$CIRCLE_TAG"
               docker push "dsarchive/dsa_girder:$CIRCLE_TAG"
+              fi
+  publish-docker-common:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2204:2023.07.2
+    steps:
+      - checkout
+      - usecommondocker
+      - run:
+          name: Publish images to Docker Hub
+          command: |
+              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              docker push dsarchive/dsa_common:latest
+              if [[ $CIRCLE_TAG =~ ^v.*$ ]]; then
+              docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$CIRCLE_TAG"
               docker push "dsarchive/dsa_common:$CIRCLE_TAG"
               fi
   docs:
@@ -535,6 +544,17 @@ workflows:
             - test-cli
             - test-girder-build
             - test-histomicsui
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - master
+      - publish-docker-common:
+          requires:
+            # - test-cli
+            # - test-girder-build
+            # - test-histomicsui
             - docker-compose
             - test-cli-common
             - test-girder-build-common
@@ -600,6 +620,11 @@ workflows:
             - test-cli
             - test-girder-build
             - test-histomicsui
+      - publish-docker-common:
+          requires:
+            # - test-cli
+            # - test-girder-build
+            # - test-histomicsui
             - docker-compose
             - test-cli-common
             - test-girder-build-common
