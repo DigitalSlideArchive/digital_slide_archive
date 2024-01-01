@@ -9,7 +9,7 @@ commands:
           command: pip3 install -U pip
       - run:
           name: Install dependencies
-          command: pip3 install requests docker 'urllib3<2'
+          command: pip3 install requests docker
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -31,7 +31,7 @@ commands:
           command: pip3 install -U pip
       - run:
           name: Install dependencies
-          command: pip3 install requests docker 'urllib3<2'
+          command: pip3 install requests docker
       - attach_workspace:
           at: /tmp/workspace
       - run:
