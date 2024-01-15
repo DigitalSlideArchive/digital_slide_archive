@@ -236,6 +236,22 @@ def preprovision(opts):
         subprocess.check_call(cmd, shell=True)
 
 
+def clean_delete_locks():
+    from girder.constants import AssetstoreType
+    from girder.models.assetstore import Assetstore
+
+    for assetstore in Assetstore().find():
+        if assetstore['type'] != AssetstoreType.FILESYSTEM:
+            continue
+        rootpath = assetstore['root']
+        cmd = ['find', rootpath, '-name', '*.deleteLock', '-delete']
+        logger.info(f'Removing old delete locks: {cmd}')
+        try:
+            subprocess.check_call(cmd, shell=False)
+        except Exception:
+            logger.info(f'Failed trying to remove old delete locks: {cmd}')
+
+
 def provision(opts):  # noqa
     """
     Provision the instance.
@@ -267,6 +283,10 @@ def provision(opts):  # noqa
         for params in assetstoreParams:
             method = params.pop('method', 'createFilesystemAssetstore')
             getattr(Assetstore(), method)(**params)
+
+    # Clean up old deleteLocks
+    if getattr(opts, 'clean-delete-locks', None):
+        clean_delete_locks()
 
     # Make sure we have a demo collection and download some demo files
     if getattr(opts, 'samples', None):
@@ -450,6 +470,8 @@ The [HistomicsUI](histomics) application is enabled.""",
             'email': 'admin@nowhere.nil',
             'public': True,
         }
+    if getattr(opts, 'clean-delete-locks', None) is None:
+        setattr(opts, 'clean-delete-locks', True)
     resources = opts.resources or []
     resources.extend([{
         'model': 'collection',
@@ -490,6 +512,13 @@ if __name__ == '__main__':  # noqa
     parser.add_argument(
         '--samples', '--data', '--sample-data',
         action='store_true', help='Download sample data')
+    parser.add_argument(
+        '--clean-delete-locks', action='store_true',
+        help='Remove assetstore delete locks on start')
+    parser.add_argument(
+        '--no-clean-delete-locks', action='store_false',
+        dest='clean-delete-locks',
+        help='Do not remove assetstore delete locks on start')
     parser.add_argument(
         '--sample-collection', dest='sample-collection', default='Samples',
         help='Sample data collection name')

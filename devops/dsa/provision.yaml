@@ -3,6 +3,7 @@
 # This is a dictionary of command-line arguments for the provisioning script
 force: False
 samples: False
+clean-delete-locks: True
 sample-collection: Samples
 sample-folder: Images
 # Set use-defaults to False to skip default settings
