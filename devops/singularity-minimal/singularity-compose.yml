@@ -1,0 +1,21 @@
+---
+version: '2.0'
+instances:
+  girder:
+    image: "docker://dsarchive/dsa_common"
+    name: girder
+    # restart: unless-stopped
+    volumes:
+      - ./assetstore:/assetstore
+      - ./girder.cfg:/etc/girder.cfg
+    depends_on:
+      - mongodb
+    command:
+      bash -c 'python provision.py --sample-data && girder serve'
+  mongodb:
+    image: "docker://mongo:latest"
+    name: mongodb
+    # restart: unless-stopped
+    command: --nojournal
+    volumes:
+      - ./db:/data/db

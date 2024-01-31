@@ -11,3 +11,4 @@ ansible/roles/girder.mongodb
 ansible/sample*.cfg
 docker-compose.local.yml
 worker.local.cfg
+docs/.bundle
