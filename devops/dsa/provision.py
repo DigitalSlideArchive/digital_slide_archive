@@ -219,12 +219,20 @@ def preprovision(opts):
         for entry in opts.pip:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
     if getattr(opts, 'shell', None) and len(opts.shell):
         for entry in opts.shell:
             cmd = entry
             logger.info('Running: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
     if getattr(opts, 'rebuild-client', None):
         cmd = 'girder build'
         if str(getattr(opts, 'rebuild-client', None)).lower().startswith('dev'):
@@ -233,7 +241,11 @@ def preprovision(opts):
         cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
                'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
                'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
-        subprocess.check_call(cmd, shell=True)
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except Exception:
+            logger.error(f'Failed to run {cmd}')
+            raise
 
 
 def clean_delete_locks():
@@ -328,12 +340,20 @@ def preprovision_worker(opts):
         for entry in settings['pip']:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
     if settings.get('shell') and len(settings['shell']):
         for entry in settings['shell']:
             cmd = entry
             logger.info('Running: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
 
 
 def provision_worker(opts):
