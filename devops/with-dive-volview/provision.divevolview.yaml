@@ -1,6 +1,6 @@
 ---
 pip:
-  - git+https://github.com/PaulHax/girder_volview
+  - git+https://github.com/DigitalSlideArchive/girder_volview
   - git+https://github.com/girder/girder-volview-dicomrt
   - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
 # both girder-dicom-viewer and girder-xtk-demo can be used to view radiology
