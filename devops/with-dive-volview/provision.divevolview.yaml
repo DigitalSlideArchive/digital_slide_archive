@@ -3,6 +3,7 @@ pip:
   - git+https://github.com/DigitalSlideArchive/girder_volview
   - git+https://github.com/girder/girder-volview-dicomrt
   - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
+  - git+https://github.com/DigitalSlideArchive/girder-clamav
 # both girder-dicom-viewer and girder-xtk-demo can be used to view radiology
 # data, but volview does a better job.  girder-archive-access extends
 # girder-dicom-viewer to let it read zip files
