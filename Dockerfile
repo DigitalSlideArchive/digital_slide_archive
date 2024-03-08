@@ -45,7 +45,7 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
     chmod +x /usr/bin/tini
 
 # Make a virtualenv with our preferred python
-RUN virtualenv --python 3.9 /opt/venv
+RUN virtualenv --python 3.11 /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Make sure core packages are up to date
