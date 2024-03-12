@@ -92,6 +92,12 @@ services:
       - memcached
       - rabbitmq
     command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   mongodb:
     image: "mongo:latest"
     # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
@@ -112,6 +118,12 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   memcached:
     image: memcached
     command: -m 4096 --max-item-size 8M
@@ -123,6 +135,12 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "bash", "-c", 'exec 3<>/dev/tcp/localhost/11211; printf "stats\nquit\n" >&3; cat <&3']
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   rabbitmq:
     image: "rabbitmq:latest"
     restart: unless-stopped
@@ -138,6 +156,11 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
   worker:
     image: dsarchive/dsa_common
     build: ../..
@@ -167,6 +190,12 @@ services:
     depends_on:
       - rabbitmq
     command: /opt/digital_slide_archive/devops/dsa/start_worker.sh
+    healthcheck:
+      test: ["CMD", "celery", "-b", "amqp://rabbitmq:5672", "inspect", "ping"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     logging:
       options:
         max-size: "10M"
