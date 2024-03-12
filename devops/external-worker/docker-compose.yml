@@ -54,6 +54,12 @@ services:
       - memcached
       - rabbitmq
     command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   mongodb:
     profiles:
       - server
@@ -73,6 +79,12 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   memcached:
     profiles:
       - server
@@ -86,6 +98,12 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "bash", "-c", 'exec 3<>/dev/tcp/localhost/11211; printf "stats\nquit\n" >&3; cat <&3']
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
   rabbitmq:
     profiles:
       - server
@@ -104,6 +122,11 @@ services:
         max-size: "10M"
         max-file: "5"
     command: "bash -c '(until rabbitmqctl await_startup; do sleep 1; done; rabbitmqctl add_user \"${RABBITMQ_USER:-girder}\" \"${RABBITMQ_PASS:-girder1234}\" 2>/dev/null ; rabbitmqctl set_permissions -p / \"${RABBITMQ_USER:-girder}\" \".*\" \".*\" \".*\") & rabbitmq-server'"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
   worker:
     profiles:
@@ -142,3 +165,9 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "celery", "-b", "amqp://${DSA_RABBITMQ_HOST:-rabbitmq}:5672", "inspect", "ping"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
