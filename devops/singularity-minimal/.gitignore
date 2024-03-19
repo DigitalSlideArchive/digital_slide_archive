@@ -1,8 +1,8 @@
 assetstore
 db
-opt
-logs
-fuse
+# opt
+# logs
+# fuse
 
 girder
 mongodb
