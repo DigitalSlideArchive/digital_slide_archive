@@ -1,0 +1,36 @@
+Bootstrap: docker
+From: dsarchive/dsa_common
+
+%setup
+
+%files
+
+%environment
+    export NVM_DIR=/opt/nvm
+    . $NVM_DIR/nvm.sh
+
+%post
+    # install nvm / node properly
+    export NVM_DIR=/opt/nvm
+
+    git clone https://github.com/nvm-sh/nvm.git $NVM_DIR
+    . $NVM_DIR/nvm.sh
+    
+    nvm install 14 && \
+    nvm alias default 14 && \
+    nvm use default
+
+    mv /opt /root_opt
+
+%runscript
+    export NVM_DIR=/opt/nvm
+    . $NVM_DIR/nvm.sh
+
+    bash
+
+%startscript
+    # assuming that the user mounts a local directory to /opt/
+    # this is necessary for getting the correct singularity permissions
+    echo " - Copying docker image's opt (/root_opt) to user mounted /opt"
+    echo " - Make sure you're mounting a local directory to /opt"
+    cp -r /root_opt/* /opt

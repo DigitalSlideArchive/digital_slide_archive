@@ -1,2 +1,10 @@
 assetstore
 db
+opt
+logs
+fuse
+
+girder
+mongodb
+etc.hosts
+resolv.conf

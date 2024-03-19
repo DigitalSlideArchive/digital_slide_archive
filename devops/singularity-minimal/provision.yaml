@@ -1,0 +1,108 @@
+---
+# The provision script can take a yaml file with provision options
+# This is a dictionary of command-line arguments for the provisioning script
+force: False
+samples: False
+clean-delete-locks: True
+sample-collection: Samples
+sample-folder: Images
+# Set use-defaults to False to skip default settings
+use-defaults: True
+# Set mongo_compat to False to not automatically set the mongo feature
+# compatibility version to the current server version.
+mongo-compat: True
+# A list of additional pip modules to install; if any are girder plugins with
+# client-side code, also specify rebuild-client.
+# pip:
+#   - girder-oauth
+#   - girder-ldap
+# rebuild-client may be False, True (for production mode), or "development"
+rebuild-client: False
+# Run additional shell commands before start
+# shell:
+#   - ls
+# Default admin user if there are no admin users
+admin:
+  login: admin
+  password: password
+  firstName: Admin
+  lastName: Admin
+  email: admin@nowhere.nil
+  public: True
+# Default assetstore if there are no assetstores
+assetstore:
+  method: createFilesystemAssetstore
+  name: Assetstore
+  root: /assetstore
+# Any resources to ensure exist.  A model must be specified.  This creates the
+# resource if there is no match for all specified values.  A value of
+# "resource:<path>" is converted to the resource document with that resource
+# path.  "resource:admin" uses the default admin, "resourceid:<path>" is the
+# string id for the resource path, and "resourceid:admin" is the string if for
+# default admin.
+#   You can add metadata to a resource.  The default key is meta.  If
+# metadata_update is False, metadata will not be set if any metadata
+# already exists.
+resources:
+  - model: collection
+    name: Tasks
+    creator: resource:admin
+    public: True
+  - model: folder
+    parent: resource:collection/Tasks
+    parentType: collection
+    name: "Slicer CLI Web Tasks"
+    creator: resource:admin
+    public: True
+    # metadata:
+    #   sample_key: sample_value
+    # metadata_key: meta
+    # metadata_update: True
+settings:
+  worker.broker: "amqp://guest:guest@rabbitmq"
+  worker.backend: "rpc://guest:guest@rabbitmq"
+  worker.api_url: "http://girder:8080/api/v1"
+  worker.direct_path: True
+  core.brand_name: "Digital Slide Archive"
+  # core.http_only_cookies: True
+  histomicsui.webroot_path: "histomics"
+  histomicsui.alternate_webroot_path: "histomicstk"
+  histomicsui.delete_annotations_after_ingest: True
+  homepage.markdown: |-
+    # Digital Slide Archive
+    ---
+    ## Bioinformatics Platform
+
+    Welcome to the **Digital Slide Archive**.
+
+    Developers who want to use the Girder REST API should check out the
+    [interactive web API docs](api/v1).
+
+    The [HistomicsUI](histomics) application is enabled.
+  slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
+# List slicer-cli-images to pull, if not present, and load
+# slicer-cli-image:
+#   - dsarchive/histomicstk:latest
+# List slicer-cli-images to always pull, and load
+slicer-cli-image-pull:
+  - dsarchive/histomicstk:latest
+# The worker can specify parameters for provisioning
+# worker-rabbitmq-host: girder:8080
+worker-rabbitmq-user: guest
+worker-rabbitmq-pass: guest
+worker-config: /opt/girder_worker/girder_worker/worker.local.cfg
+# These have precedence over the top level values
+worker:
+  # rabbitmq-host: girder:8080
+  # rabbitmq-user: guest
+  # rabbitmq-pass: guest
+  # config: /opt/girder_worker/girder_worker/worker.local.cfg
+  # Install additional pip packages in the worker
+  # pip:
+  #   - package_one
+  # Run additional shell commands in the worker before start
+  # shell:
+  #   - ls
+pip:
+ - -e /opt/local_girder_worker
+ - -e /opt/local_slicer_cli_web
