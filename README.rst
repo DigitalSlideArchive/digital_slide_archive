@@ -47,6 +47,8 @@ Adding Docker Tasks
 
 Docker tasks conforming to the `slicer_cli_web <https://github.com/girder/slicer_cli_web>`_ module's requirements can be added.  These tasks appear in the HistomicsUI interface and in the Girder interface.  An administrator can add a Docker image by going to the slicer_cli_web plugin settings and entering the Docker image name there.  For instance, to get the HistomicsTK tasks, add ``dsarchive/histomicstk:latest``.
 
+To use a docker image from a docker repository that requires authentication, see the comments on how to pass through authenticaition in the ``docker-compose.yml`` file.  On the host machine (and the worker machines if they are separate), login to the docker repository, saving credentials.  This could be done with the command ``docker login <repository>`` which will then prompt for username and password.  Other docker config values can be set this way, too.
+
 Funding
 -------
 This work was funded in part by the `NIH grant U24-CA194362-01 <http://grantome.com/grant/NIH/U24-CA194362-01>`_.
