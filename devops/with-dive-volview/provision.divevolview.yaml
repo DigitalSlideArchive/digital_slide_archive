@@ -2,7 +2,7 @@
 pip:
   - git+https://github.com/DigitalSlideArchive/girder_volview
   - git+https://github.com/girder/girder-volview-dicomrt
-  - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
+  - git+https://github.com/DigitalSlideArchive/dive-dsa.git#subdirectory=server
   - git+https://github.com/DigitalSlideArchive/girder-clamav
 # both girder-dicom-viewer and girder-xtk-demo can be used to view radiology
 # data, but volview does a better job.  girder-archive-access extends
@@ -21,6 +21,6 @@ slicer-cli-image:
   - ghcr.io/girder/girder-volview-dicomrt/worker-volview-dicomrt:latest
 worker:
   pip:
-    - git+https://github.com/BryonLewis/dive-dsa.git#subdirectory=server
+    - git+https://github.com/DigitalSlideArchive/dive-dsa.git#subdirectory=server
   shell:
     - wget -O ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz && mkdir /tmp/ffextracted && tar -xvf ffmpeg.tar.xz -C /tmp/ffextracted --strip-components 1 && cp /tmp/ffextracted/ffmpeg /opt/venv/bin && cp /tmp/ffextracted/ffprobe /opt/venv/bin && rm -rf /tmp/ffextracted

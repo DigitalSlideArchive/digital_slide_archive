@@ -125,7 +125,7 @@ def get_memory_use(client):
     return info['virtualMemory']['used']
 
 
-def test_cli(client, folder, opts):
+def test_cli(client, folder, opts):  # noqa
     """
     Run the CLI on an image and make sure we get an annotation out of it.
 
@@ -200,6 +200,15 @@ def test_cli(client, folder, opts):
     if len(annot['annotation']['elements']) < 100:
         raise Exception('Got less than 100 annotation elements (%d) from annotation %s' % (
             len(annot['annotation']['elements']), anList[0]['_id']))
+    anList = client.get('annotation', parameters=dict(
+        sort='_id', sortdir=-1, itemId=testItem['_id']))
+    keep = 3
+    for annot in anList:
+        if annot['annotation']['name'] == 'cli_test-nuclei-bbox':
+            if keep:
+                keep -= 1
+            else:
+                client.delete(f'annotation/{annot["_id"]}')
 
 
 def test_tiles(client, folder, opts):
