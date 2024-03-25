@@ -28,6 +28,12 @@ services:
       DSA_GIRDER_MOUNT_OPTIONS: ${DSA_GIRDER_MOUNT_OPTIONS:-}
       # You can also set girder settings here:
       # GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
+      # If you want to authorize docker image repositories on the host machine
+      # and have them accessed without further authorization within Girder,
+      # you can specify a docker config location, mount it (see volumes,
+      # below), and do "docker login <repo>" on the host machine before
+      # starting the DSA.
+      # DOCKER_CONFIG: /.docker
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
@@ -52,6 +58,9 @@ services:
       # data.
       # - /opt/HistomicsUI/histomicsui.egg-info
       # - ../../../HistomicsUI:/opt/HistomicsUI
+
+      # See comments about authorizing docker repositories above
+      # - /home/<user directory>/.docker:/.docker:ro
 
       # Add additional mounts here to get access to existing files on your
       # system.  Also add them to the worker container to reduce copying.
@@ -140,6 +149,9 @@ services:
       DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
       DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
       TMPDIR:
+
+      # See comments about authorizing docker repositories above
+      # DOCKER_CONFIG: /.docker
     restart: unless-stopped
     volumes:
       # Needed to use slicer_cli_web to run docker containers
@@ -153,6 +165,10 @@ services:
       - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
       # Needed to allow transferring data to slicer_cli_web docker containers
       - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
+
+      # See comments about authorizing docker repositories above
+      # - /home/<user directory>/.docker:/.docker:ro
+
       # Add additional mounts here to get access to existing files on your
       # system if they have the same path as on the girder container.
     depends_on:
