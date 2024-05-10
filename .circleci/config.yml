@@ -410,7 +410,7 @@ jobs:
               fi
   docs:
     docker:
-      - image: cimg/ruby:3.2
+      - image: cimg/ruby:3.3
     steps:
       - checkout
       - run:
