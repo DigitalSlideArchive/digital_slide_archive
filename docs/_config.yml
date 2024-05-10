@@ -31,7 +31,7 @@ logo_image: assets/img/dsa_logo.svg
 
 # Build settings
 #theme: bulma-clean-theme
-remote_theme: chrisrhymes/bulma-clean-theme
+remote_theme: chrisrhymes/bulma-clean-theme@v0.13.3
 plugins:
   - jekyll-sitemap
   - jekyll-paginate

@@ -28,6 +28,7 @@ services:
       DSA_GIRDER_MOUNT_OPTIONS: ${DSA_GIRDER_MOUNT_OPTIONS:-}
       # You can also set girder settings here:
       # GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
+      # GIRDER_SETTING_HISTOMICSUI_LOGIN_SESSION_EXPIRY_MINUTES: 15
       # If you want to authorize docker image repositories on the host machine
       # and have them accessed without further authorization within Girder,
       # you can specify a docker config location, mount it (see volumes,
