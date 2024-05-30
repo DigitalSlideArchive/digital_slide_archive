@@ -145,6 +145,35 @@ To add some additional girder plugins and mount additional directories for asset
       - dsarchive/histomicstk:latest
       - girder/slicer_cli_web:small
 
+Using Private Docker Registries for CLI images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One of the principal abilities of the Digital Slide Archive is to run algorithms that are packages via Docker and expose their interface via the Slicer Execution Model.  See `HistomicTK <https://github.com/DigitalSlideArchive/HistomicsTK>`_ as an example.
+
+For docker images that are published on public container registries, these can be imported either as part of the provisioning process or via the Slicer CLI Web plugin UI by using the docker image tag (e.g., ``dsarchive/histomcstk:latest``).
+
+Since private registries require authentication, pulling docker images from private registries will not work in the reference deployment without either logging into the running docker container (for both the main Girder container and for any and all girder_worker containers) and authenticating via the ``docker login <private_registry>`` OR by authenticating on the base operating system and passing through the authentication as part of the provisioning process.
+
+An example of passing through the authentication using docker-compose is commented in the default docker-compose.yaml file.  In this case, use ``docker login`` on the base machine running the DSA and on any worker machines.  Use the appropriate override:
+
+``docker-compose.override.yml``::
+
+    ---
+    version: '3'
+    services:
+      girder:
+        environment:
+          DOCKER_CONFIG: /.docker
+        volumes:
+          - /home/<user directory>/.docker:/.docker:ro
+      worker:
+        environment:
+          DOCKER_CONFIG: /.docker
+        volumes:
+          - /home/<user directory>/.docker:/.docker:ro
+
+Docker images can then be added via the provisioning or via the UI using the appropriate private registry and tag (e.g., ``private_registry:5000/dsarchive/histomicstk:latest`` would pull the image from a registry called ``private_registry`` that serves data on port 5000).
+
 Database Backup
 ---------------
 
