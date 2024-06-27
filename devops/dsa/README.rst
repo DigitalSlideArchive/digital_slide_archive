@@ -2,16 +2,16 @@
 Digital Slide Archive via Docker Compose
 ========================================
 
-This directory contains a complete docker-compose set up for the Digital Slide Archive.
+This directory contains a complete docker compose set up for the Digital Slide Archive.
 
-Edit the docker-compose.yml file (or add a docker-compose override file) to add mount points for additional data or for exposing additional ports.
+Edit the docker-compose.yml file (or add a docker compose override file) to add mount points for additional data or for exposing additional ports.
 
 Prerequisites
 -------------
 
-Before using this, you need both Docker and docker-compose.  See the `official installation instructions <https://docs.docker.com/compose/install>`_.
+Before using this, you need both Docker and docker compose.  See the `official installation instructions <https://docs.docker.com/compose/install>`_.
 
-The docker-compose file assumes certain file paths.  This has been tested on Ubuntu 20.04.  It will probably work on other Linux variants.
+The docker compose file assumes certain file paths.  This has been tested on Ubuntu 20.04.  It will probably work on other Linux variants.
 
 Get the Digital Slide Archive repository::
 
@@ -26,13 +26,13 @@ Change to the appropriate directory::
 
 To get the most recent built docker images, do::
 
-    docker-compose pull
+    docker compose pull
 
 If you don't pull the images, the main image will be built in preference to pulling.
 
 To start the Digital Slide Archive::
 
-    DSA_USER=$(id -u):$(id -g) docker-compose up
+    DSA_USER=$(id -u):$(id -g) docker compose up
 
 This uses your current user id so that database files, logs, assetstore files, and temporary files are owned by the current user.  If you omit setting ``DSA_USER``, files may be created owned by root.
 
@@ -43,14 +43,14 @@ Stop
 
 To stop the Digital Slide Archive::
 
-    docker-compose down -v
+    docker compose down -v
 
 The ``-v`` option removes unneeded temporary docker volumes.
 
 Sample Data
 -----------
 
-Sample data can be added after performing ``docker-compose up`` by running::
+Sample data can be added after performing ``docker compose up`` by running::
 
     python utils/cli_test.py dsarchive/histomicstk:latest --test
 
@@ -62,7 +62,7 @@ Development
 
 You can log into the running ``girder`` or ``worker`` containers by typing::
 
-    docker-compose exec girder bash
+    docker compose exec girder bash
 
 There are two convenience scripts ``restart_girder.sh`` and ``rebuild_and_restart_girder.sh`` that can be run in the container.
 
@@ -70,12 +70,12 @@ You can develop source code by mounting the source directory into the container.
 
 If you need to log into the container as the Girder user, type::
 
-    docker-compose exec --user $(id -u) girder bash
+    docker compose exec --user $(id -u) girder bash
 
 Technical Details
 -----------------
 
-The Digital Slider Archive is built in Girder and Girder Worker.  Here, these are coordinated using docker-compose.  There are five containers that are started:
+The Digital Slider Archive is built in Girder and Girder Worker.  Here, these are coordinated using docker compose.  There are five containers that are started:
 
 - `Girder <https://girder.readthedocs.io/>`_.  Girder is an asset and user management system.  It handles permissions and serves data via http.
 
@@ -105,7 +105,7 @@ By default, the girder container is run in Docker privileged mode.  This can be 
 Customizing
 -----------
 
-Since this uses standard docker-compose, you can customize the process by creating a ``docker-compose.override.yml`` file in the same directory (or a yaml file of any name and use appropriate ``docker-compose -f docker-compose.yml -f <my yaml file> <command>`` command).  Further, if you mount a provisioning yaml file into the docker image, you can customize settings, plugins, resources, and other options.
+Since this uses standard docker compose, you can customize the process by creating a ``docker-compose.override.yml`` file in the same directory (or a yaml file of any name and use appropriate ``docker compose -f docker-compose.yml -f <my yaml file> <command>`` command).  Further, if you mount a provisioning yaml file into the docker image, you can customize settings, plugins, resources, and other options.
 
 See the ``docker-compose.yml`` and ``provision.yaml`` files for details.
 
@@ -154,7 +154,7 @@ For docker images that are published on public container registries, these can b
 
 Since private registries require authentication, pulling docker images from private registries will not work in the reference deployment without either logging into the running docker container (for both the main Girder container and for any and all girder_worker containers) and authenticating via the ``docker login <private_registry>`` OR by authenticating on the base operating system and passing through the authentication as part of the provisioning process.
 
-An example of passing through the authentication using docker-compose is commented in the default docker-compose.yaml file.  In this case, use ``docker login`` on the base machine running the DSA and on any worker machines.  Use the appropriate override:
+An example of passing through the authentication using docker compose is commented in the default docker-compose.yaml file.  In this case, use ``docker login`` on the base machine running the DSA and on any worker machines.  Use the appropriate override:
 
 ``docker-compose.override.yml``::
 
@@ -177,4 +177,4 @@ Docker images can then be added via the provisioning or via the UI using the app
 Database Backup
 ---------------
 
-You may want to periodically back up the database.  The standard ``mongodump`` tool can be used for this via a command line ``docker-compose exec mongodb /usr/bin/mongodump --db girder --archive --gzip > dsa_girder.dump.gz``.  Restoring is similar: ``docker-compose exec -T mongodb /usr/bin/mongorestore --db girder --archive --gzip < /tmp/dsa_girder.dump.gz``; you may want to add ``--drop`` as flag to the restore process.  See Mongo's official documentation for details.
+You may want to periodically back up the database.  The standard ``mongodump`` tool can be used for this via a command line ``docker compose exec mongodb /usr/bin/mongodump --db girder --archive --gzip > dsa_girder.dump.gz``.  Restoring is similar: ``docker compose exec -T mongodb /usr/bin/mongorestore --db girder --archive --gzip < /tmp/dsa_girder.dump.gz``; you may want to add ``--drop`` as flag to the restore process.  See Mongo's official documentation for details.

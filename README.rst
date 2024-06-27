@@ -34,9 +34,9 @@ Community
 Installation
 ------------
 
-For installation instructions, see the complete `docker-compose example <./devops/dsa>`_.
+For installation instructions, see the complete `docker compose example <./devops/dsa>`_.
 
-There is an older method that doesn't use docker-compose.  See `here <./ansible>`_.
+There is an older method that doesn't use docker compose.  See `here <./ansible>`_.
 
 For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
 

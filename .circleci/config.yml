@@ -42,8 +42,8 @@ commands:
     description: Start containers for tests.
     steps:
       - run:
-          name: Run docker-compose up
-          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose up -d'
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose up -d'
           working_directory: ./devops/dsa
       - run:
           name: Wait for girder to respond and be configured
@@ -178,8 +178,8 @@ jobs:
             sudo cp .circleci/dsa_proxy.nginx /etc/nginx/sites-available/default
             sudo service nginx restart
       - run:
-          name: Run docker-compose up
-          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose -f docker-compose.yml -f ../../.circleci/docker-compose.proxy.yml up -d'
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose -f docker-compose.yml -f ../../.circleci/docker-compose.proxy.yml up -d'
           working_directory: ./devops/dsa
       - run:
           name: "Wait for girder to be available"
@@ -280,8 +280,8 @@ jobs:
             diff /tmp/defaults.yaml /tmp/provfile.yaml && true
             if [[ $(diff /tmp/defaults.yaml /tmp/provfile.yaml | tail -n '+5') ]]; then false; fi
       - run:
-          name: Run docker-compose up
-          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose up --build -d'
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose up --build -d'
           working_directory: ./devops/dsa
       - run:
           name: Archive docker images
@@ -306,7 +306,7 @@ jobs:
             for f in `seq 60`; do if curl --silent 'http://127.0.0.1:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
       - run:
           name: Grant permissions to docker socket.
-          # This is better done by adding the user in the docker container to the group, but that complicates the docker-compose example.
+          # This is better done by adding the user in the docker container to the group, but that complicates the docker compose example.
           command: sudo chmod a+xwr /var/run/docker.sock
       - run:
           name: Test the instance
@@ -324,8 +324,8 @@ jobs:
             pyenv global 3.12
             pip --version
       - run:
-          name: Run docker-compose up
-          command: docker-compose up --build -d
+          name: Run docker compose up
+          command: docker compose up --build -d
           working_directory: ./devops/minimal
       - run:
           name: Wait for girder to respond and be configured
@@ -344,10 +344,10 @@ jobs:
             pyenv global 3.12
             pip --version
       - run:
-          name: Run docker-compose up
+          name: Run docker compose up
           command: |
-            bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose --profile server up --build -d'
-            bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose --profile worker up --build -d'
+            bash -c 'DSA_USER=$(id -u):$(id -g) docker compose --profile server up --build -d'
+            bash -c 'DSA_USER=$(id -u):$(id -g) docker compose --profile worker up --build -d'
           working_directory: ./devops/external-worker
       - run:
           name: Wait for girder to respond and be configured
@@ -366,8 +366,8 @@ jobs:
             pyenv global 3.12
             pip --version
       - run:
-          name: Run docker-compose up
-          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker-compose  -f ../dsa/docker-compose.yml -f docker-compose.override.yml -p dsa-plus up --build -d'
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose -f ../dsa/docker-compose.yml -f docker-compose.override.yml -p dsa-plus up --build -d'
           working_directory: ./devops/with-dive-volview
       - run:
           name: Wait for girder to respond and be configured
