@@ -48,7 +48,7 @@ commands:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
 jobs:
   build:
     working_directory: ~/project
@@ -302,8 +302,8 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
-            for f in `seq 60`; do if curl --silent 'http://127.0.0.1:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 120`; do if curl --silent 'http://127.0.0.1:8080/api/v1/folder?text=Slicer%20CLI%20Web%20Tasks' | grep 'Tasks'; then break; fi; sleep 1; done
       - run:
           name: Grant permissions to docker socket.
           # This is better done by adding the user in the docker container to the group, but that complicates the docker compose example.
@@ -330,7 +330,7 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   docker-compose-external-worker:
     working_directory: ~/project
     machine:
@@ -352,7 +352,7 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   docker-compose-with-dive-volview:
     working_directory: ~/project
     machine:
@@ -372,7 +372,7 @@ jobs:
       - run:
           name: Wait for girder to respond and be configured
           command: |
-            for f in `seq 60`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   publish-docker:
     working_directory: ~/project
     machine:
