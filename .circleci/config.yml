@@ -392,6 +392,11 @@ jobs:
               docker push "dsarchive/dsa_worker:$CIRCLE_TAG"
               docker push "dsarchive/dsa_girder:$CIRCLE_TAG"
               fi
+              export DATE_TAG=`date '+%Y%m%d'`
+              docker tag dsarchive/dsa_worker:latest "dsarchive/dsa_worker:$DATE_TAG"
+              docker tag dsarchive/dsa_girder:latest "dsarchive/dsa_girder:$DATE_TAG"
+              docker push "dsarchive/dsa_worker:$DATE_TAG"
+              docker push "dsarchive/dsa_girder:$DATE_TAG"
   publish-docker-common:
     working_directory: ~/project
     machine:
@@ -408,6 +413,9 @@ jobs:
               docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$CIRCLE_TAG"
               docker push "dsarchive/dsa_common:$CIRCLE_TAG"
               fi
+              export DATE_TAG=`date '+%Y%m%d'`
+              docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$DATE_TAG"
+              docker push "dsarchive/dsa_common:$DATE_TAG"
   docs:
     docker:
       - image: cimg/ruby:3.3
