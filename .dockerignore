@@ -14,4 +14,7 @@ devops/dsa/assetstore
 devops/dsa/db
 devops/dsa/logs
 devops/singularity-minimal
+docs/.bundle
+docs/_site
+docs/vendor
 !**/.gitignore
