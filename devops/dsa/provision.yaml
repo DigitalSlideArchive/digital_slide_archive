@@ -35,14 +35,17 @@ assetstore:
   name: Assetstore
   root: /assetstore
 # Any resources to ensure exist.  A model must be specified.  This creates the
-# resource if there is no match for all specified values.  A value of
-# "resource:<path>" is converted to the resource document with that resource
-# path.  "resource:admin" uses the default admin, "resourceid:<path>" is the
-# string id for the resource path, and "resourceid:admin" is the string if for
-# default admin.
+# resource if there is no match for all specified values other than metadata
+# and attrs.  A value of "resource:<path>" is converted to the resource
+# document with that resource path.  "resourceid:<path>" is the string id for
+# the resource path, "resourceobjid:<path>" is the Mongo object id for the
+# resource path.  A <path> of "admin" uses the default admin user.  A <path> of
+# the form "assetstore/<name>" references the named assetstore.
 #   You can add metadata to a resource.  The default key is meta.  If
 # metadata_update is False, metadata will not be set if any metadata
 # already exists.
+#   You can alter the core model of a resource using the attrs key.  If the
+# resource already exists, this will only be applied if attrs_update is True.
 resources:
   - model: collection
     name: Tasks
@@ -58,6 +61,10 @@ resources:
     #   sample_key: sample_value
     # metadata_key: meta
     # metadata_update: True
+    # attrs:
+    #   quota:
+    #     preferredAssetstore: resource:assetstore/Assetstore
+    # attrs_update: True
 settings:
   worker.broker: "amqp://guest:guest@rabbitmq"
   worker.backend: "rpc://guest:guest@rabbitmq"

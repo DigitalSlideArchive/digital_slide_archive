@@ -94,16 +94,29 @@ def value_from_resource(value, adminUser):
         resource.
     """
     import girder.utility.path as path_util
+    from girder.models.assetstore import Assetstore
 
-    if str(value) == 'resourceid:admin':
-        value = str(adminUser['_id'])
-    elif str(value).startswith('resourceid:'):
-        resource = path_util.lookUpPath(value.split(':', 1)[1], force=True)['document']
-        value = str(resource['_id'])
-    elif str(value) == 'resource:admin':
-        value = adminUser
-    elif str(value).startswith('resource:'):
-        value = path_util.lookUpPath(value.split(':', 1)[1], force=True)['document']
+    starts = {'resource:': 'doc', 'resourceid:': 'id', 'resourceobjid:': 'obj'}
+    if isinstance(value, dict):
+        value = {k: value_from_resource(v, adminUser) for k, v in value.items()}
+    for start, stype in starts.items():
+        if str(value).startswith(start):
+            resPath = value.split(':', 1)[1]
+            if resPath == 'admin':
+                resource = adminUser
+            elif resPath.startswith('assetstore/'):
+                resource = Assetstore().findOne({'name': value.split('/', 1)[1]})
+            else:
+                resource = path_util.lookUpPath(resPath, force=True)['document']
+            logger.info(f'Finding {start} reference for {resPath} as '
+                        f'{resource["_id"] if resource else resource}')
+            if stype == 'doc':
+                value = resource
+            elif stype == 'id':
+                value = str(resource['_id'])
+            else:
+                value = resource['_id']
+            break
     return value
 
 
@@ -124,6 +137,8 @@ def provision_resources(resources, adminUser):
         metadata = entry.pop('metadata', None)
         metadata_update = entry.pop('metadata_update', True)
         metadata_key = entry.pop('metadata_key', 'meta')
+        attrs = entry.pop('attrs', None)
+        attrs_update = entry.pop('attrs_update', True)
         model = ModelImporter.model(modelName)
         key = 'name' if model != 'user' else 'login'
         query = {}
@@ -141,6 +156,7 @@ def provision_resources(resources, adminUser):
             createFunc = getattr(model, 'create%s' % modelName.capitalize())
             logger.info('Creating %s (%r)', modelName, entry)
             result = createFunc(**entry)
+            attrs_update = True
         if isinstance(metadata, dict) and hasattr(model, 'setMetadata'):
             if metadata_key not in metadata or metadata_update:
                 if metadata_key not in result:
@@ -151,6 +167,9 @@ def provision_resources(resources, adminUser):
                         del result[metadata_key][key]
                 model.validateKeys(result[metadata_key])
                 result = model.save(result)
+        if attrs and attrs_update:
+            result.update(attrs)
+            result = model.save(result)
 
 
 def get_slicer_images(imageList, adminUser, alwaysPull=False):
