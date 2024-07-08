@@ -94,16 +94,29 @@ def value_from_resource(value, adminUser):
         resource.
     """
     import girder.utility.path as path_util
+    from girder.models.assetstore import Assetstore
 
-    if str(value) == 'resourceid:admin':
-        value = str(adminUser['_id'])
-    elif str(value).startswith('resourceid:'):
-        resource = path_util.lookUpPath(value.split(':', 1)[1], force=True)['document']
-        value = str(resource['_id'])
-    elif str(value) == 'resource:admin':
-        value = adminUser
-    elif str(value).startswith('resource:'):
-        value = path_util.lookUpPath(value.split(':', 1)[1], force=True)['document']
+    starts = {'resource:': 'doc', 'resourceid:': 'id', 'resourceobjid:': 'obj'}
+    if isinstance(value, dict):
+        value = {k: value_from_resource(v, adminUser) for k, v in value.items()}
+    for start, stype in starts.items():
+        if str(value).startswith(start):
+            resPath = value.split(':', 1)[1]
+            if resPath == 'admin':
+                resource = adminUser
+            elif resPath.startswith('assetstore/'):
+                resource = Assetstore().findOne({'name': value.split('/', 1)[1]})
+            else:
+                resource = path_util.lookUpPath(resPath, force=True)['document']
+            logger.info(f'Finding {start} reference for {resPath} as '
+                        f'{resource["_id"] if resource else resource}')
+            if stype == 'doc':
+                value = resource
+            elif stype == 'id':
+                value = str(resource['_id'])
+            else:
+                value = resource['_id']
+            break
     return value
 
 
@@ -124,6 +137,8 @@ def provision_resources(resources, adminUser):
         metadata = entry.pop('metadata', None)
         metadata_update = entry.pop('metadata_update', True)
         metadata_key = entry.pop('metadata_key', 'meta')
+        attrs = entry.pop('attrs', None)
+        attrs_update = entry.pop('attrs_update', True)
         model = ModelImporter.model(modelName)
         key = 'name' if model != 'user' else 'login'
         query = {}
@@ -141,6 +156,7 @@ def provision_resources(resources, adminUser):
             createFunc = getattr(model, 'create%s' % modelName.capitalize())
             logger.info('Creating %s (%r)', modelName, entry)
             result = createFunc(**entry)
+            attrs_update = True
         if isinstance(metadata, dict) and hasattr(model, 'setMetadata'):
             if metadata_key not in metadata or metadata_update:
                 if metadata_key not in result:
@@ -151,6 +167,9 @@ def provision_resources(resources, adminUser):
                         del result[metadata_key][key]
                 model.validateKeys(result[metadata_key])
                 result = model.save(result)
+        if attrs and attrs_update:
+            result.update(attrs)
+            result = model.save(result)
 
 
 def get_slicer_images(imageList, adminUser, alwaysPull=False):
@@ -219,12 +238,20 @@ def preprovision(opts):
         for entry in opts.pip:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
     if getattr(opts, 'shell', None) and len(opts.shell):
         for entry in opts.shell:
             cmd = entry
             logger.info('Running: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
     if getattr(opts, 'rebuild-client', None):
         cmd = 'girder build'
         if str(getattr(opts, 'rebuild-client', None)).lower().startswith('dev'):
@@ -233,7 +260,27 @@ def preprovision(opts):
         cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
                'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
                'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
-        subprocess.check_call(cmd, shell=True)
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except Exception:
+            logger.error(f'Failed to run {cmd}')
+            raise
+
+
+def clean_delete_locks():
+    from girder.constants import AssetstoreType
+    from girder.models.assetstore import Assetstore
+
+    for assetstore in Assetstore().find():
+        if assetstore['type'] != AssetstoreType.FILESYSTEM:
+            continue
+        rootpath = assetstore['root']
+        cmd = ['find', rootpath, '-name', '*.deleteLock', '-delete']
+        logger.info(f'Removing old delete locks: {cmd}')
+        try:
+            subprocess.check_call(cmd, shell=False)
+        except Exception:
+            logger.info(f'Failed trying to remove old delete locks: {cmd}')
 
 
 def provision(opts):  # noqa
@@ -267,6 +314,10 @@ def provision(opts):  # noqa
         for params in assetstoreParams:
             method = params.pop('method', 'createFilesystemAssetstore')
             getattr(Assetstore(), method)(**params)
+
+    # Clean up old deleteLocks
+    if getattr(opts, 'clean-delete-locks', None):
+        clean_delete_locks()
 
     # Make sure we have a demo collection and download some demo files
     if getattr(opts, 'samples', None):
@@ -308,12 +359,20 @@ def preprovision_worker(opts):
         for entry in settings['pip']:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
     if settings.get('shell') and len(settings['shell']):
         for entry in settings['shell']:
             cmd = entry
             logger.info('Running: %s', cmd)
-            subprocess.check_call(cmd, shell=True)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception:
+                logger.error(f'Failed to run {cmd}')
+                raise
 
 
 def provision_worker(opts):
@@ -416,6 +475,7 @@ def merge_default_opts(opts):
         'worker.api_url': 'http://girder:8080/api/v1',
         'worker.direct_path': True,
         'core.brand_name': 'Digital Slide Archive',
+        # 'core.http_only_cookies': True,
         'histomicsui.webroot_path': 'histomics',
         'histomicsui.alternate_webroot_path': 'histomicstk',
         'histomicsui.delete_annotations_after_ingest': True,
@@ -449,6 +509,8 @@ The [HistomicsUI](histomics) application is enabled.""",
             'email': 'admin@nowhere.nil',
             'public': True,
         }
+    if getattr(opts, 'clean-delete-locks', None) is None:
+        setattr(opts, 'clean-delete-locks', True)
     resources = opts.resources or []
     resources.extend([{
         'model': 'collection',
@@ -489,6 +551,13 @@ if __name__ == '__main__':  # noqa
     parser.add_argument(
         '--samples', '--data', '--sample-data',
         action='store_true', help='Download sample data')
+    parser.add_argument(
+        '--clean-delete-locks', action='store_true',
+        help='Remove assetstore delete locks on start')
+    parser.add_argument(
+        '--no-clean-delete-locks', action='store_false',
+        dest='clean-delete-locks',
+        help='Do not remove assetstore delete locks on start')
     parser.add_argument(
         '--sample-collection', dest='sample-collection', default='Samples',
         help='Sample data collection name')
