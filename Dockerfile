@@ -136,6 +136,9 @@ RUN cp /opt/digital_slide_archive/devops/dsa/utils/.vimrc ~/.vimrc && \
     cp /opt/digital_slide_archive/devops/dsa/girder.cfg /etc/girder.cfg && \
     cp /opt/digital_slide_archive/devops/dsa/worker.local.cfg /opt/girder_worker/girder_worker/.
 
+ARG DSA_VERSIONS
+ENV DSA_VERSIONS="$DSA_VERSIONS"
+
 # Better shutdown signalling
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
