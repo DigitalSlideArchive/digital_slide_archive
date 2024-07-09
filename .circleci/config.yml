@@ -281,14 +281,14 @@ jobs:
             if [[ $(diff /tmp/defaults.yaml /tmp/provfile.yaml | tail -n '+5') ]]; then false; fi
       - run:
           name: Run docker compose build
-          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose build'
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose build girder'
           working_directory: ./devops/dsa
       - run:
           name: Rebuild with version information
           command: |
-            export DSA_VERSIONS=$(docker run --rm -it --entrypoint bash dsarchive/dsa_common -c 'python -c "import importlib.metadata,json,sys;sys.stdout.write(json.dumps({k: importlib.metadata.version(k).split(\"+\")[0] for k in [\"girder\",\"histomicsui\",\"large_image\",\"girder_worker\",\"girder_worker_utils\",\"girder_slicer_cli_web\",\"import_tracker\"]}))"' | grep -o '{.*}')
+            export DSA_VERSIONS=$(docker run --rm -it --entrypoint bash dsarchive/dsa_common -c 'python -c "import datetime,importlib.metadata,json,sys;sys.stdout.write(json.dumps({k: datetime.datetime.utcnow().strftime(\"%Y-%m-%d\") if k == \"build_date\" else importlib.metadata.version(k).split(\"+\")[0] for k in [\"girder\",\"histomicsui\",\"large_image\",\"girder_worker\",\"girder_worker_utils\",\"girder_slicer_cli_web\",\"import_tracker\",\"build_date\"]}))"' | grep -o '{.*}')
             echo $DSA_VERSIONS
-            DSA_USER=$(id -u):$(id -g) docker compose build
+            DSA_USER=$(id -u):$(id -g) docker compose build girder
           working_directory: ./devops/dsa
       - run:
           name: Run docker compose up
