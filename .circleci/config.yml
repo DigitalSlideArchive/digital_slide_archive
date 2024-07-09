@@ -280,8 +280,19 @@ jobs:
             diff /tmp/defaults.yaml /tmp/provfile.yaml && true
             if [[ $(diff /tmp/defaults.yaml /tmp/provfile.yaml | tail -n '+5') ]]; then false; fi
       - run:
+          name: Run docker compose build
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose build'
+          working_directory: ./devops/dsa
+      - run:
+          name: Rebuild with version information
+          command: |
+            export DSA_VERSIONS=$(docker run --rm -it --entrypoint bash dsarchive/dsa_common -c 'python -c "import importlib.metadata,json,sys;sys.stdout.write(json.dumps({k: importlib.metadata.version(k).split(\"+\")[0] for k in [\"girder\",\"histomicsui\",\"large_image\",\"girder_worker\",\"girder_worker_utils\",\"girder_slicer_cli_web\",\"import_tracker\"]}))"' | grep -o '{.*}')
+            echo $DSA_VERSIONS
+            DSA_USER=$(id -u):$(id -g) docker compose build
+          working_directory: ./devops/dsa
+      - run:
           name: Run docker compose up
-          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose up --build -d'
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose up -d'
           working_directory: ./devops/dsa
       - run:
           name: Archive docker images
