@@ -103,7 +103,7 @@ jobs:
   test-cli-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - usecommondocker
@@ -163,7 +163,7 @@ jobs:
   test-proxy-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - usecommondocker
@@ -227,7 +227,7 @@ jobs:
   test-girder-build-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - usecommondocker
@@ -250,7 +250,7 @@ jobs:
   test-histomicsui-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - usecommondocker
@@ -262,7 +262,7 @@ jobs:
   docker-compose:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - run:
@@ -325,7 +325,7 @@ jobs:
   docker-compose-minimal:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - run:
@@ -345,7 +345,7 @@ jobs:
   docker-compose-external-worker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - run:
@@ -367,7 +367,7 @@ jobs:
   docker-compose-with-dive-volview:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - run:
@@ -387,7 +387,7 @@ jobs:
   publish-docker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - usedockers
@@ -411,7 +411,7 @@ jobs:
   publish-docker-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2204:current
+      image: ubuntu-2404:current
     steps:
       - checkout
       - usecommondocker
@@ -571,13 +571,14 @@ workflows:
                 - master
       - publish-docker-common:
           requires:
-            # - test-cli
-            # - test-girder-build
-            # - test-histomicsui
-            - docker-compose
             - test-cli-common
             - test-girder-build-common
             - test-histomicsui-common
+            - test-proxy-common
+            - docker-compose
+            - docker-compose-minimal
+            - docker-compose-external-worker
+            - docker-compose-with-dive-volview
           filters:
             tags:
               only: /^v.*/
