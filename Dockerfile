@@ -142,4 +142,4 @@ ENV DSA_VERSIONS="$DSA_VERSIONS"
 # Better shutdown signalling
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
-CMD bash
+CMD ["bash"]
