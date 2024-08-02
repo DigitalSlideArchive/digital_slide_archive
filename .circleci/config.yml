@@ -444,6 +444,13 @@ jobs:
             cd docs
             mkdir /tmp/artifacts
             bundle exec jekyll build -d /tmp/artifacts --baseurl /0/tmp/artifacts/
+      - run:
+          name: Test links
+          command: |
+            curl -OLJ https://bootstrap.pypa.io/get-pip.py
+            python3 get-pip.py
+            pip install linkchecker
+            linkchecker /tmp/artifacts/index.html
       - store_artifacts:
           path: /tmp/artifacts
 

@@ -36,7 +36,7 @@ about_resources_title: Resources
 about_system_diagram: assets/img/system-diagrams/system-diagram.svg
 about_system_diagram_caption: "DSA System Diagram."
 about_system_overview_page_button: ( View detailed system overview )
-about_system_link: system-overview
+about_system_link: system-overview/
 
 about_resources:
   - name: Gitter
@@ -116,17 +116,17 @@ platforms:
 # =================================
 callouts:
   - heading: Documentation
-    link: documentation
+    link: documentation/
     link_text: Use Cases & Examples
     image: assets/img/home-callouts/demos_examples.jpg
 
   - heading: Success Stories
-    link: success-stories
+    link: success-stories/
     link_text: View Stories
     image: assets/img/home-callouts/success_stories.jpg
 
   - heading: Papers & Publications
-    link: papers-publications
+    link: papers-publications/
     link_text: Read Papers
     image: assets/img/home-callouts/papers_publications.jpg
 
