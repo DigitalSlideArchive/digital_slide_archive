@@ -36,11 +36,9 @@ Installation
 
 For installation instructions, see the complete `docker compose example <./devops/dsa>`_.
 
-There is an older method that doesn't use docker compose.  See `here <./ansible>`_.
-
 For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
 
-There is a `migration guide <./ansible/migration.rst>`_  from the Girder 2 version and from the ``deploy_docker.py`` script.
+There is a `migration guide <./docs/migration.rst>`_  from the Girder 2 version or from the ``deploy_docker.py`` script.
 
 Adding Docker Tasks
 -------------------
