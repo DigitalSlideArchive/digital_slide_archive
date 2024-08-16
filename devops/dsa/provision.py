@@ -700,8 +700,10 @@ if __name__ == '__main__':  # noqa
     if getattr(opts, 'portion', None) in {'main', None}:
         # This loads plugins, allowing setting validation.  We want the import
         # to be after the preprovision step.
+        from girder import _attachFileLogHandlers
         from girder.utility.server import configureServer
 
+        _attachFileLogHandlers()
         configureServer()
         if getattr(opts, 'mongo-compat', None) is not False:
             from girder.models import getDbConnection
