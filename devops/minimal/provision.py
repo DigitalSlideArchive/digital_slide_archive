@@ -218,7 +218,8 @@ def get_slicer_images(imageList, adminUser, alwaysPull=False):
         job = Job().load(id=job['_id'], user=adminUser, includeLog=True)
         if 'log' in job:
             while logpos < len(job['log']):
-                logger.info(job['log'][logpos].rstrip())
+                if 'Pulling' not in job['log'][logpos] or '%' not in job['log'][logpos]:
+                    logger.info(job['log'][logpos].rstrip())
                 logpos += 1
     t.join()
     if 'log' not in job:
@@ -337,15 +338,19 @@ def provision(opts):  # noqa
             value = value_from_resource(value, adminUser)
             logger.info('Setting %s to %r', key, value)
             Setting().set(key, value)
+    images = []
     if getattr(opts, 'slicer-cli-image-pull', None):
+        images = list(dict.fromkeys(getattr(opts, 'slicer-cli-image-pull', None)))
         try:
             get_slicer_images(getattr(opts, 'slicer-cli-image-pull', None),
                               adminUser, alwaysPull=True)
         except Exception:
             logger.info('Cannot fetch slicer-cli-images.')
     if getattr(opts, 'slicer-cli-image', None):
+        images = [image for image in dict.fromkeys(getattr(opts, 'slicer-cli-image', None))
+                  if image not in images]
         try:
-            get_slicer_images(getattr(opts, 'slicer-cli-image', None), adminUser)
+            get_slicer_images(images, adminUser)
         except Exception:
             logger.info('Cannot fetch slicer-cli-images.')
 
@@ -700,8 +705,10 @@ if __name__ == '__main__':  # noqa
     if getattr(opts, 'portion', None) in {'main', None}:
         # This loads plugins, allowing setting validation.  We want the import
         # to be after the preprovision step.
+        from girder import _attachFileLogHandlers
         from girder.utility.server import configureServer
 
+        _attachFileLogHandlers()
         configureServer()
         if getattr(opts, 'mongo-compat', None) is not False:
             from girder.models import getDbConnection
