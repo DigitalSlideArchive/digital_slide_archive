@@ -5,14 +5,22 @@
           <div class="citation-text column is-11">
             <h4>{{ publication.title }}</h4>
             <p>{{ publication.full-citation }}
+            {% if publication.DOI_link %}
             <a href="{{ publication.DOI_link }}">
               {{ publication.DOI_link }}
             </a></p>
+            {% else %}
+            <a href="{{ publication.link }}">
+              {{ publication.link_text }}
+            </a></p>
+            {% endif %}
             <div class="citation-numbers">
               {% if publication.PMID %}
               PMID: {{ publication.PMID }} <br>
               {% endif %}
+              {% if publication.DOI %}
               DOI: {{ publication.DOI }}
+              {% endif %}
             </div>
           </div>
           <div class="citation-link-icon column is-1">
