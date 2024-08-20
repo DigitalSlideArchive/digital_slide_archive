@@ -228,15 +228,24 @@ def get_slicer_images(imageList, adminUser, alwaysPull=False):
         raise Exception('Failed to pull and load images')
 
 
-def preprovision(opts):
+def pip_install(packages):
     """
-    Preprovision the instance.  This includes installing python modules with
-    pip and rebuilding the girder client if desired.
+    Pip install a list of packages via the shell pip install command.  This
+    first tries installing all of the packages in a single command; if it
+    fails, they are tried individually to betetr show where the failure occurs.
 
-    :param opts: the argparse options.
+    :param packages: a list of strings to add to the end of the pip install
+        command.
     """
-    if getattr(opts, 'pip', None) and len(opts.pip):
-        for entry in opts.pip:
+    if not packages or not len(packages):
+        return
+    cmd = 'pip install -q ' + ' '.join(packages)
+    logger.info('Installing: %s', cmd)
+    try:
+        subprocess.check_call(cmd, shell=True)
+    except Exception:
+        logger.error(f'Failed to run {cmd}; trying pip install individually.')
+        for entry in packages:
             cmd = 'pip install %s' % entry
             logger.info('Installing: %s', cmd)
             try:
@@ -244,6 +253,16 @@ def preprovision(opts):
             except Exception:
                 logger.error(f'Failed to run {cmd}')
                 raise
+
+
+def preprovision(opts):
+    """
+    Preprovision the instance.  This includes installing python modules with
+    pip and rebuilding the girder client if desired.
+
+    :param opts: the argparse options.
+    """
+    pip_install(getattr(opts, 'pip', None))
     if getattr(opts, 'shell', None) and len(opts.shell):
         for entry in opts.shell:
             cmd = entry
@@ -360,15 +379,7 @@ def preprovision_worker(opts):
     Preprovision the worker.
     """
     settings = dict({}, **(opts.worker or {}))
-    if settings.get('pip') and len(settings['pip']):
-        for entry in settings['pip']:
-            cmd = 'pip install %s' % entry
-            logger.info('Installing: %s', cmd)
-            try:
-                subprocess.check_call(cmd, shell=True)
-            except Exception:
-                logger.error(f'Failed to run {cmd}')
-                raise
+    pip_install(settings.get('pip'))
     if settings.get('shell') and len(settings['shell']):
         for entry in settings['shell']:
             cmd = entry
