@@ -281,7 +281,12 @@ def preprovision(opts):
                'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
                'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
         try:
-            subprocess.check_call(cmd, shell=True)
+            if not getattr(opts, 'no_wait', False):
+                subprocess.check_call(cmd, shell=True)
+            else:
+                proc = subprocess.Popen(cmd + ' ; touch /tmp/girder_build_done', shell=True)
+                logger.info('Rebuilding in background via pid %r', proc.pid)
+                open('/tmp/girder_build.pid', 'w').write(str(proc.pid))
         except Exception:
             logger.error(f'Failed to run {cmd}')
             raise
@@ -678,6 +683,10 @@ if __name__ == '__main__':  # noqa
     parser.add_argument(
         '--main', dest='portion', action='store_const', const='main',
         help='Only do main provisioning.')
+    parser.add_argument(
+        '--no-wait', action='store_true',
+        help='If a girder build is performed during preprovisioning, do not '
+        'wait for it to complete.')
     parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='Increase verbosity')
     parser.add_argument(

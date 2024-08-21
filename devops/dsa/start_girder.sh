@@ -28,7 +28,7 @@ iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type U
 echo 'PATH="/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH"' >> /home/$(id -nu ${DSA_USER%%:*})/.bashrc
 echo ==== Pre-Provisioning ===
 PATH="/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH" \
-python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre
+python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre --no-wait
 # Run subsequent commands as the DSA_USER.  This sets some paths based on what
 # is expected in the Docker so that the current python environment and the
 # devops/dsa/utils are available.  Then:
@@ -45,6 +45,10 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   python /opt/digital_slide_archive/devops/dsa/provision.py -v --main &&
   echo ==== Creating FUSE mount === &&
   (girder mount ${DSA_GIRDER_MOUNT_OPTIONS%%:-} /fuse || true) &&
+  if [[ -f /tmp/girder_build.pid ]]; then
+  echo ==== Wait for girder build to finish === &&
+  while [[ -e /proc/$(cat /tmp/girder_build.pid) && ! -f /tmp/girder_build_done ]]; do sleep 0.1; done &&
+  true; fi &&
   echo ==== Starting Girder === &&
   girder serve --dev
 "
