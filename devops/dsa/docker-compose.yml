@@ -4,10 +4,10 @@ services:
   girder:
     image: dsarchive/dsa_common
     build:
-        context: ../..
-        # We use this to optionally set version information during the build
-        args:
-          DSA_VERSIONS: ${DSA_VERSIONS:-}
+      context: ../..
+      # We use this to optionally set version information during the build
+      args:
+        DSA_VERSIONS: ${DSA_VERSIONS:-}
     # Instead of privileged mode, fuse can use:
     # devices:
     #   - /dev/fuse:/dev/fuse
@@ -146,10 +146,10 @@ services:
   worker:
     image: dsarchive/dsa_common
     build:
-        context: ../..
-        # We use this to optionally set version information during the build
-        args:
-          DSA_VERSIONS: ${DSA_VERSIONS:-}
+      context: ../..
+      # We use this to optionally set version information during the build
+      args:
+        DSA_VERSIONS: ${DSA_VERSIONS:-}
     # Set DSA_USER to a user id that is part of the docker group (e.g.,
     # `DSA_USER=$(id -u):$(id -g)`).  This provides permissions to manage
     # docker
