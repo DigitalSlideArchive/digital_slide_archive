@@ -44,6 +44,8 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
     """
     try:
         import girder_client
+        import requests
+        import urllib3
     except ImportError:
         logger.error('girder_client is unavailable.  Cannot get sample data.')
         return
@@ -53,6 +55,13 @@ def get_sample_data(adminUser, collName='Sample Images', folderName='Images'):
 
     folder = get_collection_folder(adminUser, collName, folderName)
     remote = girder_client.GirderClient(apiUrl='https://data.kitware.com/api/v1')
+    session = requests.Session()
+    retries = urllib3.util.retry.Retry(
+        total=10, backoff_factor=0.1, status_forcelist=[104, 500, 502, 503, 504])
+    session.mount('http://', requests.adapters.HTTPAdapter(max_retries=retries))
+    session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
+    remote._session = session
+
     remoteFolder = remote.resourceLookup('/collection/HistomicsTK/Deployment test images')
     sampleItems = []
     for remoteItem in remote.listItem(remoteFolder['_id']):
