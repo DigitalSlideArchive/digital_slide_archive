@@ -50,5 +50,5 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   while [[ -e /proc/$(cat /tmp/girder_build.pid) && ! -f /tmp/girder_build_done ]]; do sleep 0.1; done &&
   true; fi &&
   echo ==== Starting Girder === &&
-  girder serve --dev
+  girder serve
 "
