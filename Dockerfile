@@ -90,7 +90,9 @@ RUN cd /opt && \
     cd /opt && \
     git clone https://github.com/DigitalSlideArchive/HistomicsUI && \
     cd /opt/HistomicsUI && \
-    pip install --no-cache-dir -e .[analysis]
+    pip install --no-cache-dir -e .[analysis] && \
+    \
+    find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
 # Install additional girder plugins
 RUN pip install --no-cache-dir \
@@ -102,7 +104,10 @@ RUN pip install --no-cache-dir \
     girder-resource-path-tools \
     girder-user-quota \
     girder-virtual-folders \
-    girder-xtk-demo
+    girder-xtk-demo \
+    && \
+    \
+    find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
 # Build the girder web client
 RUN NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=warn NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true \
@@ -110,7 +115,8 @@ RUN NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false NPM_CONFIG_AUDIT_LEVEL=high NPM
     # Get rid of unnecessary files to keep the docker image smaller \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     find /opt -name package-lock.json -exec rm -f {} \+ && \
-    rm -rf /tmp/* ~/.npm
+    rm -rf /tmp/* ~/.npm && \
+    find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
 # Install phantomjs for testing
 RUN npm install -g phantomjs-prebuilt --unsafe-perm && \
