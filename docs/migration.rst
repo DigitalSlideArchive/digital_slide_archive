@@ -15,7 +15,6 @@ The ``deploy_docker.py`` script was developed prior to docker compose handling a
 The, add ``docker-compose.override.yml`` to the ``devops/dsa`` directory, replacing ``/home/ubuntu`` with the resolution of ``~``::
 
     ---
-    version: '3'
     services:
       girder:
         volumes:
