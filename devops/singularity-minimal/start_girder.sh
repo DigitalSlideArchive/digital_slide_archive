@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 # Ensures that the main process runs as the DSA_USER and is part of both that
 # group and the docker group.  Fail if DSA_USER is not specified.
 # if [[ -z "$DSA_USER" ]]; then
@@ -28,7 +29,8 @@
 # echo 'PATH="/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH"' >> /home/$(id -nu ${DSA_USER%%:*})/.bashrc
 echo ==== Pre-Provisioning ===
 PATH="/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH" \
-python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre --yaml /opt/provision.yaml
+# python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre --yaml /opt/provision.yaml
+python /opt/provision.py -v --pre --yaml /opt/provision.yaml
 # Run subsequent commands as the DSA_USER.  This sets some paths based on what
 # is expected in the Docker so that the current python environment and the
 # devops/dsa/utils are available.  Then:
@@ -39,10 +41,13 @@ python /opt/digital_slide_archive/devops/dsa/provision.py -v --pre --yaml /opt/p
 #   resources.  It requires the host to have fuse installed and the docker
 #   container to be run with enough permissions to use fuse.
 # - Start the main girder process.
-PATH="/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH";
 echo ==== Provisioning === &&
-python /opt/digital_slide_archive/devops/dsa/provision.py -v --main --yaml /opt/provision.yaml &&
+PATH="/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH" \
+# python /opt/digital_slide_archive/devops/dsa/provision.py -v --main --yaml /opt/provision.yaml
+python /opt/provision.py -v --main --yaml /opt/provision.yaml
 echo ==== Creating FUSE mount === &&
-(girder mount ${DSA_GIRDER_MOUNT_OPTIONS%%:-} /fuse || true) &&
+PATH="/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH" \
+girder mount ${DSA_GIRDER_MOUNT_OPTIONS%%:-} /fuse
 echo ==== Starting Girder === &&
+PATH="/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH" \
 girder serve --dev
