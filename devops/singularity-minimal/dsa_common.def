@@ -10,6 +10,7 @@ From: dsarchive/dsa_common
     . $NVM_DIR/nvm.sh
 
 %post
+    set -x
     # install nvm / node properly
     export NVM_DIR=/opt/nvm
 
@@ -20,13 +21,26 @@ From: dsarchive/dsa_common
     nvm alias default 14 && \
     nvm use default
 
+    # install pyaml in virtual environment
+    . /opt/venv/bin/activate
+    /opt/venv/bin/pip install pyaml
+
     mv /opt /root_opt
 
+    # install apptainer
+    apt install -y software-properties-common
+    add-apt-repository -y ppa:apptainer/ppa
+    apt update
+    apt install -y apptainer
+
 %runscript
+    set -x
+
     export NVM_DIR=/opt/nvm
     . $NVM_DIR/nvm.sh
+    . /opt/venv/bin/activate
 
-    bash
+    bash -c "$@"
 
 %startscript
     # assuming that the user mounts a local directory to /opt/
