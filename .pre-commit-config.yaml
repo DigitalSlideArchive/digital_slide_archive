@@ -4,7 +4,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v5.0.0
   hooks:
   - id: check-added-large-files
     exclude: docs/assets/pdfs
@@ -46,7 +46,7 @@ repos:
     files: README.rst
     name: rst-linter of README.rst
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.4
+  rev: v2.3.0
   hooks:
   - id: codespell
     exclude: (?x)^(.*_config.yml|.*\.(lock|scss))$
@@ -57,25 +57,18 @@ repos:
   rev: v0.0.18
   hooks:
   - id: circleci-config-validate
-- repo: https://github.com/ThisIsManta/stylus-supremacy
-  rev: v2.17.5
-  hooks:
-    - id: stylus-supremacy
-      args:
-        - '--options'
-        - './girder/girder_large_image/web_client/package.json'
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.4.0
+  rev: v3.19.0
   hooks:
     - id: pyupgrade
       args:
-        - --py36-plus
+        - --py39-plus
         - --keep-percent-format
 - repo: https://github.com/pre-commit/mirrors-autopep8
-  rev: v2.0.2
+  rev: v2.0.4
   hooks:
     - id: autopep8
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 7.1.1
   hooks:
     - id: flake8

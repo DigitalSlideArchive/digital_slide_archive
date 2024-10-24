@@ -39,13 +39,9 @@ about_system_overview_page_button: ( View detailed system overview )
 about_system_link: system-overview/
 
 about_resources:
-  - name: Gitter
-    link: https://gitter.im/DigitalSlideArchive/HistomicsTK
-    icon: fab fa-gitter
-
-  - name: Discourse
-    link: https://discourse.girder.org/c/histomicstk
-    icon: fab fa-discourse
+  - name: GitHub Discussion
+    link: https://github.com/DigitalSlideArchive/digital_slide_archive/discussions
+    icon: fab fa-github
 
   - name: Jupyter
     link: https://digitalslidearchive.github.io/HistomicsTK/examples.html
