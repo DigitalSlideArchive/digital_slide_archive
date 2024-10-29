@@ -455,6 +455,7 @@ def merge_environ_opts(opts):
         if not opts.force:
             opts.force = {key}
         elif opts.force is not True:
+            opts.force = set(opts.force)
             opts.force.add(key)
     return opts
 

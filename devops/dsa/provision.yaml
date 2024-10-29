@@ -1,6 +1,11 @@
 ---
 # The provision script can take a yaml file with provision options
+
 # This is a dictionary of command-line arguments for the provisioning script
+# If force is True, set all settings even if they are already set.  This may
+# also be a list of settings keys to force.  It does not change the admin user
+# or the default assetstore if those already exist.  If False, settings are
+# only added or modified if they do not exist or are the default value.
 force: False
 samples: False
 clean-delete-locks: True
