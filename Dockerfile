@@ -45,13 +45,16 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
     chmod +x /usr/bin/tini
 
 # Make a virtualenv with our preferred python
-RUN virtualenv --python 3.11 /opt/venv
+RUN virtualenv --python 3.11 /opt/venv && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
+
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Make sure core packages are up to date
 RUN python --version && \
     pip install --no-cache-dir -U pip && \
-    pip install --no-cache-dir -U tox wheel
+    pip install --no-cache-dir -U tox wheel && \
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 # Clone packages and pip install what we want to be local
 RUN cd /opt && \
@@ -92,6 +95,8 @@ RUN cd /opt && \
     cd /opt/HistomicsUI && \
     pip install --no-cache-dir -e .[analysis] && \
     \
+    find /opt/venv \( -name '*.so' -o -name '*.a' -o -name '*.so.*' \) -exec bash -c "strip -p -D --strip-unneeded {} -o /tmp/striped; if ! cmp {} /tmp/striped; then cp /tmp/striped {}; fi; rm -f /tmp/striped" \; && \
+    rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /opt/venv && \
     find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
 # Install additional girder plugins
@@ -111,7 +116,7 @@ RUN pip install --no-cache-dir \
 
 # Build the girder web client
 RUN NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=warn NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true \
-    girder build --dev && \
+    girder build && \
     # Get rid of unnecessary files to keep the docker image smaller \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     find /opt -name package-lock.json -exec rm -f {} \+ && \
