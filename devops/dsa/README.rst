@@ -17,6 +17,15 @@ Get the Digital Slide Archive repository::
 
     git clone https://github.com/DigitalSlideArchive/digital_slide_archive
 
+Hardware Requirements
+~~~~~~~~~~~~~~~~~~~~~
+
+The main server has only modest hardware requirements.  It can run in a 2 core, 8 GByte machine (such as an t3.large EC2 instance), but it will perform better with more memory and cores.
+
+Storage requirements are largely driven by the images used and the number of annotations.  For a small test instance, a few GBytes will suffice.  For a deployment with high usage, this will need to be much, much larger.
+
+The worker's requirements are highly dependent on the algorithms being run.  The core HistomicsTK examples do not require a GPU, but benefit for more cores and more memory.  For a small test instance, this can be run on the same machine as the server.  For a serious deployment, multiple workers with GPUs will greatly facilitate some jobs.
+
 Start
 -----
 
