@@ -270,6 +270,25 @@ jobs:
             linkchecker /tmp/artifacts/index.html
       - store_artifacts:
           path: /tmp/artifacts
+  scan-docker:
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Install trivy
+          command: |
+            apk add --update-cache --upgrade curl
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      - run:
+          name: Scan the local image with trivy; fail on high or critical vulnerabilities
+          command: trivy image --scanners vuln --input /tmp/workspace/dsa_common.tar --exit-code 1 --severity HIGH,CRITICAL --no-progress
+      - run:
+          name: Scan the local image with trivy; report low and medium vulnerabilities, but don't fail
+          command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
 
 workflows:
   version: 2
@@ -339,6 +358,12 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - scan-docker:
+          requires:
+            - docker-compose
+          filters:
+            tags:
+              only: /^v.*/
       - publish-docker-common:
           requires:
             - test-cli-common
@@ -349,6 +374,7 @@ workflows:
             - docker-compose-minimal
             - docker-compose-external-worker
             - docker-compose-with-dive-volview
+            - scan-docker
           filters:
             tags:
               only: /^v.*/
@@ -391,6 +417,9 @@ workflows:
       - docker-compose-minimal
       - docker-compose-with-dive-volview
       - docker-compose-external-worker
+      - scan-docker:
+          requires:
+            - docker-compose
       - docs
       - publish-docker-common:
           requires:
@@ -399,3 +428,4 @@ workflows:
             - test-girder-build-common
             - test-histomicsui-common
             - test-proxy-common
+            - scan-docker
