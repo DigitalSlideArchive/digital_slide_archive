@@ -107,10 +107,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.12
+          name: Use Python 3.13
           command: |
             pyenv versions
-            pyenv global 3.12
+            pyenv global 3.13
             pip --version
       - run:
           name: Check provisioning defaults match
@@ -170,10 +170,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.12
+          name: Use Python 3.13
           command: |
             pyenv versions
-            pyenv global 3.12
+            pyenv global 3.13
             pip --version
       - run:
           name: Run docker compose up
@@ -190,10 +190,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.12
+          name: Use Python 3.13
           command: |
             pyenv versions
-            pyenv global 3.12
+            pyenv global 3.13
             pip --version
       - run:
           name: Run docker compose up
@@ -212,10 +212,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.12
+          name: Use Python 3.13
           command: |
             pyenv versions
-            pyenv global 3.12
+            pyenv global 3.13
             pip --version
       - run:
           name: Run docker compose up
