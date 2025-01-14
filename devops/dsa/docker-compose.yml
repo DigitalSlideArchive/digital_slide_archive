@@ -58,8 +58,7 @@ services:
 
       # For local development, uncomment the set of mounts associated with the
       # local source files.  Adding the editable egg directories first allows
-      # allow mounting source files from the host without breaking the internal
-      # data.
+      # mounting source files from the host without breaking the internal data.
       # - /opt/HistomicsUI/histomicsui.egg-info
       # - ../../../HistomicsUI:/opt/HistomicsUI
 
