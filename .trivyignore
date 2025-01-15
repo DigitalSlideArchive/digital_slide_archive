@@ -19,3 +19,6 @@ CVE-2024-29415
 # This is a hyper-v hv_sock issue; it doesn't seem like we should be using that
 # in our docker context
 CVE-2024-53103
+
+# This is rsync, which we don't use in any of our production methods
+CVE-2024-12084
