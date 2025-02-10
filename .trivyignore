@@ -2,8 +2,6 @@
 
 # In bioformats_package.jar; shouldn't be an issue because of how xml is used
 CVE-2024-47554
-# In bioformats_package.jar; worst case is jvm halts
-CVE-2024-36114
 # In bioformats_package.jar; we don't pass urls to bioformats
 CVE-2023-32697
 
@@ -18,3 +16,7 @@ CVE-2024-29415
 
 # libc-dev net free
 CVE-2024-56658
+# libc-dev UAF
+CVE-2024-56672
+# libc-dev uvcvideo
+CVE-2024-53104
