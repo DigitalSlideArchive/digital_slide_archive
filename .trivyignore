@@ -20,3 +20,6 @@ CVE-2024-56658
 CVE-2024-56672
 # libc-dev uvcvideo
 CVE-2024-53104
+# libc-dev netlink
+CVE-2024-53140
+CVE-2024-57798
