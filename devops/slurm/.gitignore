@@ -1,0 +1,4 @@
+assetstore/
+db/
+logs/
+*.local.*

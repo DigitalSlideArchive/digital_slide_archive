@@ -1,0 +1,193 @@
+---
+services:
+  girder:
+    image: dsarchive/dsa_common
+    build:
+      context: ../..
+      # We use this to optionally set version information during the build
+      args:
+        DSA_VERSIONS: ${DSA_VERSIONS:-}
+    # Instead of privileged mode, fuse can use:
+    # devices:
+    #   - /dev/fuse:/dev/fuse
+    # security_opt:
+    #   - apparmor:unconfined
+    # cap_add:
+    #   - SYS_ADMIN
+    # but these may be somewhat host specific, so we default to privileged.  If
+    # the docker daemon is being run with --no-new-privileges, fuse may not
+    # work.
+    # See also https://github.com/docker/for-linux/issues/321 for possible
+    # methods to avoid both privileged mode and cap_add SYS_ADMIN.
+    privileged: true
+    # Set DSA_USER to a user id that is part of the docker group (e.g.,
+    # `DSA_USER=$(id -u):$(id -g)`).  This makes files in assetstores and logs
+    # owned by that user and provides permissions to manage docker
+    environment:
+      DSA_USER: ${DSA_USER:-}
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+      # Mount options can be used to, for instance, add diskcache (e.g.,
+      #  "-o diskcache,diskcache_size_limit=2147483648")
+      DSA_GIRDER_MOUNT_OPTIONS: ${DSA_GIRDER_MOUNT_OPTIONS:-}
+      # You can also set girder settings here:
+      # GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
+      # GIRDER_SETTING_HISTOMICSUI_LOGIN_SESSION_EXPIRY_MINUTES: 15
+      # If you want to authorize docker image repositories on the host machine
+      # and have them accessed without further authorization within Girder,
+      # you can specify a docker config location, mount it (see volumes,
+      # below), and do "docker login <repo>" on the host machine before
+      # starting the DSA.
+      # DOCKER_CONFIG: /.docker
+    restart: unless-stopped
+    # Set DSA_PORT to expose the interface on another port (default 8080).
+    ports:
+      - "${DSA_PORT:-8080}:8080"
+    volumes:
+      # Needed to use slicer_cli_web to run docker containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Default assetstore
+      - ./assetstore:/assetstore
+      # Location of girder.cfg
+      - ./girder.cfg:/etc/girder.cfg
+      # Location of provision.py
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ./start_girder.sh:/opt/digital_slide_archive/devops/dsa/start_girder.sh
+      # Location to store logs
+      - ./logs:/logs
+
+      # For local development, uncomment the set of mounts associated with the
+      # local source files.  Adding the editable egg directories first allows
+      # mounting source files from the host without breaking the internal data.
+      # - /opt/HistomicsUI/histomicsui.egg-info
+      # - ../../../HistomicsUI:/opt/HistomicsUI
+
+      # See comments about authorizing docker repositories above
+      # - /home/<user directory>/.docker:/.docker:ro
+
+      # Add additional mounts here to get access to existing files on your
+      # system.  Also add them to the worker container to reduce copying.
+    depends_on:
+      - mongodb
+      - memcached
+      - rabbitmq
+    command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  mongodb:
+    image: "mongo:latest"
+    # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
+    # so that database files are owned by yourself.
+    user: ${DSA_USER:-PLEASE SET DSA_USER}
+    restart: unless-stopped
+    # Limiting maxConns reduces the amount of shared memory demanded by
+    # mongo.  Remove this limit or increase the host vm.max_map_count value.
+    command: --maxConns 1000
+    volumes:
+      # Location to store database files
+      - ./db:/data/db
+    # Uncomment to allow access to the database from outside of the docker
+    # network.
+    # ports:
+    #   - "27017"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  memcached:
+    image: memcached
+    command: -m 4096 --max-item-size 8M
+    restart: unless-stopped
+    # Uncomment to allow access to memcached from outside of the docker network
+    # ports:
+    #   - "11211"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "bash", "-c", 'exec 3<>/dev/tcp/localhost/11211; printf "stats\nquit\n" >&3; cat <&3']
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  rabbitmq:
+    image: "rabbitmq:latest"
+    restart: unless-stopped
+    # Uncomment to allow access to rabbitmq from outside of the docker network
+    # ports:
+    #   - "5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-}
+    volumes:
+      - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  worker:
+    image: dsarchive/dsa_common
+    build:
+      context: ../..
+      # We use this to optionally set version information during the build
+      args:
+        DSA_VERSIONS: ${DSA_VERSIONS:-}
+    # Set DSA_USER to a user id that is part of the docker group (e.g.,
+    # `DSA_USER=$(id -u):$(id -g)`).  This provides permissions to manage
+    # docker
+    environment:
+      DSA_USER: ${DSA_USER:-}
+      DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
+      DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
+      TMPDIR:
+
+      # See comments about authorizing docker repositories above
+      # DOCKER_CONFIG: /.docker
+    restart: unless-stopped
+    volumes:
+      # Needed to use slicer_cli_web to run docker containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Modify the worker.local.cfg to specify a different rabbitmq server and
+      # then enable this mount.  On the rabbitmq server, make sure you add a
+      # non-guest default user and use that both in the worker and in the main
+      # girder settings.
+      # - ./worker.local.cfg:/opt/girder_worker/girder_worker/worker.local.cfg
+      # Allow overriding the start command
+      - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
+      # Needed to allow transferring data to slicer_cli_web docker containers
+      - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
+
+      # See comments about authorizing docker repositories above
+      # - /home/<user directory>/.docker:/.docker:ro
+
+      # Add additional mounts here to get access to existing files on your
+      # system if they have the same path as on the girder container.
+    depends_on:
+      - rabbitmq
+    command: /opt/digital_slide_archive/devops/dsa/start_worker.sh
+    healthcheck:
+      test: ["CMD", "celery", "-b", "amqp://rabbitmq:5672", "inspect", "ping"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
