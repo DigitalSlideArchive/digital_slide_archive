@@ -156,6 +156,7 @@ services:
       DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
       DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
       TMPDIR:
+      SIF_IMAGE_PATH: /SIF
 
       # See comments about authorizing docker repositories above
       # DOCKER_CONFIG: /.docker
@@ -177,6 +178,7 @@ services:
 
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
+      - ./SIF:/SIF
 
       # Add additional mounts here to get access to existing files on your
       # system if they have the same path as on the girder container.
