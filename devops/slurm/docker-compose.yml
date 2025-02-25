@@ -169,6 +169,8 @@ services:
       # girder settings.
       # - ./worker.local.cfg:/opt/girder_worker/girder_worker/worker.local.cfg
       # Allow overriding the start command
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
       - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
       # Needed to allow transferring data to slicer_cli_web docker containers
       - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
