@@ -4,6 +4,7 @@ services:
     image: dsarchive/dsa_common
     build:
       context: ../..
+      dockerfile: slurm.Dockerfile
       # We use this to optionally set version information during the build
       args:
         DSA_VERSIONS: ${DSA_VERSIONS:-}
@@ -38,6 +39,8 @@ services:
       # below), and do "docker login <repo>" on the host machine before
       # starting the DSA.
       # DOCKER_CONFIG: /.docker
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
@@ -61,6 +64,7 @@ services:
       # mounting source files from the host without breaking the internal data.
       # - /opt/HistomicsUI/histomicsui.egg-info
       # - ../../../HistomicsUI:/opt/HistomicsUI
+      - ./SIF:/SIF
 
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
@@ -146,6 +150,7 @@ services:
     build:
       context: ../..
       # We use this to optionally set version information during the build
+      dockerfile: slurm.Dockerfile
       args:
         DSA_VERSIONS: ${DSA_VERSIONS:-}
     # Set DSA_USER to a user id that is part of the docker group (e.g.,
@@ -157,10 +162,14 @@ services:
       DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
       TMPDIR:
       SIF_IMAGE_PATH: /SIF
-
+      LOGS: /logs # this is needed in slicer_cli_web -> direct_singularity_run.py:53
+      GIRDER_WORKER_SLURM_SUBMIT_SCRIPT: /opt/girder_worker/girder_worker/slurm/girder_worker_slurm/singluarity.slurm
       # See comments about authorizing docker repositories above
       # DOCKER_CONFIG: /.docker
     restart: unless-stopped
+
+    privileged: true  # needed for apptainer in docker. TODO: re-evaulate method
+
     volumes:
       # Needed to use slicer_cli_web to run docker containers
       - /var/run/docker.sock:/var/run/docker.sock
@@ -179,6 +188,7 @@ services:
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
       - ./SIF:/SIF
+      - ./logs:/logs
 
       # Add additional mounts here to get access to existing files on your
       # system if they have the same path as on the girder container.
