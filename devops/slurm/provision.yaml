@@ -97,7 +97,7 @@ settings:
 #   - dsarchive/histomicstk:latest
 # List slicer-cli-images to always pull, and load
 slicer-cli-image-pull:
-  - dsarchive/histomicstk:latest
+  # - dsarchive/histomicstk:latest
 # The worker can specify parameters for provisioning
 # worker-rabbitmq-host: girder:8080
 worker-rabbitmq-user: guest
@@ -113,20 +113,13 @@ worker:
   # pip:
   #   - package_one
   # Run additional shell commands in the worker before start
-  shell:
-    - rm -rf /opt/girder_worker /opt/slicer_cli_web
-    - git clone --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
-    - git clone --branch slicer-cli-web-singularity https://github.com/girder/slicer_cli_web.git /opt/slicer_cli_web
-    - pip install -e /opt/girder_worker
-    - pip install -e /opt/girder_worker/girder_worker/singularity
-    - pip install -e /opt/girder_worker/girder_worker/slurm
-    - pip install -e /opt/slicer_cli_web
-    - pip install -e /opt/slicer_cli_web/slicer_cli_web/singularity
+  # shell:
 
 shell:
  - rm -rf /opt/girder_worker /opt/slicer_cli_web
  - git clone --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
  - git clone --branch slicer-cli-web-singularity https://github.com/girder/slicer_cli_web.git /opt/slicer_cli_web
+ - cp /opt/worker.dist.cfg /opt/girder_worker/girder_worker/worker.dist.cfg
  - pip install -e /opt/girder_worker
  - pip install -e /opt/girder_worker/girder_worker/singularity
  - pip install -e /opt/girder_worker/girder_worker/slurm
