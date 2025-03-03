@@ -59,6 +59,8 @@ services:
       # Location to store logs
       - ./logs:/logs
 
+      - ./worker.dist.cfg:/opt/worker.dist.cfg
+
       # For local development, uncomment the set of mounts associated with the
       # local source files.  Adding the editable egg directories first allows
       # mounting source files from the host without breaking the internal data.
