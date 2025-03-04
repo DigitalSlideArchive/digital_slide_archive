@@ -39,8 +39,11 @@ services:
       # below), and do "docker login <repo>" on the host machine before
       # starting the DSA.
       # DOCKER_CONFIG: /.docker
+
+      # Environment variables needed for girder_worker_slurm
       SIF_IMAGE_PATH: /SIF
       LOGS: /logs
+
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
@@ -59,6 +62,10 @@ services:
       # Location to store logs
       - ./logs:/logs
 
+      # Mount the SIF directory to allow shared access to singularity images
+      - ./SIF:/SIF
+
+      # Mount local celery config (see README.md for more info)
       - ./worker.dist.cfg:/opt/worker.dist.cfg
 
       # For local development, uncomment the set of mounts associated with the
@@ -66,7 +73,6 @@ services:
       # mounting source files from the host without breaking the internal data.
       # - /opt/HistomicsUI/histomicsui.egg-info
       # - ../../../HistomicsUI:/opt/HistomicsUI
-      - ./SIF:/SIF
 
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
@@ -147,63 +153,3 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
-  # worker:
-  #   image: dsarchive/dsa_common
-  #   build:
-  #     context: ../..
-  #     # We use this to optionally set version information during the build
-  #     dockerfile: slurm.Dockerfile
-  #     args:
-  #       DSA_VERSIONS: ${DSA_VERSIONS:-}
-  #   # Set DSA_USER to a user id that is part of the docker group (e.g.,
-  #   # `DSA_USER=$(id -u):$(id -g)`).  This provides permissions to manage
-  #   # docker
-  #   environment:
-  #     DSA_USER: ${DSA_USER:-}
-  #     DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
-  #     DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
-  #     TMPDIR:
-  #     SIF_IMAGE_PATH: /SIF
-  #     LOGS: /logs # this is needed in slicer_cli_web -> direct_singularity_run.py:53
-  #     GIRDER_WORKER_SLURM_SUBMIT_SCRIPT: /opt/girder_worker/girder_worker/slurm/girder_worker_slurm/singluarity.slurm
-  #     # See comments about authorizing docker repositories above
-  #     # DOCKER_CONFIG: /.docker
-  #   restart: unless-stopped
-
-  #   privileged: true  # needed for apptainer in docker. TODO: re-evaulate method
-
-  #   volumes:
-  #     # Needed to use slicer_cli_web to run docker containers
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     # Modify the worker.local.cfg to specify a different rabbitmq server and
-  #     # then enable this mount.  On the rabbitmq server, make sure you add a
-  #     # non-guest default user and use that both in the worker and in the main
-  #     # girder settings.
-  #     # - ./worker.local.cfg:/opt/girder_worker/girder_worker/worker.local.cfg
-  #     # Allow overriding the start command
-  #     - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
-  #     - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
-  #     - ./start_worker.sh:/opt/digital_slide_archive/devops/dsa/start_worker.sh
-  #     # Needed to allow transferring data to slicer_cli_web docker containers
-  #     - ${TMPDIR:-/tmp}:${TMPDIR:-/tmp}
-
-  #     # See comments about authorizing docker repositories above
-  #     # - /home/<user directory>/.docker:/.docker:ro
-  #     - ./SIF:/SIF
-  #     - ./logs:/logs
-
-  #     # Add additional mounts here to get access to existing files on your
-  #     # system if they have the same path as on the girder container.
-  #   depends_on:
-  #     - rabbitmq
-  #   command: /opt/digital_slide_archive/devops/dsa/start_worker.sh
-  #   healthcheck:
-  #     test: ["CMD", "celery", "-b", "amqp://rabbitmq:5672", "inspect", "ping"]
-  #     interval: 5m
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 30s
-  #   logging:
-  #     options:
-  #       max-size: "10M"
-  #       max-file: "5"
