@@ -95,3 +95,16 @@ docker compose build
 # stop/start the girder and worker containers
 docker compose down; DSA_USER=$(id -u):$(id -g) docker compose up
 ```
+
+
+## Note on Apptainer `slicer_cli_web` images
+
+Typically the DSA executes CLIs using Docker images. `slicer_cli_web` manages the pulling of these images while `girder_worker` manages the execution of the CLIs.
+
+However with most Slurm/HPC systems, we need to run the CLIs in Apptainer (aka Singularity) containers since Docker execution is limited. Apptainer provides a default mechanism for converting Docker images to Apptainer images.
+
+One critical difference between Docker and Apptainer images is that Apptainer doesn't have a notion of a `WORKDIR`. Unfortunately this means that `WORKDIR` information is lost during the image conversion process. This causes issues with CLIs that rely on the `WORKDIR` to find files.
+
+Our current workaround is to manually add an `entry_path` `LABEL` to Docker images we want to convert (where `entry_path` is set to the `WORKDIR` value).
+
+To make your Docker image CLI compatible with `girder_worker_slurm`, add the `LABEL entry_path=/path/to/workdir` to your image.
