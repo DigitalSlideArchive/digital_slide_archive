@@ -7,12 +7,9 @@ _build*
 .eggs
 .tox
 .vagrant
-ansible/roles/girder.girder
-ansible/roles/girder.mongodb
-ansible/sample*.cfg
-devops/dsa/assetstore
-devops/dsa/db
-devops/dsa/logs
+devops/**/assetstore
+devops/**/db
+devops/**/logs
 devops/singularity-minimal
 docs/.bundle
 docs/_site
