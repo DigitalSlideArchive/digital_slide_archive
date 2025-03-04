@@ -6,10 +6,9 @@ This is a setup for running the DSA with Slurm workers.
 
 We expect to run on:
 
-- Slurm control node (TODO: what's the proper name?)
+- Slurm control node
   - Have access to `sbatch`, `scontrol show job`, `scancel`.
-- Have apptainer installed on compute nodes (TODO: what's the proper name?)
-
+- Have apptainer installed on compute nodes.
 
 ## Key differences from typical DSA setup:
 
