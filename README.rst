@@ -36,8 +36,6 @@ Installation
 
 For installation instructions, see the complete `docker compose example <./devops/dsa>`_.
 
-For local development including HistomicsUI, there are some `devops <./devops>`_ scripts.
-
 There is a `migration guide <./docs/migration.rst>`_  from the Girder 2 version or from the ``deploy_docker.py`` script.
 
 Adding Docker Tasks
