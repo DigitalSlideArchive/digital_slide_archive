@@ -1,27 +1,28 @@
 # Accept these; revisit as needed
 
-# In bioformats_package.jar; shouldn't be an issue because of how xml is used
-CVE-2024-47554
-# In bioformats_package.jar; we don't pass urls to bioformats
+# In bioformats_package.jar: these shouldn't be an issue because of how xml is
+# used and because we don't pass urls to bioformats
+
+# In node-pkg: this is only used during the build and not after start
+
+# In ubuntu: these will be addressed by Ubuntu and shouldn't directly affect
+# the way we run
+
+# HIGH: jar - sqlite-jdbc: Remote code execution when JDBC url is attacker
 CVE-2023-32697
-
-# possible regex dos issues during girder build, not exposed during running
+# HIGH: jar - apache-commons-io: Possible denial of service attack on untr
+CVE-2024-47554
+# HIGH: node-pkg - nodejs-ansi-regex: Regular expression denial of service (ReD
 CVE-2021-3807
-CVE-2024-21538
+# HIGH: node-pkg - http-cache-semantics: Regular Expression Denial of Service (
 CVE-2022-25881
+# HIGH: node-pkg - nodejs-semver: Regular expression denial of service
 CVE-2022-25883
-# Partial urls can route badly; this shouldn't ever be exposed except possibly
-# during girder build, as node isn't run otherwise
+# HIGH: node-pkg - cross-spawn: regular expression denial of service
+CVE-2024-21538
+# HIGH: node-pkg - node-ip: Incomplete fix for CVE-2023-42282
 CVE-2024-29415
-
-# libc-dev net free
-CVE-2024-56658
-# libc-dev UAF
-CVE-2024-56672
-# libc-dev uvcvideo
-CVE-2024-53104
-# libc-dev netlink
+# HIGH: ubuntu - kernel: netlink: terminate outstanding dump on socket close
 CVE-2024-53140
-CVE-2024-57798
-
+# HIGH: ubuntu - kernel: jfs: add a check to prevent array-index-out-of-bound
 CVE-2024-56595
