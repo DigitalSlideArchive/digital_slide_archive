@@ -4,7 +4,7 @@ services:
     image: dsarchive/dsa_common
     build:
       context: ../..
-      dockerfile: slurm.Dockerfile
+      dockerfile: apptainer.Dockerfile
       # We use this to optionally set version information during the build
       args:
         DSA_VERSIONS: ${DSA_VERSIONS:-}

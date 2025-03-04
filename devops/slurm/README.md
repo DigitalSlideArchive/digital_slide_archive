@@ -84,3 +84,14 @@ Additionally, `SIF_IMAGE_PATH` should be set to the same directory we mount in `
 This is because girder will pull the Singularity/Apptainer images and store them in this directory. The worker will then use this directory to access the images.
 
 These environment variables are set in `worker/run.sh`. You must edit this file to set the correct values before running the worker.
+
+
+## To to run the DSA
+
+```bash
+# build the docker containers (needed for apptainer in docker)
+docker compose build
+
+# stop/start the girder and worker containers
+docker compose down; DSA_USER=$(id -u):$(id -g) docker compose up
+```
