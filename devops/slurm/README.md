@@ -107,3 +107,11 @@ One critical difference between Docker and Apptainer images is that Apptainer do
 Our current workaround is to manually add an `entry_path` `LABEL` to Docker images we want to convert (where `entry_path` is set to the `WORKDIR` value).
 
 To make your Docker image CLI compatible with `girder_worker_slurm`, add the `LABEL entry_path=/path/to/workdir` to your image.
+
+
+## See also
+
+- [Girder Worker Slurm](https://github.com/girder/girder_worker/tree/slurm/girder_worker/slurm) plugin
+- [Girder Worker Singularity](https://github.com/girder/girder_worker/tree/slurm/girder_worker/singularity) plugin
+- [Slicer CLI Web Singularity](https://github.com/girder/slicer_cli_web/tree/slicer-cli-web-singularity) plugin
+- [Apptainer](https://apptainer.org/docs/admin/main/installation.html) installation docs
