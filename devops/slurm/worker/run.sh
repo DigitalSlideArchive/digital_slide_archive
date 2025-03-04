@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 . ./venv/bin/activate
 
-# TODO: communicate TMP assignment (it needs to be accessible by worker's node and compute node)
+echo -e "Before running, please edit environment variables per README.md instructions.\n Once set, remove this line from script.\n" && exit 1
 
-SIF_IMAGE_PATH=~/work/digital_slide_archive/devops/slurm/SIF \
-    TMP=/slurmshare/test-dsa-slurm/tmp \
-    LOGS=~/work/digital_slide_archive/devops/slurm/logs \
-    GIRDER_WORKER_SLURM_SUBMIT_SCRIPT=~/work/digital_slide_archive/devops/slurm/worker/lib/girder_worker/girder_worker/slurm/girder_worker_slurm/singluarity.slurm \
+# CHANGE THESE VALUES (see README.md)
+TMP=/slurmshare/test-dsa-slurm/tmp \
+    SIF_IMAGE_PATH="$CURRENT_DIR/../SIF" \
+    LOGS="$CURRENT_DIR/../logs" \
+    GIRDER_WORKER_SLURM_SUBMIT_SCRIPT="$CURRENT_DIR/lib/girder_worker/girder_worker/slurm/girder_worker_slurm/singluarity.slurm" \
     GW_DIRECT_PATHS=true \
     python -m girder_worker -l info -Ofair --prefetch-multiplier=1 --without-heartbeat --concurrency=2
