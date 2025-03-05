@@ -26,3 +26,5 @@ CVE-2024-29415
 CVE-2024-53140
 # HIGH: ubuntu - kernel: jfs: add a check to prevent array-index-out-of-bound
 CVE-2024-56595
+# HIGH: ubuntu - kernel: HID: core: zero-initialize the report buffer
+CVE-2024-50302
