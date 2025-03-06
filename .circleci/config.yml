@@ -16,6 +16,21 @@ commands:
           name: Load archived common docker image
           command: |
             docker load -i /tmp/workspace/dsa_common.tar
+  usecommon5docker:
+    description: "Make built common docker available"
+    steps:
+      - run:
+          name: Upgrade pip
+          command: pip3 install -U pip
+      - run:
+          name: Install dependencies
+          command: pip3 install requests docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Load archived common docker image
+          command: |
+            docker load -i /tmp/workspace/dsa_common_5.tar
   startcommon:
     description: Start containers for tests.
     steps:
@@ -225,6 +240,36 @@ jobs:
           name: Wait for girder to respond and be configured
           command: |
             for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+  docker-compose-girder-5:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2404:current
+    steps:
+      - checkout
+      - run:
+          name: Use Python 3.13
+          command: |
+            pyenv versions
+            pyenv global 3.13
+            pip --version
+      - run:
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose up --build -d'
+          working_directory: ./devops/ver5
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+      - run:
+          name: Archive docker images
+          command: |
+            docker save -o dsa_common_5.tar dsarchive/dsa_common_5:latest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./dsa_common_5.tar
+      - store_artifacts:
+          path: ./dsa_common_5.tar
   publish-docker-common:
     working_directory: ~/project
     machine:
@@ -244,6 +289,25 @@ jobs:
               export DATE_TAG=`date '+%Y%m%d'`
               docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$DATE_TAG"
               docker push "dsarchive/dsa_common:$DATE_TAG"
+  publish-docker-common5:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2404:current
+    steps:
+      - checkout
+      - usecommon5docker
+      - run:
+          name: Publish images to Docker Hub
+          command: |
+              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              docker push dsarchive/dsa_common_5:latest
+              if [[ $CIRCLE_TAG =~ ^v.*$ ]]; then
+              docker tag dsarchive/dsa_common_5:latest "dsarchive/dsa_common_5:$CIRCLE_TAG"
+              docker push "dsarchive/dsa_common_5:$CIRCLE_TAG"
+              fi
+              export DATE_TAG=`date '+%Y%m%d'`
+              docker tag dsarchive/dsa_common_5:latest "dsarchive/dsa_common_5:$DATE_TAG"
+              docker push "dsarchive/dsa_common_5:$DATE_TAG"
   docs:
     docker:
       - image: cimg/ruby:3.3
@@ -351,6 +415,13 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - docker-compose-girder-5:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
       - docker-compose-external-worker:
           filters:
             tags:
@@ -375,6 +446,23 @@ workflows:
             - docker-compose-external-worker
             - docker-compose-with-dive-volview
             - scan-docker
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - master
+      - publish-docker-common5:
+          requires:
+            # - test-cli-common
+            # - test-girder-build-common
+            # - test-histomicsui-common
+            # - test-proxy-common
+            - docker-compose-girder-5
+            # - docker-compose-minimal
+            # - docker-compose-external-worker
+            # - docker-compose-with-dive-volview
+            # - scan-docker
           filters:
             tags:
               only: /^v.*/
@@ -416,6 +504,7 @@ workflows:
             - docker-compose
       - docker-compose-minimal
       - docker-compose-with-dive-volview
+      - docker-compose-girder-5
       - docker-compose-external-worker
       - scan-docker:
           requires:
@@ -429,3 +518,11 @@ workflows:
             - test-histomicsui-common
             - test-proxy-common
             - scan-docker
+      - publish-docker-common5:
+          requires:
+            - docker-compose-girder-5
+            # - test-cli-common
+            # - test-girder-build-common
+            # - test-histomicsui-common
+            # - test-proxy-common
+            # - scan-docker
