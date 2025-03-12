@@ -28,3 +28,5 @@ CVE-2024-50302
 CVE-2024-53063
 # HIGH: ubuntu - kernel: netlink: terminate outstanding dump on socket close
 CVE-2024-53140
+# HIGH: ubuntu - kernel: jfs: array-index-out-of-bounds fix in dtReadFirst
+CVE-2024-56598
