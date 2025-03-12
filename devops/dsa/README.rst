@@ -39,13 +39,21 @@ To get the most recent built docker images, do::
 
 If you don't pull the images, the main image will be built in preference to pulling.
 
-To start the Digital Slide Archive::
+To start the Digital Slide Archive (except on Windows)::
 
     DSA_USER=$(id -u):$(id -g) docker compose up
 
 This uses your current user id so that database files, logs, assetstore files, and temporary files are owned by the current user.  If you omit setting ``DSA_USER``, files may be created owned by root.
 
 The girder instance can now be accessed at http://localhost:8080. By default, it creates an ``admin`` user with a password of ``password``. Note that this example does not add any default tasks or sample files.  You can log in with the admin user and use the Slicer CLI Web plugin settings to add default tasks (e.g., ``dsarchive/histomicstk:latest``).
+
+Windows
+~~~~~~~
+
+On Windows, to start the Digital Slide Archive::
+
+    set DSA_USER=1000:1000
+    docker compose up
 
 Stop
 ----
