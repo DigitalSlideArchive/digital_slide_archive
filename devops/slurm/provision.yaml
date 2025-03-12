@@ -118,7 +118,7 @@ worker:
 shell:
  - rm -rf /opt/girder_worker /opt/slicer_cli_web
  - git clone --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
- - git clone --branch slicer-cli-web-singularity https://github.com/girder/slicer_cli_web.git /opt/slicer_cli_web
+ - git clone --branch slicer-cli-web-singularity https://github.com/willdunklin/slicer_cli_web.git /opt/slicer_cli_web
  - cp /opt/worker.dist.cfg /opt/girder_worker/girder_worker/worker.dist.cfg
  - pip install -e /opt/girder_worker
  - pip install -e /opt/girder_worker/girder_worker/singularity
