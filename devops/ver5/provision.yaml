@@ -17,12 +17,10 @@ use-defaults: True
 # compatibility version to the current server version.
 mongo-compat: True
 # A list of additional pip modules to install; if any are girder plugins with
-# client-side code, also specify rebuild-client.
+# client-side code, that code must be built in the shell step
 # pip:
 #   - girder-oauth
 #   - girder-ldap
-# rebuild-client may be False, True (for production mode), or "development"
-rebuild-client: False
 # Run additional shell commands before start
 # shell:
 #   - ls

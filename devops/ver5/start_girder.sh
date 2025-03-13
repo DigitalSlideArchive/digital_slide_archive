@@ -51,7 +51,7 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   true; fi &&
   echo ==== Starting Girder === &&
   # girder serve --host 0.0.0.0 2> >(tee -a /logs/error.log | tee -a /logs/info.log >&2) | tee -a /logs/info.log &
-  gunicorn girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
+  gunicorn --timeout 0 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
   girder_pid=\$! &&
   echo ==== Postprovisioning === &&
   python /opt/digital_slide_archive/devops/dsa/provision.py -v --post &&
