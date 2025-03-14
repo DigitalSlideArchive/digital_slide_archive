@@ -30,5 +30,5 @@ echo ==== Starting Worker === &&
 # devops/dsa/utils are available.  Then it runs girder_worker
 su $(id -nu ${DSA_USER%%:*}) -c "
   PATH=\"/opt/digital_slide_archive/devops/dsa/utils:/opt/venv/bin:/.pyenv/bin:/.pyenv/shims:$PATH\";
-  DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true python -m girder_worker --concurrency=${DSA_WORKER_CONCURRENCY:-2} -Ofair --prefetch-multiplier=1
+  DOCKER_CLIENT_TIMEOUT=86400 TMPDIR=${TMPDIR:-/tmp} GW_DIRECT_PATHS=true celery -A girder_worker.app.app worker --concurrency=${DSA_WORKER_CONCURRENCY:-2} -Ofair --prefetch-multiplier=1
 "
