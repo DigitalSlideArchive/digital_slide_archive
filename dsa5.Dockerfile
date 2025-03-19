@@ -66,6 +66,8 @@ RUN . ~/.bashrc && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     true
 
+ENV SKIP_SOURCE_MAPS=true
+
 # Clone packages and pip install what we want to be local
 RUN cd /opt && \
     # Install gunicorn so we can use it instead of girder serve \
@@ -135,21 +137,7 @@ RUN true && \
     # virtual_folders has no web_client \
     cd /opt/girder/plugins/virtual_folders && \
     pip install --no-cache-dir -e . && \
-    find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
-    rm -rf /root/.cache /root/.npm /tmp/* && \
-    find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
-    true
-
-# Girder worker
-RUN true && \
-    cd /opt/girder/worker && \
-    pip install --no-cache-dir -e . && \
-    rm -rf /root/.cache /root/.npm /tmp/* && \
-    find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
-    true
-
-RUN cd /opt/girder/plugins/slicer_cli_web && \
-    # pip install --no-cache-dir -e .[girder,worker] && \
+    cd /opt/girder/plugins/slicer_cli_web && \
     pip install --no-cache-dir -e . && \
     cd girder_slicer_cli_web/web_client && \
     npm ci && \
@@ -176,6 +164,7 @@ RUN cd /opt && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
+    find . -name *js.map* -exec rm -r {} \+ && \
     true
 
 RUN cd /opt && \
@@ -194,6 +183,7 @@ RUN cd /opt && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
+    find . -name *js.map* -exec rm -r {} \+ && \
     true
 
 RUN cd /opt && \
@@ -206,6 +196,7 @@ RUN cd /opt && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
+    find . -name *js.map* -exec rm -r {} \+ && \
     true
 
 # When running the worker, adjust some settings
