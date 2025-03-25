@@ -16,7 +16,7 @@ From: dsarchive/dsa_common
 
     git clone https://github.com/nvm-sh/nvm.git $NVM_DIR
     . $NVM_DIR/nvm.sh
-    
+
     nvm install 14 && \
     nvm alias default 14 && \
     nvm use default
@@ -28,6 +28,7 @@ From: dsarchive/dsa_common
     mv /opt /root_opt
 
     # install apptainer
+    apt update
     apt install -y software-properties-common
     add-apt-repository -y ppa:apptainer/ppa
     apt update
@@ -48,3 +49,4 @@ From: dsarchive/dsa_common
     echo " - Copying docker image's opt (/root_opt) to user mounted /opt"
     echo " - Make sure you're mounting a local directory to /opt"
     cp -r /root_opt/* /opt
+    /opt/venv/bin/pip install pyaml

@@ -111,13 +111,24 @@ worker:
   # shell:
   #   - pip -V
   #   - python -V
-  pip:
-    # - -e /opt/local_girder_worker
-    - --force-reinstall -e /opt/local_girder_worker
-    - -e /opt/local_girder_worker/girder_worker/singularity
-    - -e /opt/local_girder_worker/girder_worker/slurm
-    - -e /opt/local_slicer_cli_web
-    - -e /opt/local_slicer_cli_web/slicer_cli_web/singularity
+  # pip:
+  #   - -e /opt/local_girder_worker
+  #   - --force-reinstall -e /opt/local_girder_worker
+  #   - -e /opt/local_girder_worker/girder_worker/singularity
+  #   - -e /opt/local_girder_worker/girder_worker/slurm
+  #   - -e /opt/local_slicer_cli_web
+  #   - -e /opt/local_slicer_cli_web/slicer_cli_web/singularity
+  shell:
+    - rm -rf /opt/girder_worker /opt/slicer_cli_web
+    - git clone --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
+    - git clone --branch slicer-cli-web-singularity https://github.com/willdunklin/slicer_cli_web.git /opt/slicer_cli_web
+    # - cp /opt/worker.dist.cfg /opt/girder_worker/girder_worker/worker.dist.cfg
+    - pip install -e /opt/girder_worker
+    - pip install -e /opt/girder_worker/girder_worker/singularity
+    - pip install -e /opt/girder_worker/girder_worker/slurm
+    - pip install -e /opt/slicer_cli_web
+    - pip install -e /opt/slicer_cli_web/slicer_cli_web/singularity
+
   # Run additional shell commands in the worker before start
   # shell:
   #   - pip -V
@@ -126,8 +137,18 @@ worker:
   #   - pip freeze | grep worker
   #   - ls
 pip:
- - -e /opt/local_girder_worker
- - -e /opt/local_girder_worker/girder_worker/singularity
- - -e /opt/local_girder_worker/girder_worker/slurm
- - -e /opt/local_slicer_cli_web
- - -e /opt/local_slicer_cli_web/slicer_cli_web/singularity
+#  - -e /opt/local_girder_worker
+#  - -e /opt/local_girder_worker/girder_worker/singularity
+#  - -e /opt/local_girder_worker/girder_worker/slurm
+#  - -e /opt/local_slicer_cli_web
+#  - -e /opt/local_slicer_cli_web/slicer_cli_web/singularity
+shell:
+ - rm -rf /opt/girder_worker /opt/slicer_cli_web
+ - git clone --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
+ - git clone --branch slicer-cli-web-singularity https://github.com/willdunklin/slicer_cli_web.git /opt/slicer_cli_web
+#  - cp /opt/worker.dist.cfg /opt/girder_worker/girder_worker/worker.dist.cfg
+ - pip install -e /opt/girder_worker
+ - pip install -e /opt/girder_worker/girder_worker/singularity
+ - pip install -e /opt/girder_worker/girder_worker/slurm
+ - pip install -e /opt/slicer_cli_web
+ - pip install -e /opt/slicer_cli_web/slicer_cli_web/singularity
