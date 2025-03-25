@@ -14,29 +14,27 @@ apptainer instance stop -a || echo "No instances stopped"
 apptainer instance start \
     --bind ./db:/data/db \
     SIF/mongodb.sif dsa-mongodb-1
-    # --bind /blue/pinaki.sarder/rc-svc-pinaki.sarder-web/db:/data/db \
-    # --no-mount /cmsuf \
 
 apptainer instance start \
     --env RABBITMQ_DEFAULT_USER=guest \
     --env RABBITMQ_DEFAULT_PASS=guest \
     --bind ./rabbitmqdata:/var/lib/rabbitmq/ \
     SIF/rabbitMQ.sif dsa-rabbitMQ-1
-    # --no-mount /cmsuf \
 
 apptainer instance start SIF/memcached.sif dsa-memcached-1
-    # --no-mount /cmsuf 
 
-# clean girder opt
-find ./opt/* -not -path "*opt/local_*" -not -path "*opt/.gitignore" -delete
+# # clean girder opt
+# find ./opt/* -not -path "*opt/local_*" -not -path "*opt/.gitignore" -delete
 
-# set up worker opt
-rm -rf ./worker_opt/*
-cp -r ./opt/* ./worker_opt/
+# # set up worker opt
+# # rm -rf ./worker_opt/*
+# # cp -r ./opt/* ./worker_opt/
+rm -rf ./tmp/*
+TMP_OPT_GIRDER=$(mktemp -d --tmpdir=./tmp)
+TMP_OPT_WORKER=$(mktemp -d --tmpdir=./tmp)
 
 ## Start Girder and Worker
 apptainer instance start \
-    --bind ./blue:/blue/pinaki.sarder/rc-svc-pinaki.sarder-web \
     --bind ./assetstore:/assetstore \
     --bind ./logs:/logs \
     --bind ./tmp:/tmp \
@@ -45,8 +43,11 @@ apptainer instance start \
     --bind ./start_girder.sh:/opt/start_girder.sh \
     --bind ./provision.yaml:/opt/provision.yaml \
     --bind ../dsa/provision.py:/opt/provision.py \
-    --bind ./opt:/opt \
+    --bind $TMP_OPT_GIRDER:/opt \
     SIF/dsa_common.sif test-dsarchive
+    # --bind ./opt:/opt \
+
+    # --bind ./blue:/blue/pinaki.sarder/rc-svc-pinaki.sarder-web \
     # --no-mount /cmsuf \
     # --bind /blue/pinaki.sarder/rc-svc-pinaki.sarder-web/assetstore:/assetstore \
     # --bind /blue/pinaki.sarder/rc-svc-pinaki.sarder-web/logs:/logs \
@@ -56,13 +57,15 @@ apptainer instance start \
     # --bind /var/run/munge:/run/munge \
 
 apptainer instance start \
-    --bind ./blue:/blue/pinaki.sarder/rc-svc-pinaki.sarder-web \
     --bind ./logs:/logs \
-    --bind ./worker_opt:/opt \
     --bind ./start_worker.sh:/opt/start_worker.sh \
     --bind ./provision.yaml:/opt/provision.yaml \
     --bind ../dsa/provision.py:/opt/provision.py \
+    --bind $TMP_OPT_WORKER:/opt \
     SIF/dsa_common.sif dsa-worker-1
+    # --bind ./worker_opt:/opt \
+
+    # --bind ./blue:/blue/pinaki.sarder/rc-svc-pinaki.sarder-web \
     # --no-mount /cmsuf \
     # --bind /blue/pinaki.sarder/rc-svc-pinaki.sarder-web/logs:/logs \
     # --bind /apps \
@@ -79,13 +82,15 @@ apptainer run \
     --env SIF_IMAGE_PATH="/home/local/KHQ/will.dunklin/work/digital_slide_archive/devops/singularity-minimal/tmp/sifs/" \
     --env TMPDIR=/home/local/KHQ/will.dunklin/work/digital_slide_archive/devops/singularity-minimal/tmp \
     --env LOGS=/home/local/KHQ/will.dunklin/work/digital_slide_archive/devops/singularity-minimal/logs \
-    --env PATH=/opt/slurm/bin:$PATH \
-    --env SLURM_QOS=pinaki.sarder-dsa \
-    --env SLURM_ACCOUNT=pinaki.sarder-dsa \
     --env DSA_PROVISION_YAML=/opt/provision.yaml \
     --env GIRDER_WORKER_BROKER=amqp://guest:guest@localhost:5672/ \
     --env GIRDER_WORKER_BACKEND=rpc://guest:guest@localhost:5672/  \
     instance://dsa-worker-1 /opt/start_worker.sh &
+
+    # --env PATH=/opt/slurm/bin:$PATH \
+    # --env SLURM_QOS=pinaki.sarder-dsa \
+    # --env SLURM_ACCOUNT=pinaki.sarder-dsa \
+
 
 sleep 30
 
@@ -94,7 +99,8 @@ apptainer run \
     --env TMPDIR=/home/local/KHQ/will.dunklin/work/digital_slide_archive/devops/singularity-minimal/tmp \
     --env LOGS=/home/local/KHQ/will.dunklin/work/digital_slide_archive/devops/singularity-minimal/logs \
     --env GIRDER_SETTING_WORKER_API_URL=http://0.0.0.0:8101/api/v1 \
-    --env PATH=/opt/slurm/bin:$PATH \
-    --env SLURM_QOS=pinaki.sarder-dsa \
-    --env SLURM_ACCOUNT=pinaki.sarder-dsa \
     instance://test-dsarchive bash # /opt/start_girder.sh
+
+    # --env PATH=/opt/slurm/bin:$PATH \
+    # --env SLURM_QOS=pinaki.sarder-dsa \
+    # --env SLURM_ACCOUNT=pinaki.sarder-dsa \

@@ -1,5 +1,7 @@
 #!/bin/bash
 set -x
+. /opt/venv/bin/activate
+pip install pyaml
 # Ensures that the main process runs as the DSA_USER and is part of both that
 # group and the docker group.  Fail if DSA_USER is not specified.
 # if [[ -z "$DSA_USER" ]]; then
