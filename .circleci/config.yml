@@ -353,6 +353,23 @@ jobs:
       - run:
           name: Scan the local image with trivy; report low and medium vulnerabilities, but don't fail
           command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
+  check-for-updates:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - last-commits-{{ .Branch }}-{{ .Environment.CIRCLECI_WORKFLOW_ID }}
+            - last-commits-{{ .Branch }} # Fallback to the most recent cache for the branch
+      - run:
+          name: Check for updates in dependent repos
+          command: |
+            ./.circleci/check_updates.sh
+      - save_cache:
+          paths:
+            - .last_commits
+          key: last-commits-{{ .Branch }}-{{ .Environment.CIRCLECI_WORKFLOW_ID }}
 
 workflows:
   version: 2
@@ -482,47 +499,12 @@ workflows:
   periodic:
     triggers:
       - schedule:
-          # Run every Monday morning at 7 a.m.
-          cron: "0 7 * * 1"
+          # Run every morning at 7 a.m.
+          cron: "0 7 * * *"
           filters:
             branches:
               only:
                 - master
+                - check-updates
     jobs:
-      - docker-compose
-      - test-cli-common:
-          requires:
-            - docker-compose
-      - test-proxy-common:
-          requires:
-            - docker-compose
-      - test-girder-build-common:
-          requires:
-            - docker-compose
-      - test-histomicsui-common:
-          requires:
-            - docker-compose
-      - docker-compose-minimal
-      - docker-compose-with-dive-volview
-      - docker-compose-girder-5
-      - docker-compose-external-worker
-      - scan-docker:
-          requires:
-            - docker-compose
-      - docs
-      - publish-docker-common:
-          requires:
-            - docker-compose
-            - test-cli-common
-            - test-girder-build-common
-            - test-histomicsui-common
-            - test-proxy-common
-            - scan-docker
-      - publish-docker-common5:
-          requires:
-            - docker-compose-girder-5
-            # - test-cli-common
-            # - test-girder-build-common
-            # - test-histomicsui-common
-            # - test-proxy-common
-            # - scan-docker
+      - check-for-updates
