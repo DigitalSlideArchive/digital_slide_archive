@@ -113,5 +113,5 @@ To make your Docker image CLI compatible with `girder_worker_slurm`, add the `LA
 
 - [Girder Worker Slurm](https://github.com/girder/girder_worker/tree/slurm/girder_worker/slurm) plugin
 - [Girder Worker Singularity](https://github.com/girder/girder_worker/tree/slurm/girder_worker/singularity) plugin
-- [Slicer CLI Web Singularity](https://github.com/girder/slicer_cli_web/tree/slicer-cli-web-singularity/slicer_cli_web/singularity) plugin
+- [Slicer CLI Web Singularity](https://github.com/willdunklin/slicer_cli_web/tree/slicer-cli-web-singularity/slicer_cli_web/singularity) plugin
 - [Apptainer](https://apptainer.org/docs/admin/main/installation.html) installation docs
