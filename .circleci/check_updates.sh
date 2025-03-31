@@ -32,6 +32,7 @@ get_latest_commit() {
 
 if [ -f "$LAST_COMMITS_FILE" ]; then
   source "$LAST_COMMITS_FILE"
+  cat "$LAST_COMMITS_FILE"
 fi
 
 UPDATES_FOUND=false
