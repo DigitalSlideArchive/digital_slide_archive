@@ -136,6 +136,11 @@ jobs:
             diff /tmp/defaults.yaml /tmp/provfile.yaml && true
             if [[ $(diff /tmp/defaults.yaml /tmp/provfile.yaml | tail -n '+5') ]]; then false; fi
       - run:
+          name: Capture current dependency commits
+          command: |
+            pip install requests
+            python .circleci/check_updates.py --out=/tmp/last_build_commits.json
+      - run:
           name: Run docker compose build
           command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose build girder'
           working_directory: ./devops/dsa
@@ -162,10 +167,10 @@ jobs:
           path: ./dsa_common.tar
       - run:
           name: Update modules
-          command: pip install -U pip requests 'urllib3<2'
+          command: pip install -U pip requests
       - run:
           name: Install modules needed for testing
-          command: pip install girder-client six setuptools
+          command: pip install girder-client setuptools
       - run:
           name: Wait for girder to respond and be configured
           command: |
@@ -178,6 +183,10 @@ jobs:
       - run:
           name: Test the instance
           command: python devops/dsa/utils/cli_test.py dsarchive/histomicstk:latest --user=admin --password=password --test
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - last_build_commits.json
   docker-compose-minimal:
     working_directory: ~/project
     machine:
@@ -289,6 +298,20 @@ jobs:
               export DATE_TAG=`date '+%Y%m%d'`
               docker tag dsarchive/dsa_common:latest "dsarchive/dsa_common:$DATE_TAG"
               docker push "dsarchive/dsa_common:$DATE_TAG"
+      - run:
+          name: Store successful build commit references
+          command: |
+            if [ $? -eq 0 ]; then
+              # Docker push was successful, now save the commit hashes
+              git checkout -b build-tracking origin/build-tracking || (git checkout --orphan build-tracking && git rm --cached -r .)
+              cp /tmp/workspace/last_build_commits.json ./last_build_commits.json
+              git config user.email "ci@circleci.com"
+              git config user.name "CircleCI"
+              git add last_build_commits.json
+              git commit -m "Update successful build references [skip ci]"
+              git push -u https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
+            fi
+
   publish-docker-common5:
     working_directory: ~/project
     machine:
@@ -355,21 +378,14 @@ jobs:
           command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
   check-for-updates:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.13-slim
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - last-commits-{{ .Branch }}-{{ .Environment.CIRCLECI_WORKFLOW_ID }}
-            - last-commits-{{ .Branch }} # Fallback to the most recent cache for the branch
       - run:
           name: Check for updates in dependent repos
           command: |
-            ./.circleci/check_updates.sh
-      - save_cache:
-          paths:
-            - .last_commits
-          key: last-commits-{{ .Branch }}-{{ .Environment.CIRCLECI_WORKFLOW_ID }}
+            pip install requests
+            python .circleci/check_updates.py --last=https://raw.githubusercontent.com/DigitalSlideArchive/digital_slide_archive/build-tracking/last_build_commits.json --trigger || true
 
 workflows:
   version: 2
