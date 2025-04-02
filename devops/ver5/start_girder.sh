@@ -50,9 +50,9 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   while [[ -e /proc/$(cat /tmp/girder_build.pid) && ! -f /tmp/girder_build_done ]]; do sleep 0.1; done &&
   true; fi &&
   echo ==== Starting Local Worker === &&
-  celery -A girder_worker.app worker -Q local &
+  celery -A girder_worker.app worker -Q local --concurrency 4 &
   echo ==== Starting Girder === &&
-  # girder serve --host 0.0.0.0 2> >(tee -a /logs/error.log | tee -a /logs/info.log >&2) | tee -a /logs/info.log &
+  # gunicorn --timeout 0 --max-requests 100 --graceful-timeout 300 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
   gunicorn --timeout 0 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
   girder_pid=\$! &&
   echo ==== Postprovisioning === &&
