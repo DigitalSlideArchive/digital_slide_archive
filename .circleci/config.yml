@@ -308,8 +308,7 @@ jobs:
               git config user.email "ci@circleci.com"
               git config user.name "CircleCI"
               git add last_build_commits.json
-              git commit -m "Update successful build references [skip ci]"
-              git push -u https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
+              git commit -m "Update successful build references [skip ci]" && git push -u https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git || true
             fi
 
   publish-docker-common5:
