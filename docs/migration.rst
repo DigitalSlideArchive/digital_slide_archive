@@ -49,4 +49,4 @@ If this isn't the current version of Mongo, you can upgrade the database's compa
 
 would upgrade to Mongo 4.2.
 
-You can start the Digital Slide Archive with an older version of Mongo by specifying the version in your ``docker-compose.override.yaml`` file as part of the mongo container's image name.  If your database is old enough, you might need to move one major version at a time, adjusting the compatibility version each time.
+You can start the Digital Slide Archive with an older version of Mongo by specifying the version in your ``docker-compose.override.yml`` file as part of the mongo container's image name.  If your database is old enough, you might need to move one major version at a time, adjusting the compatibility version each time.
