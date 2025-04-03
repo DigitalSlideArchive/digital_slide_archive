@@ -171,7 +171,7 @@ For docker images that are published on public container registries, these can b
 
 Since private registries require authentication, pulling docker images from private registries will not work in the reference deployment without either logging into the running docker container (for both the main Girder container and for any and all girder_worker containers) and authenticating via the ``docker login <private_registry>`` OR by authenticating on the base operating system and passing through the authentication as part of the provisioning process.
 
-An example of passing through the authentication using docker compose is commented in the default docker-compose.yaml file.  In this case, use ``docker login`` on the base machine running the DSA and on any worker machines.  Use the appropriate override:
+An example of passing through the authentication using docker compose is commented in the default docker-compose.yml file.  In this case, use ``docker login`` on the base machine running the DSA and on any worker machines.  Use the appropriate override:
 
 ``docker-compose.override.yml``::
 
