@@ -1,0 +1,17 @@
+version: 2.1
+
+workflows:
+  version: 2
+  null-workflow:
+    jobs:
+      - null-job:
+          filters:
+            branches:
+              ignore: /.*/
+
+jobs:
+  null-job:
+    docker:
+      - image: busybox:latest  # A minimal image - just needs *something*
+    steps:
+      - run: echo "This branch is intentionally empty."
