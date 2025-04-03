@@ -21,7 +21,7 @@ The default installation of the Digital Slide Archive is on a single computer. T
 
 Image and other data files, the database, and log files are all stored on the local file system. Data files can also be stored or imported from external assetstores, such as Amazon S3.
 
-When ``docker compose`` is used for installation with the default ``docker-compose.yaml`` file in the ``devops/dsa`` folder, a set of five docker containers are started to provide all of the services needed by the DSA. When an image analysis task is performed through HistomicsUI or the API, e.g., detecting nuclei on a whole slide image using the HistomicsTK toolkit, an additional docker container is created to run the task. This container only exists as long as is necessary for the image analysis. The results are stored back to the database and file assetstore.
+When ``docker compose`` is used for installation with the default ``docker-compose.yml`` file in the ``devops/dsa`` folder, a set of five docker containers are started to provide all of the services needed by the DSA. When an image analysis task is performed through HistomicsUI or the API, e.g., detecting nuclei on a whole slide image using the HistomicsTK toolkit, an additional docker container is created to run the task. This container only exists as long as is necessary for the image analysis. The results are stored back to the database and file assetstore.
 
 ---
 
