@@ -24,6 +24,9 @@ DEPENDENT_REPOS = [
     'girder/large_image/branches/girder-5',
     'DigitalSlideArchive/HistomicsUI/branches/girder-5',
     'DigitalSlideArchive/girder_assetstore/branches/girder-5',
+
+    # both
+    'girder/large_image_wheels/branches/gh-pages',
 ]
 
 
