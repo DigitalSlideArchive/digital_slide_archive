@@ -45,16 +45,13 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   python /opt/digital_slide_archive/devops/dsa/provision.py -v --main &&
   echo ==== Creating FUSE mount === &&
   (girder mount ${DSA_GIRDER_MOUNT_OPTIONS%%:-} /fuse || true) &&
-  if [[ -f /tmp/girder_build.pid ]]; then
-  echo ==== Wait for girder build to finish === &&
-  while [[ -e /proc/$(cat /tmp/girder_build.pid) && ! -f /tmp/girder_build_done ]]; do sleep 0.1; done &&
-  true; fi &&
-  echo ==== Starting Local Worker === &&
+  echo ==== Starting Local Worker === ;
   celery -A girder_worker.app worker -Q local --concurrency 4 &
-  echo ==== Starting Girder === &&
+  echo ==== Starting Girder === ;
   # gunicorn --timeout 0 --max-requests 100 --graceful-timeout 300 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
   gunicorn --timeout 0 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
   girder_pid=\$! &&
+  until curl --silent "http://localhost:8080/api/v1/system/version" >/dev/null 2>/dev/null; do echo -n .; sleep 1; done &&
   echo ==== Postprovisioning === &&
   python /opt/digital_slide_archive/devops/dsa/provision.py -v --post &&
   wait \${girder_pid}
