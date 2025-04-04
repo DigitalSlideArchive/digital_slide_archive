@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import configparser
 import json
 import logging
 import os
@@ -230,12 +229,26 @@ def get_slicer_images(imageList, adminUser, alwaysPull=False):
             gc = girder_client.GirderClient(apiUrl='http://localhost:8080/api/v1')
         except Exception:
             time.sleep(0.25)
-    gc.token = token
+    gc.token = str(token['_id'])
     job = gc.put('slicer_cli_web/docker_image', data={
         'name': json.dumps(imageList),
         'pull': 'true' if alwaysPull else 'false',
     })
     wait_for_job(gc, job)
+
+
+def wait_for_server():
+    import girder_client
+
+    gc = None
+    start = time.time()
+    while time.time() - start < 60:
+        try:
+            gc = girder_client.GirderClient(apiUrl='http://localhost:8080/api/v1')
+            gc.get('system/version')
+            break
+        except Exception:
+            time.sleep(0.25)
 
 
 def pip_install(packages):
@@ -367,6 +380,8 @@ def postprovision(opts):
     """
     from girder.models.user import User
 
+    wait_for_server()
+
     adminUser = User().findOne({'admin': True})
     images = []
     if getattr(opts, 'slicer-cli-image-pull', None):
@@ -416,14 +431,6 @@ def provision_worker(opts):
                 settings[mainkey] = getattr(opts, key)
     if not settings.get('rabbitmq-host'):
         return
-    conf = configparser.ConfigParser()
-    conf.read([settings['config']])
-    conf.set('celery', 'broker', 'amqp://%s:%s@%s/' % (
-        settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
-    conf.set('celery', 'backend', 'rpc://%s:%s@%s/' % (
-        settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
-    with open(settings['config'], 'w') as fptr:
-        conf.write(fptr)
 
 
 def merge_environ_opts(opts):
@@ -760,7 +767,7 @@ if __name__ == '__main__':  # noqa
                 logger.warning('Could not update old source names.')
         provision(opts)
     if getattr(opts, 'portion', None) in {'post', None}:
-        # Run provisioning that has to happen before configuring the server.
+        # Run provisioning that has to happen after the server is running
         postprovision(opts)
         if getattr(opts, 'portion', None) == 'post':
             sys.exit(0)
