@@ -2,14 +2,14 @@
   "girder/girder/branches/master": "e8941dfc68a46baef1b781b381af5c9904f5c12e",
   "girder/girder_worker/branches/master": "786be3e8ffc35cff1d5c280659abfaa964365323",
   "girder/girder_worker_utils/branches/master": "d7cdb4cf5fa8b1f3b30d7b94117df63157113c5f",
-  "girder/large_image/branches/master": "67a26ee25d586584c4c7128da3326d013c6cf82a",
+  "girder/large_image/branches/master": "0d8273a354ae70f65dc5f1f7967c65cb125117c1",
   "girder/slicer_cli_web/branches/master": "e40d1e1ebb501f81ac43789fc7afea64b14b1758",
   "DigitalSlideArchive/HistomicsUI/branches/master": "840cc3081547dbc5fc6ed18356ef489bcd89b11a",
   "DigitalSlideArchive/import-tracker/branches/main": "66b275d33c5764eb6b18bcfb0430ae5d1e3be76d",
   "DigitalSlideArchive/girder_assetstore/branches/main": "dbf539d8212de175a7eb65fa78d17d380fe6e46d",
-  "girder/girder/branches/v4-integration": "443df9f478d0d4f859c6dcae34b0806daeeb391b",
+  "girder/girder/branches/v4-integration": "61d4ad2290237a82414bdf511b4df1583e96ddd0",
   "girder/large_image/branches/girder-5": "fefc0b98bdb69a3e5eb96724324fc53b4c1165a9",
   "DigitalSlideArchive/HistomicsUI/branches/girder-5": "d3f12962a8087c56311a90097bf4da2c18f0a5dd",
   "DigitalSlideArchive/girder_assetstore/branches/girder-5": "f860fef09e0530965e03f0d43fd3d87651628755",
-  "girder/large_image_wheels/branches/gh-pages": "1b208dace04ccadc7be11d8f7131edd67e53cba4"
+  "girder/large_image_wheels/branches/gh-pages": "8e68d0b611d1804f91fd3e84b7974ff7bfd038d1"
 }
