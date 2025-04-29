@@ -139,7 +139,7 @@ RUN true && \
     pip install --no-cache-dir -e . && \
     cd /opt/girder/plugins/slicer_cli_web && \
     pip install --no-cache-dir -e . && \
-    cd girder_slicer_cli_web/web_client && \
+    cd slicer_cli_web/web_client && \
     npm ci && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
