@@ -88,10 +88,10 @@ jobs:
           command: |
             curl --silent 'http://127.0.0.1/dsa/'
             curl --silent 'http://127.0.0.1/dsa/api/v1/system/version'
-            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' | head || true
             curl --silent 'http://127.0.0.1/dsa/' | grep '/dsa/static/built/plugins/large_image' | grep -q '/dsa/static/built/plugins/large_image' && echo 'correct references'
             curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | grep 'release' | grep -q 'release' && echo 'reports version'
-            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' | grep 'createRenderer' | grep -q 'createRenderer' && echo 'can reach geojs'
+            curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' > output.js
+            grep -q 'createRenderer' output.js && echo 'can reach geojs'
   test-girder-build-common:
     working_directory: ~/project
     machine:
