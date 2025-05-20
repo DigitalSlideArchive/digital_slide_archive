@@ -5,6 +5,10 @@
 
 # In node-pkg: this is only used during the build and not after start
 
+# In python: this only applies to 3.8 which is bundled for ease of testing and
+# in case someone wants to use the older isyntax reader.  It is not directly
+# exposed
+
 # In ubuntu: these will be addressed by Ubuntu and shouldn't directly affect
 # the way we run
 
@@ -22,11 +26,5 @@ CVE-2022-25883
 CVE-2024-21538
 # HIGH: node-pkg - node-ip: Incomplete fix for CVE-2023-42282
 CVE-2024-29415
-# HIGH: ubuntu - kernel: HID: core: zero-initialize the report buffer
-CVE-2024-50302
-# HIGH: ubuntu - kernel: media: dvbdev: prevent the risk of out of memory acc
-CVE-2024-53063
-# HIGH: ubuntu - kernel: netlink: terminate outstanding dump on socket close
-CVE-2024-53140
-# HIGH: ubuntu - kernel: jfs: array-index-out-of-bounds fix in dtReadFirst
-CVE-2024-56598
+# HIGH: python-pkg - setuptools is a package that allows users to download, build
+CVE-2025-47273
