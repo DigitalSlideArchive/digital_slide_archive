@@ -2,6 +2,7 @@
 
 import argparse
 import configparser
+import datetime
 import logging
 import os
 import subprocess
@@ -309,10 +310,21 @@ def clean_delete_locks():
         if assetstore['type'] != AssetstoreType.FILESYSTEM:
             continue
         rootpath = assetstore['root']
-        cmd = ['find', rootpath, '-name', '*.deleteLock', '-delete']
-        logger.info(f'Removing old delete locks: {cmd}')
+        cmd = ['find', rootpath, '-type', 'f', '-name', '*.deleteLock', '-not',
+               '-newermt', (
+                   datetime.datetime.now().astimezone() -
+                   datetime.timedelta(hours=3)).strftime('%Y-%m-%dT%H:%M:%S'),
+               '-delete']
+        logger.info(f'Removing old delete locks in the background: {cmd}')
         try:
-            subprocess.check_call(cmd, shell=False)
+            # Running this in the background adds a slight chance of a race
+            # condition, which, in turn, adds a slight chance that there could
+            # be an issue.  Specifically, if find locates an old deleteLock,
+            # that deleteLock could be freshened before the delete command has
+            # a chance to run.  This is deemed an acceptable risk
+            subprocess.Popen(
+                cmd, stdin=subprocess.DEVNULL, stdout=None, stderr=None,
+                start_new_session=True, close_fds=True)
         except Exception:
             logger.info(f'Failed trying to remove old delete locks: {cmd}')
 
