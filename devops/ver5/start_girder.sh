@@ -48,8 +48,8 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   echo ==== Starting Local Worker === ;
   celery -A girder_worker.app worker -Q local --concurrency 4 &
   echo ==== Starting Girder === ;
-  # gunicorn --timeout 0 --max-requests 100 --graceful-timeout 300 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
-  gunicorn --timeout 0 girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
+  # gunicorn --timeout 0 --worker-class gevent girder.wsgi:app --bind=0.0.0.0:8080 --workers=4 --preload &
+  gunicorn girder.wsgi:app --bind=0.0.0.0:8080 --workers=12 --preload &
   girder_pid=\$! &&
   until curl --silent "http://localhost:8080/api/v1/system/version" >/dev/null 2>/dev/null; do echo -n .; sleep 1; done &&
   echo ==== Postprovisioning === &&

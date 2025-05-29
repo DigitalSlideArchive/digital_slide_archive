@@ -11,6 +11,11 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 # Papers and Publications list
 # =================================
 publications:
+  - title: "ComPRePS 2.0: Enabling Massive-Scale Distributed Computing on High-Performance Computing Cluster for Histopathological Data Processing."
+    full-citation: "Katari Chaluva Kumar, Suhas, Anindya S. Paul, Haitham Abdelazim, Will Dunklin, David Manthey, Oleksandr Moskalenko, Sayat Mimar, Erik Deumens, and Pinaki Sarder. 2025. “ComPRePS 2.0: Enabling Massive-Scale Distributed Computing on High-Performance Computing Cluster for Histopathological Data Processing.” Edited by John E. Tomaszewski and Aaron D. Ward. Medical Imaging 2025: Digital and Computational Pathology. SPIE."
+    DOI_link: https://doi.org/10.1117/12.3048195
+    link: https://doi.org/10.1117/12.3048195
+    DOI: 10.1117/12.3048195
   - title: "Efficiently Writing and Visualizing Many-Dimension Large Images."
     full-citation: "Haley, Anne, David Manthey, Lee Cooper, and David Gutman. 2024. “Poster Presentations: Efficiently Writing and Visualizing Many-Dimension Large Images.” Digital Pathology & AI Congress, May 7-8, 2024."
     link: ../assets/pdfs/Poster2024DigPathAI.pdf
