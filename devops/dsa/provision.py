@@ -192,7 +192,6 @@ def get_slicer_images(imageList, adminUser, alwaysPull=False):
     """
     import threading
 
-    from girder import logger
     from girder.models.setting import Setting
     from girder_jobs.constants import JobStatus
     from girder_jobs.models.job import Job
