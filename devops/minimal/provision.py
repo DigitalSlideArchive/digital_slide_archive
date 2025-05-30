@@ -227,8 +227,7 @@ def get_slicer_images(imageList, adminUser, alwaysPull=False):
         job = Job().load(id=job['_id'], user=adminUser, includeLog=True)
         if 'log' in job:
             while logpos < len(job['log']):
-                if 'Pulling' not in job['log'][logpos] or '%' not in job['log'][logpos]:
-                    logger.info(job['log'][logpos].rstrip())
+                logger.info(job['log'][logpos].rstrip())
                 logpos += 1
     t.join()
     if 'log' not in job:
