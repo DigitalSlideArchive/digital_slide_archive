@@ -8,8 +8,8 @@
   "DigitalSlideArchive/import-tracker/branches/main": "66b275d33c5764eb6b18bcfb0430ae5d1e3be76d",
   "DigitalSlideArchive/girder_assetstore/branches/main": "dbf539d8212de175a7eb65fa78d17d380fe6e46d",
   "girder/girder/branches/v4-integration": "812d1e47cf9cc411af060cf76ca9765ee74b295b",
-  "girder/large_image/branches/girder-5": "9c8c128aee80db090a9a7541ca40e5e264358d7c",
-  "DigitalSlideArchive/HistomicsUI/branches/girder-5": "3cd231a8dc2c726380a49e98eccf6d5dbfab49a7",
+  "girder/large_image/branches/girder-5": "0d4084e388a204df74060c2aae353c9247b61227",
+  "DigitalSlideArchive/HistomicsUI/branches/girder-5": "f1a147cd510091c320984137c16b3720fbec9ed3",
   "DigitalSlideArchive/girder_assetstore/branches/girder-5": "f860fef09e0530965e03f0d43fd3d87651628755",
   "girder/large_image_wheels/branches/gh-pages": "02b9b43919266cac487bd97f9aa28fdb8e5138d2"
 }
