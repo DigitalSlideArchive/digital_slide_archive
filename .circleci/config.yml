@@ -107,6 +107,7 @@ jobs:
     working_directory: ~/project
     machine:
       image: ubuntu-2404:current
+    resource_class: large
     steps:
       - checkout
       - usecommondocker
@@ -114,7 +115,7 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=2 tox -e lint,lintclient,py38,py312'
+            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py39,py313'
   docker-compose:
     working_directory: ~/project
     machine:
