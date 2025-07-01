@@ -14,6 +14,8 @@
 
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untr
 CVE-2024-47554
+# HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
+CVE-2025-52999
 # HIGH: node-pkg - nodejs-ansi-regex: Regular expression denial of service (ReD
 CVE-2021-3807
 # HIGH: node-pkg - http-cache-semantics: Regular Expression Denial of Service (
@@ -26,5 +28,3 @@ CVE-2024-21538
 CVE-2024-29415
 # HIGH: python-pkg - setuptools is a package that allows users to download, build
 CVE-2025-47273
-# HIGH: ubuntu - kernel: RDMA/erdma: Prevent use-after-free in erdma_accept_n
-CVE-2025-22088
