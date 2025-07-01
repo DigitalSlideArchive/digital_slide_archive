@@ -10,6 +10,6 @@ echo -e "Before running, please edit environment variables per README.md instruc
 TMP=/slurmshare/test-dsa-slurm/tmp \
     SIF_IMAGE_PATH="$CURRENT_DIR/../SIF" \
     LOGS="$CURRENT_DIR/../logs" \
-    GIRDER_WORKER_SLURM_SUBMIT_SCRIPT="$CURRENT_DIR/lib/girder_worker/girder_worker/slurm/girder_worker_slurm/singluarity.slurm" \
+    GIRDER_WORKER_SLURM_SUBMIT_SCRIPT="$CURRENT_DIR/lib/girder_worker/girder_worker/slurm/girder_worker_slurm/singularity.slurm" \
     GW_DIRECT_PATHS=true \
     python -m girder_worker -l info -Ofair --prefetch-multiplier=1 --without-heartbeat --concurrency=2
