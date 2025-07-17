@@ -28,3 +28,5 @@ CVE-2024-21538
 CVE-2024-29415
 # HIGH: python-pkg - setuptools is a package that allows users to download, build
 CVE-2025-47273
+# HIGH: ubuntu - kernel: ovl: fix UAF in ovl_dentry_update_reval by moving dp
+CVE-2025-21887
