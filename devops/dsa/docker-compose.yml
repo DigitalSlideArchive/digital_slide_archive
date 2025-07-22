@@ -26,18 +26,21 @@ services:
     environment:
       DSA_USER: ${DSA_USER:-}
       DSA_PROVISION_YAML: ${DSA_PROVISION_YAML:-/opt/digital_slide_archive/devops/dsa/provision.yaml}
-      # Mount options can be used to, for instance, add diskcache (e.g.,
-      #  "-o diskcache,diskcache_size_limit=2147483648")
+      #   Mount options can be used to, for instance, add diskcache (e.g.,
+      #    "-o diskcache,diskcache_size_limit=2147483648")
       DSA_GIRDER_MOUNT_OPTIONS: ${DSA_GIRDER_MOUNT_OPTIONS:-}
-      # You can also set girder settings here:
+      #   You can also set girder settings here:
       # GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
       # GIRDER_SETTING_HISTOMICSUI_LOGIN_SESSION_EXPIRY_MINUTES: 15
-      # If you want to authorize docker image repositories on the host machine
-      # and have them accessed without further authorization within Girder,
-      # you can specify a docker config location, mount it (see volumes,
-      # below), and do "docker login <repo>" on the host machine before
-      # starting the DSA.
+      #   If you want to authorize docker image repositories on the host
+      #   machine and have them accessed without further authorization within
+      #   Girder, you can specify a docker config location, mount it (see
+      #   volumes, below), and do "docker login <repo>" on the host machine
+      #   before starting the DSA.
       # DOCKER_CONFIG: /.docker
+      #   You can give worker jobs extra default scopes.  For instance to allow
+      #   jobs to schedule and check on other jobs, you can add:
+      # GIRDER_WORKER_JOB_GC_SCOPE: "jobs.rest.create_job,jobs.rest.list_job"
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
