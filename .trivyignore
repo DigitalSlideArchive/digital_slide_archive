@@ -3,12 +3,6 @@
 # In bioformats_package.jar: this shouldn't be an issue because of how xml is
 # used and because we don't pass urls to bioformats
 
-# In node-pkg: this is only used during the build and not after start
-
-# In python: this only applies to 3.8 which is bundled for ease of testing and
-# in case someone wants to use the older isyntax reader.  It is not directly
-# exposed
-
 # In ubuntu: these will be addressed by Ubuntu and shouldn't directly affect
 # the way we run
 
@@ -16,17 +10,5 @@
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
-# HIGH: node-pkg - nodejs-ansi-regex: Regular expression denial of service (ReD
-CVE-2021-3807
-# HIGH: node-pkg - http-cache-semantics: Regular Expression Denial of Service (
-CVE-2022-25881
-# HIGH: node-pkg - nodejs-semver: Regular expression denial of service
-CVE-2022-25883
-# HIGH: node-pkg - cross-spawn: regular expression denial of service
-CVE-2024-21538
-# HIGH: node-pkg - node-ip: Incomplete fix for CVE-2023-42282
-CVE-2024-29415
-# HIGH: python-pkg - setuptools is a package that allows users to download, build
-CVE-2025-47273
 # HIGH: ubuntu - kernel: ovl: fix UAF in ovl_dentry_update_reval by moving dp
 CVE-2025-21887
