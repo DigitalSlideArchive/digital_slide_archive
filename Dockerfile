@@ -122,6 +122,10 @@ RUN NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false NPM_CONFIG_AUDIT_LEVEL=high NPM
 
 # Install phantomjs for testing
 RUN npm install -g phantomjs-prebuilt --unsafe-perm && \
+    cd /root/.nvm/versions/node/v14.21.3/lib/node_modules/phantomjs-prebuilt && \
+    npm install 'form-data@^2.5.5' && \
+    cd /root/.nvm/versions/node/v14.21.3/lib/node_modules/phantomjs-prebuilt/node_modules/request && \
+    npm install 'form-data@^2.5.5' && \
     rm -rf /tmp/* ~/.npm
 
 # When running the worker, adjust some settings
