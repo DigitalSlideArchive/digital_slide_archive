@@ -70,10 +70,10 @@ services:
       - redis
       - rabbitmq
     command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
-    # logging:
-    #   options:
-    #     max-size: "10M"
-    #     max-file: "5"
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
       interval: 5m
@@ -181,6 +181,7 @@ services:
   redis:
     image: redis
     command: ["redis-server", "--maxmemory", "4096MB"]
+    restart: unless-stopped
     logging:
       options:
         max-size: "10M"
@@ -191,3 +192,16 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+  logging:
+    image: python:3.13-slim
+    user: ${DSA_USER:-PLEASE SET DSA_USER}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/logs
+      - ./start_dockerlog.py:/app/start_dockerlog.py
+    command: ["bash", "-c", "export PYTHONUSERBASE=/tmp && pip install --user docker && python -u /app/start_dockerlog.py"]
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
