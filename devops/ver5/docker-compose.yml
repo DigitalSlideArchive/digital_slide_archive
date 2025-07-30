@@ -199,8 +199,15 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./logs:/logs
       - ./start_dockerlog.py:/app/start_dockerlog.py
-    command: ["bash", "-c", "export PYTHONUSERBASE=/tmp && pip install --user docker && python -u /app/start_dockerlog.py"]
+    init: true
+    command: ["bash", "-c", "export PYTHONUSERBASE=/tmp && pip install --no-cache-dir --no-warn-script-location --user docker && python -u /app/start_dockerlog.py"]
     restart: unless-stopped
+    depends_on:
+      - girder
+      - worker
+      - redis
+      - mongodb
+      - rabbitmq
     logging:
       options:
         max-size: "10M"

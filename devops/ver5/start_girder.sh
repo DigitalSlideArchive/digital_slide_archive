@@ -53,7 +53,7 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   # gunicorn girder.wsgi:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8080 --workers=4 --preload &
   girder serve --host=0.0.0.0 &
   girder_pid=\$! &&
-  until curl --silent "http://localhost:8080/api/v1/system/version" >/dev/null 2>/dev/null; do echo -n .; sleep 1; done &&
+  until curl --silent http://localhost:8080/api/v1/system/version >/dev/null 2>/dev/null; do echo -n .; sleep 1; done &&
   echo ==== Postprovisioning === &&
   python /opt/digital_slide_archive/devops/dsa/provision.py -v --post &&
   wait \${girder_pid}
