@@ -180,7 +180,7 @@ services:
       start_period: 30s
   redis:
     image: redis
-    command: ["redis-server", "--maxmemory", "4096MB"]
+    command: ["redis-server", "--maxmemory", "4096MB", "--maxmemory-policy", "allkeys-lru"]
     restart: unless-stopped
     logging:
       options:
