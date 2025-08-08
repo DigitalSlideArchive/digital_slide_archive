@@ -30,6 +30,7 @@ services:
       CELERY_BROKER_URL: amqp://guest:guest@rabbitmq/
       CELERY_RESULT_BACKEND: rpc://guest:guest@rabbitmq/
       GIRDER_MONGO_URI: mongodb://mongodb:27017/girder?socketTimeoutMS=3600000
+      GIRDER_NOTIFICATION_REDIS_URL: redis://redis:6379
       GIRDER_SERVER_MODE: production
       GIRDER_SETTING_CORE_CACHE_ENABLED: true
       GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: true
