@@ -51,7 +51,7 @@ su $(id -nu ${DSA_USER%%:*}) -c "
   # You could run more workers which may increase speed, robustness, and memory
   # use
   # gunicorn girder.asgi:app --worker-args=\"--server-header=false --date-header=false\" --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8080 --workers=4 --preload &
-  girder serve --host=0.0.0.0 --mode production &
+  girder serve --host=0.0.0.0 &
   girder_pid=\$! &&
   until curl --silent http://localhost:8080/api/v1/system/version >/dev/null 2>/dev/null; do echo -n .; sleep 1; done &&
   echo ==== Postprovisioning === &&

@@ -3,12 +3,11 @@
 # In bioformats_package.jar: this shouldn't be an issue because of how xml is
 # used and because we don't pass urls to bioformats
 
-# In ubuntu: these will be addressed by Ubuntu and shouldn't directly affect
-# the way we run
+# The python cve already requires a compromised server to be exploitable
 
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untr
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
-# HIGH: ubuntu - kernel: ovl: fix UAF in ovl_dentry_update_reval by moving dp
-CVE-2025-21887
+# HIGH: python-pkg - pypi-future: Python future unintended import
+CVE-2025-50817
