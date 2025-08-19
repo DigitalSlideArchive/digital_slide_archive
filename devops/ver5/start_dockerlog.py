@@ -9,9 +9,10 @@ import time
 import docker
 
 LOG_DIR = '/logs'
-LOG_SIZE = 10 * 1024 ** 2
-LOG_COUNT = 6
-ATTACH_INTERVAL = 60
+LOG_SIZE = int(os.environ.get('DSA_LOGGER_LOG_SIZE', 10 * 1024 ** 2))
+# This excludes the "0th" log
+LOG_COUNT = int(os.environ.get('DSA_LOGGER_LOG_COUNT', 5))
+ATTACH_INTERVAL = float(os.environ.get('DSA_LOGGER_REATTACH_INTERVAL', 60))
 
 
 PrintLock = threading.Lock()
