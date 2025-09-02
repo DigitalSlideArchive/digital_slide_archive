@@ -11,3 +11,5 @@ CVE-2024-47554
 CVE-2025-52999
 # HIGH: python-pkg - pypi-future: Python future unintended import
 CVE-2025-50817
+# HIGH: ubuntu - kernel: ovl: fix UAF in ovl_dentry_update_reval by moving dp
+CVE-2025-21887
