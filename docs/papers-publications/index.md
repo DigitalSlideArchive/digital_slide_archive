@@ -10,7 +10,15 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 
 # Papers and Publications list
 # =================================
+
+[//]: # (keys are title, full-citation, DOI_link, link, DOI, PMID)
+
 publications:
+  - title: "HistomicsTK: A Python Toolkit for Pathology Image Analysis Algorithms."
+    full-citation: "Pourakpour, Fattaneh, Ákos Szölgyén, Ramin Nateghi, David A Gutman, David Manthey, and Lee AD Cooper. 2025. “HistomicsTK: A Python Toolkit for Pathology Image Analysis Algorithms.” SoftwareX 31 (September): 102318."
+    DOI_link: https://doi.org/10.1016/j.softx.2025.102318
+    link: https://doi.org/10.1016/j.softx.2025.102318
+    DOI: 10.1016/j.softx.2025.102318
   - title: "ComPRePS 2.0: Enabling Massive-Scale Distributed Computing on High-Performance Computing Cluster for Histopathological Data Processing."
     full-citation: "Katari Chaluva Kumar, Suhas, Anindya S. Paul, Haitham Abdelazim, Will Dunklin, David Manthey, Oleksandr Moskalenko, Sayat Mimar, Erik Deumens, and Pinaki Sarder. 2025. “ComPRePS 2.0: Enabling Massive-Scale Distributed Computing on High-Performance Computing Cluster for Histopathological Data Processing.” Edited by John E. Tomaszewski and Aaron D. Ward. Medical Imaging 2025: Digital and Computational Pathology. SPIE."
     DOI_link: https://doi.org/10.1117/12.3048195
