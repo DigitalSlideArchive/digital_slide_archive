@@ -42,6 +42,17 @@ commands:
           name: Wait for girder to respond and be configured
           command: |
             for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+  startcommon5:
+    description: Start containers for tests.
+    steps:
+      - run:
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose up -d'
+          working_directory: ./devops/ver5
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
 jobs:
   test-cli-common:
     working_directory: ~/project
@@ -54,6 +65,17 @@ jobs:
       - run:
           name: Run a cli test
           command: docker exec dsa-girder-1 bash -c "python /opt/digital_slide_archive/devops/dsa/utils/cli_test.py dsarchive/histomicstk:latest --test --username=admin --password=password"
+  test-cli-common-5:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2404:current
+    steps:
+      - checkout
+      - usecommon5docker
+      - startcommon5
+      - run:
+          name: Run a cli test
+          command: docker exec ver5-girder-1 bash -c "python /opt/digital_slide_archive/devops/dsa/utils/cli_test.py dsarchive/histomicstk:latest --test --username=admin --password=password"
   test-proxy-common:
     working_directory: ~/project
     machine:
@@ -92,6 +114,44 @@ jobs:
             curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | grep 'release' | grep -q 'release' && echo 'reports version'
             curl --silent 'http://127.0.0.1/dsa/static/built/plugins/large_image/extra/geojs.js' > output.js
             grep -q 'createRenderer' output.js && echo 'can reach geojs'
+  test-proxy-common-5:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2404:current
+    steps:
+      - checkout
+      - usecommon5docker
+      - run:
+          name: Install nginx
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y nginx
+      - run:
+          name: Start nginx
+          command: |
+            sudo cp .circleci/dsa_proxy.nginx /etc/nginx/sites-available/default
+            sudo service nginx restart
+      - run:
+          name: Run docker compose up
+          command: bash -c 'DSA_USER=$(id -u):$(id -g) docker compose -f docker-compose.yml -f ../../.circleci/docker-compose.proxy.yml up -d'
+          working_directory: ./devops/ver5
+      - run:
+          name: "Wait for girder to be available"
+          command: |
+            for f in `seq 120`; do curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | tac | tac | grep -q 'release' && break; sleep 1; done
+      - run:
+          name: "Check that we can read from the api and static assets in the proxy path locations"
+          # grep -q will close its connection as soon as it finds a match, but
+          # curl with throw an error 23 when that occurs.  Piping through a
+          # program that reads the entire contents avoids this problem.
+          # grepping unquietly first does this.
+          command: |
+            curl --silent 'http://127.0.0.1/dsa/'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/system/version'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/plugin_static_files' | grep -q  'large_image' && echo 'correct references'
+            curl --silent 'http://127.0.0.1/dsa/api/v1/system/version' | grep 'release' | grep -q 'release' && echo 'reports version'
+            curl --silent 'http://127.0.0.1/dsa/plugin_static/large_image/extra/geojs.js' > output.js
+            grep -q 'createRenderer' output.js && echo 'can reach geojs'
   test-girder-build-common:
     working_directory: ~/project
     machine:
@@ -116,6 +176,20 @@ jobs:
           name: Ensure that we can run tests
           command: |
             docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py39,py313'
+  test-histomicsui-common-5:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2404:current
+    resource_class: large
+    steps:
+      - checkout
+      - usecommon5docker
+      - startcommon5
+      - run:
+          name: Ensure that we can run tests
+          # remove git stash when large-image-girder-5 is default
+          command: |
+            docker exec ver5-girder-1 bash -lc 'git stash; PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py39,py313'
   docker-compose:
     working_directory: ~/project
     machine:
@@ -376,6 +450,25 @@ jobs:
       - run:
           name: Scan the local image with trivy; report low and medium vulnerabilities, but don't fail
           command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
+  scan-docker-5:
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Install trivy
+          command: |
+            apk add --update-cache --upgrade curl
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      - run:
+          name: Scan the local image with trivy; fail on high or critical vulnerabilities
+          command: trivy image --scanners vuln --input /tmp/workspace/dsa_common_5.tar --exit-code 1 --severity HIGH,CRITICAL --no-progress
+      - run:
+          name: Scan the local image with trivy; report low and medium vulnerabilities, but don't fail
+          command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common_5.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
   check-for-updates:
     docker:
       - image: python:3.13-slim
@@ -400,9 +493,27 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+      - test-cli-common-5:
+          requires:
+            - docker-compose-girder-5
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
       - test-proxy-common:
           requires:
             - docker-compose
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-proxy-common-5:
+          requires:
+            - docker-compose-girder-5
           filters:
             tags:
               only: /^v.*/
@@ -421,6 +532,15 @@ workflows:
       - test-histomicsui-common:
           requires:
             - docker-compose
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - test-histomicsui-common-5:
+          requires:
+            - docker-compose-girder-5
           filters:
             tags:
               only: /^v.*/
@@ -468,6 +588,12 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+      - scan-docker-5:
+          requires:
+            - docker-compose-girder-5
+          filters:
+            tags:
+              only: /^v.*/
       - publish-docker-common:
           requires:
             - test-cli-common
@@ -487,15 +613,14 @@ workflows:
                 - master
       - publish-docker-common5:
           requires:
-            # - test-cli-common
-            # - test-girder-build-common
-            # - test-histomicsui-common
-            # - test-proxy-common
+            - test-cli-common-5
+            - test-histomicsui-common-5
+            - test-proxy-common-5
             - docker-compose-girder-5
             # - docker-compose-minimal
             # - docker-compose-external-worker
             # - docker-compose-with-dive-volview
-            # - scan-docker
+            - scan-docker-5
           filters:
             tags:
               only: /^v.*/
