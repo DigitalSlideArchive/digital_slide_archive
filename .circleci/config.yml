@@ -304,6 +304,28 @@ jobs:
           name: Wait for girder to respond and be configured
           command: |
             for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
+  docker-compose-external-worker-5:
+    working_directory: ~/project
+    machine:
+      image: ubuntu-2404:current
+    steps:
+      - checkout
+      - run:
+          name: Use Python 3.13
+          command: |
+            pyenv versions
+            pyenv global 3.13
+            pip --version
+      - run:
+          name: Run docker compose up
+          command: |
+            bash -c 'DSA_USER=$(id -u):$(id -g) docker compose --profile server up --build -d'
+            bash -c 'DSA_USER=$(id -u):$(id -g) docker compose --profile worker up --build -d'
+          working_directory: ./devops/external-worker-5
+      - run:
+          name: Wait for girder to respond and be configured
+          command: |
+            for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
   docker-compose-with-dive-volview:
     working_directory: ~/project
     machine:
@@ -324,7 +346,7 @@ jobs:
           name: Wait for girder to respond and be configured
           command: |
             for f in `seq 120`; do if curl --silent http://127.0.0.1:8080/api/v1/system/version | grep 'release'; then break; fi; sleep 1; done
-  docker-compose-girder-5:
+  docker-compose-5:
     working_directory: ~/project
     machine:
       image: ubuntu-2404:current
@@ -386,7 +408,7 @@ jobs:
               git commit -m "Update successful build references [skip ci]" && git push -u https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git || true
             fi
 
-  publish-docker-common5:
+  publish-docker-common-5:
     working_directory: ~/project
     machine:
       image: ubuntu-2404:current
@@ -495,7 +517,7 @@ workflows:
                 - gh-pages
       - test-cli-common-5:
           requires:
-            - docker-compose-girder-5
+            - docker-compose-5
           filters:
             tags:
               only: /^v.*/
@@ -513,7 +535,7 @@ workflows:
                 - gh-pages
       - test-proxy-common-5:
           requires:
-            - docker-compose-girder-5
+            - docker-compose-5
           filters:
             tags:
               only: /^v.*/
@@ -540,7 +562,7 @@ workflows:
                 - gh-pages
       - test-histomicsui-common-5:
           requires:
-            - docker-compose-girder-5
+            - docker-compose-5
           filters:
             tags:
               only: /^v.*/
@@ -568,7 +590,7 @@ workflows:
             branches:
               ignore:
                 - gh-pages
-      - docker-compose-girder-5:
+      - docker-compose-5:
           filters:
             tags:
               only: /^v.*/
@@ -576,6 +598,13 @@ workflows:
               ignore:
                 - gh-pages
       - docker-compose-external-worker:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore:
+                - gh-pages
+      - docker-compose-external-worker-5:
           filters:
             tags:
               only: /^v.*/
@@ -590,7 +619,7 @@ workflows:
               only: /^v.*/
       - scan-docker-5:
           requires:
-            - docker-compose-girder-5
+            - docker-compose-5
           filters:
             tags:
               only: /^v.*/
@@ -600,7 +629,6 @@ workflows:
             - test-girder-build-common
             - test-histomicsui-common
             - test-proxy-common
-            - docker-compose
             - docker-compose-minimal
             - docker-compose-external-worker
             - docker-compose-with-dive-volview
@@ -611,14 +639,13 @@ workflows:
             branches:
               only:
                 - master
-      - publish-docker-common5:
+      - publish-docker-common-5:
           requires:
             - test-cli-common-5
             - test-histomicsui-common-5
             - test-proxy-common-5
-            - docker-compose-girder-5
             # - docker-compose-minimal
-            # - docker-compose-external-worker
+            - docker-compose-external-worker-5
             # - docker-compose-with-dive-volview
             - scan-docker-5
           filters:
