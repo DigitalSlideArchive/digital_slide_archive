@@ -50,6 +50,9 @@ services:
       # below), and do "docker login <repo>" on the host machine before
       # starting the DSA.
       # DOCKER_CONFIG: /.docker
+      # If you use a reverse proxy to serve girder from something other than
+      # the root of the url, specify it in the GIRDER_URL_ROOT:
+      # GIRDER_URL_ROOT: girder
     restart: unless-stopped
     # Set DSA_PORT to expose the interface on another port (default 8080).
     ports:
