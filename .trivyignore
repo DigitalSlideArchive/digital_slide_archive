@@ -7,3 +7,5 @@
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
+# HIGH: ubuntu - kernel: posix-cpu-timers: fix race between handle_posix_cpu_
+CVE-2025-38352

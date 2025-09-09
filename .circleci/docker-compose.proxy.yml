@@ -2,5 +2,7 @@
 version: '3'
 services:
   girder:
+    environment:
+      GIRDER_URL_ROOT: dsa
     volumes:
       - ../../.circleci/dsa_proxy.cfg:/etc/girder.cfg
