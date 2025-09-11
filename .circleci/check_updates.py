@@ -27,6 +27,7 @@ DEPENDENT_REPOS = [
 
     # both
     'girder/large_image_wheels/branches/gh-pages',
+    'OpenGeoscience/geojs/branches/master',
 ]
 
 
