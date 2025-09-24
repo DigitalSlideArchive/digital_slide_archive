@@ -175,7 +175,7 @@ jobs:
       - run:
           name: Ensure that we can run tests
           command: |
-            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py39,py313'
+            docker exec dsa-girder-1 bash -lc 'PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py310,py313'
   test-histomicsui-common-5:
     working_directory: ~/project
     machine:
@@ -189,7 +189,7 @@ jobs:
           name: Ensure that we can run tests
           # remove git stash when large-image-girder-5 is default
           command: |
-            docker exec ver5-girder-1 bash -lc 'git stash; PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py39,py313'
+            docker exec ver5-girder-1 bash -lc 'git stash; PYTEST_NUMPROCESSES=4 tox -e lint,lintclient,py310,py313'
   docker-compose:
     working_directory: ~/project
     machine:
