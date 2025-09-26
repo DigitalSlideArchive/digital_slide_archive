@@ -14,6 +14,12 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 [//]: # (keys are title, full-citation, DOI_link, link, DOI, PMID)
 
 publications:
+  - title: "FUSION: A Web-Based Application for in-Depth Exploration of Multi-Omics Data with Brightfield Histology."
+    full-citation: "Border, Samuel P., Ricardo Melo Ferreira, Nicholas Lucarelli, Suhas Katari Chaluva Kumar, Anindya S. Paul, David Manthey, Laura Barisoni, et al. 2025. “FUSION: A Web-Based Application for in-Depth Exploration of Multi-Omics Data with Brightfield Histology.” Nature Communications 16 (1)."
+    DOI_link: https://doi.org/10.1038/s41467-025-63050-9
+    link: https://www.nature.com/articles/s41467-025-63050-9
+    DOI: 10.1038/s41467-025-63050-9
+    PMID: 40998789
   - title: "HistomicsTK: A Python Toolkit for Pathology Image Analysis Algorithms."
     full-citation: "Pourakpour, Fattaneh, Ákos Szölgyén, Ramin Nateghi, David A Gutman, David Manthey, and Lee AD Cooper. 2025. “HistomicsTK: A Python Toolkit for Pathology Image Analysis Algorithms.” SoftwareX 31 (September): 102318."
     DOI_link: https://doi.org/10.1016/j.softx.2025.102318
