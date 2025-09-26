@@ -84,7 +84,7 @@ publications:
     DOI: 10.1158/1541-7786.MCR-19-0545
   - title: Structured crowdsourcing enables convolutional segmentation of histology images.
     full-citation: "Amgad, Mohamed, Habiba Elfandy, Hagar Hussein, Lamees A Atteya, Mai A T Elsebaie, Lamia S Abo Elnasr, Rokia A Sakr, et al. “Structured Crowdsourcing Enables Convolutional Segmentation of Histology Images.” Edited by Robert Murphy. Bioinformatics 35, no. 18 (February 6, 2019): 3461–67."
-    DOI_link: https://doi.org/10.1038/s41374-019-0325-7
+    DOI_link: https://doi.org/10.1093/bioinformatics/btz083
     link: https://www.ncbi.nlm.nih.gov/pubmed/?term=30726865
     PMID: 30726865
     DOI: 10.1093/bioinformatics/btz083
