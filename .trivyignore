@@ -9,9 +9,5 @@
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
-# HIGH: ubuntu - kernel: Bluetooth: MGMT: Fix UAF on mgmt_remove_adv_monitor_complete
-CVE-2025-38118
-# HIGH: ubuntu - kernel: posix-cpu-timers: fix race between handle_posix_cpu_
-CVE-2025-38352
-# HIGH: ubuntu - kernel: x86/vmscape: Add conditional IBPB mitigation
-CVE-2025-40300
+# HIGH: ubuntu - kernel: net: appletalk: Fix use-after-free in AARP proxy pro
+CVE-2025-38666
