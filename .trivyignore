@@ -3,12 +3,13 @@
 # In bioformats_package.jar: this shouldn't be an issue because of how xml is
 # used and because we don't pass urls to bioformats
 
-# In ubuntu, these are probably not reachable based on how we deploy
+# In node-pkg, this is not reachable based on how we deploy
 
-New ignore file:
 # HIGH: jar - okhttp: information disclosure via improperly used cryptogra
 CVE-2021-0341
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untr
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
+# HIGH: node-pkg - glob CLI: Command injection via -c/--cmd executes matches wi
+CVE-2025-64756

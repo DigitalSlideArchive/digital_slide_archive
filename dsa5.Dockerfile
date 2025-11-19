@@ -55,8 +55,8 @@ RUN python --version && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
 
 RUN . ~/.bashrc && \
-    nvm install 22 && \
-    nvm alias default 22 && \
+    nvm install --lts && \
+    nvm alias default lts/* && \
     nvm use default && \
     rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /root/.nvm && \
     nvm uninstall 14 && \
@@ -77,7 +77,7 @@ RUN cd /opt && \
     pip install --no-cache-dir -e .[mount] && \
     pip install --no-cache-dir -e clients/python && \
     cd girder/web && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
@@ -90,49 +90,51 @@ RUN cd /opt/girder/worker && \
     cd /opt/girder/plugins/worker && \
     pip install --no-cache-dir -e .[girder,worker] && \
     cd girder_plugin_worker/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     true
 
-# Girder plugins
+# Girder plugins.  If we are installing from source, use npm install if npm ci
+# false, since npm ci can fail if the package-lock was generated with ai
+# different npm version.
 RUN true && \
     cd /opt/girder/plugins/hashsum_download && \
     pip install --no-cache-dir -e . && \
     cd girder_hashsum_download/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/girder/plugins/homepage && \
     pip install --no-cache-dir -e . && \
     cd girder_homepage/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/girder/plugins/jobs && \
     pip install --no-cache-dir -e . && \
     cd girder_jobs/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/girder/plugins/ldap && \
     pip install --no-cache-dir -e . && \
     cd girder_ldap/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/girder/plugins/oauth && \
     pip install --no-cache-dir -e . && \
     cd girder_oauth/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/girder/plugins/user_quota && \
     pip install --no-cache-dir -e . && \
     cd girder_user_quota/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/girder/plugins/import_tracker && \
     pip install --no-cache-dir -e . && \
     cd girder_import_tracker/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     # virtual_folders has no web_client \
     cd /opt/girder/plugins/virtual_folders && \
@@ -140,7 +142,7 @@ RUN true && \
     cd /opt/girder/plugins/slicer_cli_web && \
     pip install --no-cache-dir -e . && \
     cd slicer_cli_web/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
@@ -152,13 +154,13 @@ RUN cd /opt && \
     cd /opt/large_image && \
     pip install --no-cache-dir --find-links https://girder.github.io/large_image_wheels -e .[memcached] -rrequirements-dev.txt && \
     cd /opt/large_image/girder/girder_large_image/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/large_image/girder_annotation/girder_large_image_annotation/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     cd /opt/large_image/sources/dicom/large_image_source_dicom/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /opt/venv && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
@@ -174,7 +176,7 @@ RUN cd /opt && \
     sed -i 's/==1\.3.*'\''/'\''/g' setup.py && \
     pip install --no-cache-dir -e .[analysis] && \
     cd /opt/HistomicsUI/histomicsui/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     # This builds both the app and the plugin \
     npm run build && \
     rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /opt/venv && \
@@ -189,7 +191,7 @@ RUN cd /opt && \
     cd /opt/girder_assetstore && \
     pip install --no-cache-dir -e . && \
     cd /opt/girder_assetstore/girder_assetstore/web_client && \
-    npm ci && \
+    npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
