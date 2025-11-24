@@ -14,6 +14,12 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 [//]: # (keys are title, full-citation, DOI_link, link, DOI, PMID)
 
 publications:
+  - title: "NimbusImage: A Cloud-Computing Platform for Image Analysis."
+    full-citation: "Niu, Zijian, Thibault Bruyère, David Manthey, Jingxin Li, Aoife O’Farrell, and Arjun Raj. 2025. “NimbusImage: A Cloud-Computing Platform for Image Analysis.” Nature Methods, ahead of print, November 20."
+    DOI_link: https://doi.org/10.1038/s41592-025-02942-6
+    link: https://www.nature.com/articles/s41592-025-02942-6
+    DOI: 10.1038/s41592-025-02942-6
+    PMID: 41266644
   - title: "FUSION: A Web-Based Application for in-Depth Exploration of Multi-Omics Data with Brightfield Histology."
     full-citation: "Border, Samuel P., Ricardo Melo Ferreira, Nicholas Lucarelli, Suhas Katari Chaluva Kumar, Anindya S. Paul, David Manthey, Laura Barisoni, et al. 2025. “FUSION: A Web-Based Application for in-Depth Exploration of Multi-Omics Data with Brightfield Histology.” Nature Communications 16 (1)."
     DOI_link: https://doi.org/10.1038/s41467-025-63050-9
