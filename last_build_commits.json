@@ -4,13 +4,13 @@
   "girder/girder_worker_utils/branches/master": "23da3ff76ddd61c91f7d53e82a13d1d9acc39ee7",
   "girder/large_image/branches/master": "b0069b395a3c7e6c23f96d71114920c928261cf9",
   "girder/slicer_cli_web/branches/master": "245692c1303aa681323a839d4335287e991fdb6f",
-  "DigitalSlideArchive/HistomicsUI/branches/master": "421c4de53cc3f52eb7be36d0f56fc3330b590291",
+  "DigitalSlideArchive/HistomicsUI/branches/master": "3af87bf033c1d573e5de9ebf9517e955c09a9005",
   "DigitalSlideArchive/import-tracker/branches/main": "055e395e9d9c2de965624391e8f6a1010f42141e",
   "DigitalSlideArchive/girder_assetstore/branches/main": "dbf539d8212de175a7eb65fa78d17d380fe6e46d",
   "girder/girder/branches/v4-integration": "d1626c009fb06cb1cad467946b7cce29ccae76fa",
   "girder/large_image/branches/girder-5": "e80efd7ced42e1ae4b81d4138ffdc4ebf20e3436",
   "DigitalSlideArchive/HistomicsUI/branches/girder-5": "e1be23f567a12e2741f619326462e7859e3b4f81",
   "DigitalSlideArchive/girder_assetstore/branches/girder-5": "f860fef09e0530965e03f0d43fd3d87651628755",
-  "girder/large_image_wheels/branches/gh-pages": "affced6cebc2c06b5b442612d020e1151c014483",
+  "girder/large_image_wheels/branches/gh-pages": "28c7f04b5925ed8decb7259bc2ca5f9d341ea15e",
   "OpenGeoscience/geojs/branches/master": "b8400edf6487b5b7029d4bd048c6dfb7da0be385"
 }
