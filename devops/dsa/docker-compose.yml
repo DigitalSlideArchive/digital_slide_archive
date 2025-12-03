@@ -63,7 +63,7 @@ services:
       # local source files.  Adding the editable egg directories first allows
       # mounting source files from the host without breaking the internal data.
       # - /opt/HistomicsUI/histomicsui.egg-info
-      - ../../../HistomicsUI:/opt/HistomicsUI
+      # - ../../../HistomicsUI:/opt/HistomicsUI
 
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
