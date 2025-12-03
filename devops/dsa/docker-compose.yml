@@ -63,7 +63,7 @@ services:
       # local source files.  Adding the editable egg directories first allows
       # mounting source files from the host without breaking the internal data.
       # - /opt/HistomicsUI/histomicsui.egg-info
-      # - ../../../HistomicsUI:/opt/HistomicsUI
+      - ../../../HistomicsUI:/opt/HistomicsUI
 
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
@@ -119,7 +119,13 @@ services:
         max-size: "10M"
         max-file: "5"
     healthcheck:
-      test: ["CMD", "bash", "-c", 'exec 3<>/dev/tcp/localhost/11211; printf "stats\nquit\n" >&3; cat <&3']
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          'exec 3<>/dev/tcp/localhost/11211; printf "stats\nquit\n" >&3; cat <&3',
+        ]
       interval: 5m
       timeout: 10s
       retries: 3

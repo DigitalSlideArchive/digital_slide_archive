@@ -22,7 +22,7 @@ mongo-compat: True
 #   - girder-oauth
 #   - girder-ldap
 # rebuild-client may be False, True (for production mode), or "development"
-rebuild-client: False
+rebuild-client: development
 # Run additional shell commands before start
 # shell:
 #   - ls
