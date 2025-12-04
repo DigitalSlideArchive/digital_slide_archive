@@ -63,7 +63,7 @@ services:
       # local source files.  Adding the editable egg directories first allows
       # mounting source files from the host without breaking the internal data.
       # - /opt/HistomicsUI/histomicsui.egg-info
-      # - ../../../HistomicsUI:/opt/HistomicsUI
+      - ../../../icore-HistomicsUI:/opt/HistomicsUI
 
       # See comments about authorizing docker repositories above
       # - /home/<user directory>/.docker:/.docker:ro
@@ -95,8 +95,8 @@ services:
       - ./db:/data/db
     # Uncomment to allow access to the database from outside of the docker
     # network.
-    # ports:
-    #   - "27017"
+    ports:
+      - "27017:27017"
     logging:
       options:
         max-size: "10M"
