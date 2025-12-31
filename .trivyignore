@@ -5,8 +5,6 @@
 
 # In node-pkg, this is not reachable based on how we deploy
 
-# In ubuntu, these should not be reachable based on how we deploy
-
 # HIGH: jar - okhttp: information disclosure via improperly used cryptogra
 CVE-2021-0341
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untr
@@ -15,7 +13,3 @@ CVE-2024-47554
 CVE-2025-52999
 # HIGH: node-pkg - glob CLI: Command injection via -c/--cmd executes matches wi
 CVE-2025-64756
-# HIGH: ubuntu - kernel: ksmbd: fix Preauh_HashValue race condition
-CVE-2025-38561
-# HIGH: ubuntu - kernel: io_uring/futex: ensure io_futex_wait() cleans up pro
-CVE-2025-39698
