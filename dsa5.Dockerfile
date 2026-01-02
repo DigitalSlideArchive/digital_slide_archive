@@ -58,8 +58,9 @@ RUN . ~/.bashrc && \
     nvm install --lts && \
     nvm alias default lts/* && \
     nvm use default && \
-    rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /root/.nvm && \
+    rdfind -minsize 8192 -makehardlinks true -makeresultsfile false /root/.nvm && \
     nvm uninstall 14 && \
+    nvm cache clear && \
     rm /usr/local/node && \
     ln -s $(dirname `which npm`) /usr/local/node && \
     npm config set fetch-timeout 600000 && \
