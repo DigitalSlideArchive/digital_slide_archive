@@ -15,7 +15,7 @@ hero_image: assets/img/home-callouts/papers_publications.jpg
 
 publications:
   - title: "NimbusImage: A Cloud-Computing Platform for Image Analysis."
-    full-citation: "Niu, Zijian, Thibault Bruyère, David Manthey, Jingxin Li, Aoife O’Farrell, and Arjun Raj. 2025. “NimbusImage: A Cloud-Computing Platform for Image Analysis.” Nature Methods, ahead of print, November 20."
+    full-citation: "Niu, Zijian, Thibault Bruyère, David Manthey, Jingxin Li, Aoife O’Farrell, and Arjun Raj. 2025. “NimbusImage: A Cloud-Computing Platform for Image Analysis.” Nature Methods 23 (1): 6–8."
     DOI_link: https://doi.org/10.1038/s41592-025-02942-6
     link: https://www.nature.com/articles/s41592-025-02942-6
     DOI: 10.1038/s41592-025-02942-6
