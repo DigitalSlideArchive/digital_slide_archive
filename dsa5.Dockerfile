@@ -1,4 +1,4 @@
-FROM girder/tox-and-node
+FROM girder/tox-and-node-lts:latest
 LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
 
 ENV LANG=en_US.UTF-8
@@ -43,7 +43,7 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
     chmod +x /usr/bin/tini
 
 # Make a virtualenv with our preferred python
-RUN virtualenv --python 3.11 /opt/venv && \
+RUN virtualenv --python 3.13 /opt/venv && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
 
 ENV PATH="/opt/venv/bin:$PATH"
@@ -53,19 +53,6 @@ RUN python --version && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -U tox wheel && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
-
-RUN . ~/.bashrc && \
-    nvm install --lts && \
-    nvm alias default lts/* && \
-    nvm use default && \
-    rdfind -minsize 8192 -makehardlinks true -makeresultsfile false /root/.nvm && \
-    nvm uninstall 14 && \
-    nvm cache clear && \
-    rm /usr/local/node && \
-    ln -s $(dirname `which npm`) /usr/local/node && \
-    npm config set fetch-timeout 600000 && \
-    rm -rf /root/.cache /root/.npm /tmp/* && \
-    true
 
 ENV SKIP_SOURCE_MAPS=true
 
