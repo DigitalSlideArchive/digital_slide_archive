@@ -3,10 +3,20 @@
 # In bioformats_package.jar: this shouldn't be an issue because of how xml is
 # used and because we don't pass urls to bioformats
 
+# The python issue can only be reached if a developer installs an unsafe
+# tarball via setuptools; it has not direct exposure
+
+# The ubuntu issues cannot be reached
+
 # HIGH: jar - okhttp: information disclosure via improperly used cryptogra
 CVE-2021-0341
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untr
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
-CVE-2025-64756
+# HIGH: node-pkg - node-tar is a Tar for Node.js. The node-tar library (<= 7.5.
+CVE-2026-23745
+# HIGH: python-pkg - jaraco.context Has a Path Traversal Vulnerability
+GHSA-58pv-8j8x-9vj2
+# HIGH: ubuntu - kernel: ksmbd: fix use-after-free in session logoff
+CVE-2025-37899
