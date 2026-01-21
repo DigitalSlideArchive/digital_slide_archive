@@ -16,6 +16,8 @@ CVE-2024-47554
 CVE-2025-52999
 # HIGH: node-pkg - node-tar is a Tar for Node.js. The node-tar library (<= 7.5.
 CVE-2026-23745
+# HIGH: node-pkg - node-tar is a Tar for Node.js. The node-tar library (<= 7.5.
+CVE-2026-23950
 # HIGH: python-pkg - jaraco.context Has a Path Traversal Vulnerability
 GHSA-58pv-8j8x-9vj2
 # HIGH: ubuntu - kernel: ksmbd: fix use-after-free in session logoff
