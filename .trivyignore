@@ -14,11 +14,13 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potent
 CVE-2025-52999
-# HIGH: node-pkg - node-tar is a Tar for Node.js. The node-tar library (<= 7.5.
+# HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file overwrite and symlin
 CVE-2026-23745
-# HIGH: node-pkg - node-tar is a Tar for Node.js. The node-tar library (<= 7.5.
+# HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file overwrite via Unicod
 CVE-2026-23950
-# HIGH: python-pkg - jaraco.context Has a Path Traversal Vulnerability
+# HIGH: python-pkg - jaraco.context: jaraco.context: Path traversal via malicious
 CVE-2026-23949
+# HIGH: python-pkg - wheel: wheel: Privilege Escalation or Arbitrary Code Executi
+CVE-2026-24049
 # HIGH: ubuntu - kernel: ksmbd: fix use-after-free in session logoff
 CVE-2025-37899
