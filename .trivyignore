@@ -18,6 +18,8 @@ CVE-2025-52999
 CVE-2026-23745
 # HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file overwrite via Unicod
 CVE-2026-23950
+# HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file creation via path tr
+CVE-2026-24842
 # HIGH: python-pkg - jaraco.context: jaraco.context: Path traversal via malicious
 CVE-2026-23949
 # HIGH: python-pkg - wheel: wheel: Privilege Escalation or Arbitrary Code Executi
