@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -30,6 +30,7 @@ RUN pip install \
     # girder-client is used to get sample data.  If you don't fetch sample \
     # data, it isn't necessary \
     girder-client \
+    --no-cache-dir \
     --find-links https://girder.github.io/large_image_wheels
 
 RUN girder build

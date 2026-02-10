@@ -16,15 +16,11 @@ CVE-2024-47554
 CVE-2025-52999
 # HIGH: jar - aircompressor Snappy and LZ4 Java-based decompressor implementati
 CVE-2025-67721
-# HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file overwrite and symlin
-CVE-2026-23745
-# HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file overwrite via Unicod
-CVE-2026-23950
-# HIGH: node-pkg - node-tar: tar: node-tar: Arbitrary file creation via path tr
-CVE-2026-24842
 # HIGH: python-pkg - jaraco.context: jaraco.context: Path traversal via malicio
 CVE-2026-23949
 # HIGH: python-pkg - wheel: wheel: Privilege Escalation or Arbitrary Code Execu
 CVE-2026-24049
 # HIGH: ubuntu - kernel: ksmbd: fix use-after-free in session logoff
 CVE-2025-37899
+# HIGH: ubuntu - stdlib: During session resumption in crypto/tls, if the underl
+CVE-2025-68121
