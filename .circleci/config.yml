@@ -468,10 +468,10 @@ jobs:
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - run:
           name: Scan the local image with trivy; fail on high or critical vulnerabilities
-          command: trivy image --scanners vuln --input /tmp/workspace/dsa_common.tar --exit-code 1 --severity HIGH,CRITICAL --no-progress
+          command: TRIVY_DISABLE_VEX_NOTICE=true trivy image --scanners vuln --input /tmp/workspace/dsa_common.tar --exit-code 1 --severity HIGH,CRITICAL --no-progress
       - run:
           name: Scan the local image with trivy; report low and medium vulnerabilities, but don't fail
-          command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
+          command: TRIVY_DISABLE_VEX_NOTICE=true trivy image --scanners vuln image --input /tmp/workspace/dsa_common.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
   scan-docker-5:
     docker:
       - image: docker:stable-git
@@ -487,10 +487,10 @@ jobs:
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - run:
           name: Scan the local image with trivy; fail on high or critical vulnerabilities
-          command: trivy image --scanners vuln --input /tmp/workspace/dsa_common_5.tar --exit-code 1 --severity HIGH,CRITICAL --no-progress
+          command: TRIVY_DISABLE_VEX_NOTICE=true trivy image --scanners vuln --input /tmp/workspace/dsa_common_5.tar --exit-code 1 --severity HIGH,CRITICAL --no-progress
       - run:
           name: Scan the local image with trivy; report low and medium vulnerabilities, but don't fail
-          command: trivy image --scanners vuln image --input /tmp/workspace/dsa_common_5.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
+          command: TRIVY_DISABLE_VEX_NOTICE=true trivy image --scanners vuln image --input /tmp/workspace/dsa_common_5.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
   check-for-updates:
     docker:
       - image: python:3.13-slim

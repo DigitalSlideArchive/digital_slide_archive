@@ -44,7 +44,7 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
 
 # Make a virtualenv with our preferred python
 RUN virtualenv --python 3.13 /opt/venv && \
-    find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
+    find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ || true
 
 ENV PATH="/opt/venv/bin:$PATH"
 
