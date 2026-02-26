@@ -54,6 +54,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN python --version && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -U tox wheel && \
+    pip install --no-cache-dir -U 'setuptools<82' && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 # Clone packages and pip install what we want to be local
@@ -104,7 +105,6 @@ RUN pip install --no-cache-dir \
     girder-hashsum-download \
     girder-homepage \
     girder-ldap \
-    girder-resource-path-tools \
     girder-user-quota \
     girder-virtual-folders \
     && \
