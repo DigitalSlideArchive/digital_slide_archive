@@ -21,6 +21,7 @@ RUN apt-get update && \
     # sudo \
     && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    sync && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
@@ -38,6 +39,7 @@ RUN mkdir -p /etc/apt/keyrings && \
     docker-ce-cli \
     && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    sync && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
@@ -45,7 +47,8 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
     chmod +x /usr/bin/tini
 
 # Make a virtualenv with our preferred python
-RUN virtualenv --python 3.11 /opt/venv && \
+RUN python3.11 -m venv /opt/venv && \
+    sync && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 ENV PATH="/opt/venv/bin:$PATH"
@@ -55,6 +58,7 @@ RUN python --version && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -U tox wheel && \
     pip install --no-cache-dir -U 'setuptools<82' && \
+    sync && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 # Clone packages and pip install what we want to be local
@@ -108,7 +112,7 @@ RUN pip install --no-cache-dir \
     girder-user-quota \
     girder-virtual-folders \
     && \
-    \
+    sync && \
     find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
 # Build the girder web client
@@ -117,6 +121,7 @@ RUN NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false NPM_CONFIG_AUDIT_LEVEL=high NPM
     # Get rid of unnecessary files to keep the docker image smaller \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
     find /opt -name package-lock.json -exec rm -f {} \+ && \
+    sync && \
     rm -rf /tmp/* ~/.npm && \
     find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
@@ -128,6 +133,7 @@ RUN npm install -g phantomjs-prebuilt --unsafe-perm && \
     cd /root/.nvm/versions/node/v14.21.3/lib/node_modules/phantomjs-prebuilt/node_modules/request && \
     npm install 'form-data@^2.5.5' && \
     npm install 'qs@^6.14.1' && \
+    sync && \
     rm -rf /tmp/* ~/.npm && \
     rdfind -minsize 1024 -makehardlinks true -makeresultsfile false /root/.nvm
 
