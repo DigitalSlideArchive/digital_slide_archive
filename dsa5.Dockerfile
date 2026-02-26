@@ -19,6 +19,7 @@ RUN apt-get update && \
     jq \
     && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    sync && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
 
@@ -36,6 +37,7 @@ RUN mkdir -p /etc/apt/keyrings && \
     docker-ce-cli \
     && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    sync && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
 
@@ -43,7 +45,8 @@ RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /
     chmod +x /usr/bin/tini
 
 # Make a virtualenv with our preferred python
-RUN virtualenv --python 3.13 /opt/venv && \
+RUN python3.13 -m venv /opt/venv && \
+    sync && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ || true
 
 ENV PATH="/opt/venv/bin:$PATH"
@@ -52,6 +55,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN python --version && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -U tox wheel && \
+    sync && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
 
 ENV SKIP_SOURCE_MAPS=true
@@ -68,6 +72,7 @@ RUN cd /opt && \
     npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    sync && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     true
@@ -81,6 +86,7 @@ RUN cd /opt/girder/worker && \
     npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    sync && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     true
@@ -133,6 +139,7 @@ RUN true && \
     npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    sync && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     true
@@ -152,6 +159,7 @@ RUN cd /opt && \
     npm run build && \
     rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /opt/venv && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    sync && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     find . -name *js.map* -exec rm -r {} \+ && \
@@ -169,6 +177,7 @@ RUN cd /opt && \
     npm run build && \
     rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /opt/venv && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    sync && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     find . -name *js.map* -exec rm -r {} \+ && \
@@ -182,6 +191,7 @@ RUN cd /opt && \
     npm ci || npm install && \
     npm run build && \
     find /opt -xdev -name node_modules -exec rm -rf {} \+ && \
+    sync && \
     rm -rf /root/.cache /root/.npm /tmp/* && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ && \
     find . -name *js.map* -exec rm -r {} \+ && \
