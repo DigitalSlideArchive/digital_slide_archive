@@ -16,8 +16,13 @@ CVE-2024-47554
 CVE-2025-52999
 # HIGH: jar - aircompressor Snappy and LZ4 Java-based decompressor implementati
 CVE-2025-67721
-# HIGH: node-pkg - minimatch: minimatch: Denial of Service via specially crafte
-CVE-2026-26996
+# HIGH: jar - jackson-core: Number Length Constraint Bypass in Async Parser Lea
+GHSA-72hv-8253-57qq
+# HIGH: node-pkg - minimatch: minimatch: Denial of Service due to unbounded rec
+CVE-2026-27903
+# HIGH: node-pkg - minimatch: Minimatch: Denial of Service via catastrophic bac
+CVE-2026-27904
 # HIGH: ubuntu - kernel: Kernel: Privilege escalation or denial of service in n
 CVE-2026-23111
+# HIGH
 CVE-2025-68121
