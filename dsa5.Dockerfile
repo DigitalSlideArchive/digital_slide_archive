@@ -92,7 +92,7 @@ RUN cd /opt/girder/worker && \
     true
 
 # Girder plugins.  If we are installing from source, use npm install if npm ci
-# false, since npm ci can fail if the package-lock was generated with ai
+# returns false, since npm ci can fail if the package-lock was generated with a
 # different npm version.
 RUN true && \
     cd /opt/girder/plugins/hashsum_download && \
