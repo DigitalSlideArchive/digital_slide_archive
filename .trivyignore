@@ -26,3 +26,7 @@ CVE-2026-27904
 CVE-2026-23111
 # HIGH
 CVE-2025-68121
+# HIGH
+CVE-2026-25679
+# HIGH: ubuntu - kernel: kernel: Privilege escalation or denial of service via
+CVE-2026-23231
