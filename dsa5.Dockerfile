@@ -64,8 +64,9 @@ ENV SKIP_SOURCE_MAPS=true
 RUN cd /opt && \
     # Install gunicorn so we can use it instead of girder serve \
     pip install --no-cache-dir gunicorn && \
-    git clone -b v4-integration https://github.com/girder/girder && \
+    git clone https://github.com/girder/girder && \
     cd /opt/girder && \
+    git checkout v4-integration || true && \
     pip install --no-cache-dir -e .[mount] && \
     pip install --no-cache-dir -e clients/python && \
     cd girder/web && \
@@ -145,8 +146,9 @@ RUN true && \
     true
 
 RUN cd /opt && \
-    git clone -b girder-5 https://github.com/girder/large_image && \
+    git clone  https://github.com/girder/large_image && \
     cd /opt/large_image && \
+    git checkout girder-5 || true && \
     pip install --no-cache-dir --find-links https://girder.github.io/large_image_wheels -e .[memcached] -rrequirements-dev.txt && \
     cd /opt/large_image/girder/girder_large_image/web_client && \
     npm ci || npm install && \
@@ -166,8 +168,9 @@ RUN cd /opt && \
     true
 
 RUN cd /opt && \
-    git clone -b girder-5 https://github.com/DigitalSlideArchive/HistomicsUI && \
+    git clone https://github.com/DigitalSlideArchive/HistomicsUI && \
     cd /opt/HistomicsUI && \
+    git checkout girder-5 || true && \
     # Unpin since we are using local installs \
     sed -i 's/==1\.3.*'\''/'\''/g' setup.py && \
     pip install --no-cache-dir -e .[analysis] && \
@@ -184,8 +187,9 @@ RUN cd /opt && \
     true
 
 RUN cd /opt && \
-    git clone -b girder-5 https://github.com/DigitalSlideArchive/girder_assetstore && \
+    git clone https://github.com/DigitalSlideArchive/girder_assetstore && \
     cd /opt/girder_assetstore && \
+    git checkout girder-5 || true && \
     pip install --no-cache-dir -e . && \
     cd /opt/girder_assetstore/girder_assetstore/web_client && \
     npm ci || npm install && \

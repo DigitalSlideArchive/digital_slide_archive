@@ -65,6 +65,7 @@ RUN python --version && \
 RUN cd /opt && \
     git clone https://github.com/girder/girder && \
     cd /opt/girder && \
+    git checkout 3.x-maintenance || true && \
     pip install --no-cache-dir -e .[mount] && \
     pip install --no-cache-dir -e clients/python && \
     \
@@ -91,6 +92,7 @@ RUN cd /opt && \
     cd /opt && \
     git clone https://github.com/girder/large_image && \
     cd /opt/large_image && \
+    git checkout girder-3 || true && \
     pip install --no-cache-dir --find-links https://girder.github.io/large_image_wheels -e .[memcached] -rrequirements-dev.txt && \
     # Reduce docker size by de-duplicating some libraries that get installed \
     rdfind -minsize 32768 -makehardlinks true -makeresultsfile false /opt/venv && \
@@ -98,6 +100,7 @@ RUN cd /opt && \
     cd /opt && \
     git clone https://github.com/DigitalSlideArchive/HistomicsUI && \
     cd /opt/HistomicsUI && \
+    git checkout girder-3 || true && \
     pip install --no-cache-dir -e .[analysis] && \
     \
     find /opt/venv \( -name '*.so' -o -name '*.a' -o -name '*.so.*' \) -exec bash -c "strip -p -D --strip-unneeded {} -o /tmp/striped; if ! cmp {} /tmp/striped; then cp /tmp/striped {}; fi; rm -f /tmp/striped" \; && \
@@ -111,6 +114,7 @@ RUN pip install --no-cache-dir \
     girder-ldap \
     girder-user-quota \
     girder-virtual-folders \
+    git+https://github.com/girder/resource_path_tools \
     && \
     sync && \
     find / -xdev -type d -name __pycache__ -exec rm -r {} \+
