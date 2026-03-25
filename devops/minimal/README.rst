@@ -9,7 +9,7 @@ Prerequsities:
 
 Before using this, you need both Docker and docker-compose.  See the `official installation instructions <https://docs.docker.com/compose/install>`_.
 
-The docker compose file assumes certain file paths.  This has been tested on Ubuntu 18.04.  It will probably work on other Linux variants.
+The docker compose file assumes certain file paths.  This has been tested on Ubuntu 24.04.  It will probably work on other Linux variants.
 
 Get the Digital Slide Archive repository::
 

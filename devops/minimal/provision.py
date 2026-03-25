@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-import configparser
 import datetime
+import json
 import logging
 import os
 import subprocess
@@ -182,6 +182,31 @@ def provision_resources(resources, adminUser):
             result = model.save(result)
 
 
+def wait_for_job(gc, job):
+    """
+    Wait for a job to complete.
+
+    :param gc: the girder client.
+    :param job: a girder job.
+    :return: the updated girder job.
+    """
+    lastdot = time.time()
+    dotfreq = 1
+    jobId = job['_id']
+    while job['status'] not in (3, 4, 5):
+        if time.time() - lastdot >= dotfreq:
+            logger.debug('.')
+            lastdot += dotfreq
+        time.sleep(0.25)
+        job = gc.get('job/%s' % jobId)
+    if job['status'] == 3:
+        logger.debug(' done')
+    else:
+        logger.error(' failed')
+        raise Exception('Failed in job')
+    return job
+
+
 def get_slicer_images(imageList, adminUser, alwaysPull=False):
     """
     Load a list of cli docker images into the system.
@@ -190,50 +215,41 @@ def get_slicer_images(imageList, adminUser, alwaysPull=False):
     :param adminUser: an admin user for permissions.
     :param alwaysPull: true to ask to always pull the latest image.
     """
-    import threading
-
-    from girder.models.setting import Setting
-    from girder_jobs.constants import JobStatus
-    from girder_jobs.models.job import Job
-    from slicer_cli_web.config import PluginSettings
-    from slicer_cli_web.docker_resource import DockerResource
-    from slicer_cli_web.image_job import jobPullAndLoad
+    import girder_client
+    from girder.models.token import Token
 
     imageList = [entry for entry in imageList if entry and len(entry)]
     if not len(imageList):
         return
     logger.info('Pulling and installing slicer_cli images: %r', imageList)
-    job = Job().createLocalJob(
-        module='slicer_cli_web.image_job',
-        function='jobPullAndLoad',
-        kwargs={
-            'nameList': imageList,
-            'folder': Setting().get(PluginSettings.SLICER_CLI_WEB_TASK_FOLDER),
-            'pull': 'true' if alwaysPull else 'asneeded',
-        },
-        title='Pulling and caching docker images',
-        type=DockerResource.jobType,
-        user=adminUser,
-        public=True,
-        asynchronous=True
-    )
-    job = Job().save(job)
-    t = threading.Thread(target=jobPullAndLoad, args=(job, ))
-    t.start()
-    logpos = 0
-    logger.info('Result:\n')
-    while job['status'] not in {JobStatus.SUCCESS, JobStatus.ERROR, JobStatus.CANCELED}:
-        time.sleep(0.1)
-        job = Job().load(id=job['_id'], user=adminUser, includeLog=True)
-        if 'log' in job:
-            while logpos < len(job['log']):
-                logger.info(job['log'][logpos].rstrip())
-                logpos += 1
-    t.join()
-    if 'log' not in job:
-        logger.warning('Job record: %r', job)
-    if job['status'] != JobStatus.SUCCESS:
-        raise Exception('Failed to pull and load images')
+    token = Token().createToken(user=adminUser)
+    gc = None
+    start = time.time()
+    while gc is None and time.time() - start < 60:
+        try:
+            gc = girder_client.GirderClient(apiUrl='http://localhost:8080/api/v1')
+        except Exception:
+            time.sleep(0.25)
+    gc.token = str(token['_id'])
+    job = gc.put('slicer_cli_web/docker_image', data={
+        'name': json.dumps(imageList),
+        'pull': 'true' if alwaysPull else 'false',
+    })
+    wait_for_job(gc, job)
+
+
+def wait_for_server():
+    import girder_client
+
+    gc = None
+    start = time.time()
+    while time.time() - start < 60:
+        try:
+            gc = girder_client.GirderClient(apiUrl='http://localhost:8080/api/v1')
+            gc.get('system/version')
+            break
+        except Exception:
+            time.sleep(0.25)
 
 
 def pip_install(packages):
@@ -266,7 +282,7 @@ def pip_install(packages):
 def preprovision(opts):
     """
     Preprovision the instance.  This includes installing python modules with
-    pip and rebuilding the girder client if desired.
+    pip.
 
     :param opts: the argparse options.
     """
@@ -280,24 +296,6 @@ def preprovision(opts):
             except Exception:
                 logger.error(f'Failed to run {cmd}')
                 raise
-    if getattr(opts, 'rebuild-client', None):
-        cmd = 'girder build'
-        if str(getattr(opts, 'rebuild-client', None)).lower().startswith('dev'):
-            cmd += ' --dev'
-        logger.info('Rebuilding girder client: %s', cmd)
-        cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
-               'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
-               'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
-        try:
-            if not getattr(opts, 'no_wait', False):
-                subprocess.check_call(cmd, shell=True)
-            else:
-                proc = subprocess.Popen(cmd + ' ; touch /tmp/girder_build_done', shell=True)
-                logger.info('Rebuilding in background via pid %r', proc.pid)
-                open('/tmp/girder_build.pid', 'w').write(str(proc.pid))
-        except Exception:
-            logger.error(f'Failed to run {cmd}')
-            raise
 
 
 def clean_delete_locks():
@@ -327,7 +325,7 @@ def clean_delete_locks():
             logger.info(f'Failed trying to remove old delete locks: {cmd}')
 
 
-def provision(opts):  # noqa
+def provision(opts):
     """
     Provision the instance.
 
@@ -380,7 +378,23 @@ def provision(opts):  # noqa
                 Setting().get(key) == Setting().getDefault(key))):
             value = value_from_resource(value, adminUser)
             logger.info('Setting %s to %r', key, value)
-            Setting().set(key, value)
+            try:
+                Setting().set(key, value)
+            except Exception:
+                logger.error('Failed to set %s', key)
+
+
+def postprovision(opts):
+    """
+    Postrovision the instance.
+
+    :param opts: the argparse options.
+    """
+    from girder.models.user import User
+
+    wait_for_server()
+
+    adminUser = User().findOne({'admin': True})
     images = []
     if getattr(opts, 'slicer-cli-image-pull', None):
         images = list(dict.fromkeys(getattr(opts, 'slicer-cli-image-pull', None)))
@@ -388,7 +402,8 @@ def provision(opts):  # noqa
             get_slicer_images(getattr(opts, 'slicer-cli-image-pull', None),
                               adminUser, alwaysPull=True)
         except Exception:
-            logger.info('Cannot fetch slicer-cli-images.')
+            logger.info('Cannot fetch and pull slicer-cli-images.')
+            logger.exception('Cannot fetch and pull slicer-cli-images.')
     if getattr(opts, 'slicer-cli-image', None):
         images = [image for image in dict.fromkeys(getattr(opts, 'slicer-cli-image', None))
                   if image not in images]
@@ -428,14 +443,6 @@ def provision_worker(opts):
                 settings[mainkey] = getattr(opts, key)
     if not settings.get('rabbitmq-host'):
         return
-    conf = configparser.ConfigParser()
-    conf.read([settings['config']])
-    conf.set('celery', 'broker', 'amqp://%s:%s@%s/' % (
-        settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
-    conf.set('celery', 'backend', 'rpc://%s:%s@%s/' % (
-        settings['rabbitmq-user'], settings['rabbitmq-pass'], settings['host']))
-    with open(settings['config'], 'w') as fptr:
-        conf.write(fptr)
 
 
 def merge_environ_opts(opts):
@@ -511,12 +518,9 @@ def merge_default_opts(opts):
     """
     settings = dict({}, **(opts.settings or {}))
     settings.update({
-        'worker.broker': 'amqp://guest:guest@rabbitmq',
-        'worker.backend': 'rpc://guest:guest@rabbitmq',
         'worker.api_url': 'http://girder:8080/api/v1',
         'worker.direct_path': True,
         'core.brand_name': 'Digital Slide Archive',
-        # 'core.http_only_cookies': True,
         'histomicsui.webroot_path': 'histomics',
         'histomicsui.alternate_webroot_path': 'histomicstk',
         'histomicsui.delete_annotations_after_ingest': True,
@@ -657,14 +661,11 @@ if __name__ == '__main__':  # noqa
         'number of parameters.')
     parser.add_argument(
         '--pip', action='append', help='A list of modules to pip install.  If '
-        'any are specified that include girder client plugins, also specify '
-        '--rebuild-client.  Each specified value is passed to pip install '
-        'directly, so additional options are needed, these can be added (such '
-        'as --find-links).  The actual values need to be escaped '
-        'appropriately for a bash shell.')
-    parser.add_argument(
-        '--rebuild-client', dest='rebuild-client', action='store_true',
-        default=False, help='Rebuild the girder client.')
+        'any are specified that include girder client plugins, also add a '
+        'shell task to build those plugins.  Each specified value is passed '
+        'to pip install directly, so additional options are needed, these can '
+        'be added (such as --find-links).  The actual values need to be '
+        'escaped appropriately for a bash shell.')
     parser.add_argument(
         '--slicer-cli-image', dest='slicer-cli-image', action='append',
         help='Install slicer_cli images, only pulling if not present.')
@@ -698,15 +699,13 @@ if __name__ == '__main__':  # noqa
         help='Pre-provision a worker, not the main process.')
     parser.add_argument(
         '--pre', dest='portion', action='store_const', const='pre',
-        help='Only do preprovisioning (install optional python modules and '
-        'optionally build the girder client).')
+        help='Only do preprovisioning (install optional python modules).')
     parser.add_argument(
         '--main', dest='portion', action='store_const', const='main',
         help='Only do main provisioning.')
     parser.add_argument(
-        '--no-wait', action='store_true',
-        help='If a girder build is performed during preprovisioning, do not '
-        'wait for it to complete.')
+        '--post', dest='portion', action='store_const', const='post',
+        help='Only do postprovisioning (add slicer_cli_web tasks).')
     parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='Increase verbosity')
     parser.add_argument(
@@ -745,11 +744,12 @@ if __name__ == '__main__':  # noqa
     if getattr(opts, 'portion', None) in {'main', None}:
         # This loads plugins, allowing setting validation.  We want the import
         # to be after the preprovision step.
-        from girder import _attachFileLogHandlers
-        from girder.utility.server import configureServer
+        from girder import constants, plugin
+        from girder.utility.server import create_app
 
-        _attachFileLogHandlers()
-        configureServer()
+        info = create_app(mode=os.environ.get(
+            'GIRDER_SERVER_MODE', constants.ServerMode.PRODUCTION))
+        plugin._loadPlugins(info)
         if getattr(opts, 'mongo-compat', None) is not False:
             from girder.models import getDbConnection
 
@@ -777,3 +777,8 @@ if __name__ == '__main__':  # noqa
             except Exception:
                 logger.warning('Could not update old source names.')
         provision(opts)
+    if getattr(opts, 'portion', None) in {'post', None}:
+        # Run provisioning that has to happen after the server is running
+        postprovision(opts)
+        if getattr(opts, 'portion', None) == 'post':
+            sys.exit(0)

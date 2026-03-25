@@ -109,11 +109,11 @@ RUN cd /opt && \
 
 # Install additional girder plugins
 RUN pip install --no-cache-dir \
-    girder-hashsum-download \
-    girder-homepage \
-    girder-ldap \
-    girder-user-quota \
-    girder-virtual-folders \
+    'girder-hashsum-download<5' \
+    'girder-homepage<5' \
+    'girder-ldap<5' \
+    'girder-user-quota<5' \
+    'girder-virtual-folders<5' \
     git+https://github.com/girder/resource_path_tools \
     && \
     sync && \

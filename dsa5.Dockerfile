@@ -146,7 +146,7 @@ RUN true && \
     true
 
 RUN cd /opt && \
-    git clone  https://github.com/girder/large_image && \
+    git clone https://github.com/girder/large_image && \
     cd /opt/large_image && \
     git checkout girder-5 || true && \
     pip install --no-cache-dir --find-links https://girder.github.io/large_image_wheels -e .[memcached] -rrequirements-dev.txt && \
