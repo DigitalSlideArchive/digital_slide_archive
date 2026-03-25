@@ -4,6 +4,11 @@ services:
     image: dsarchive/dsa_minimal
     build: .
     restart: unless-stopped
+    environment:
+      GIRDER_MONGO_URI: mongodb://mongodb:27017/girder?socketTimeoutMS=3600000
+      GIRDER_NOTIFICATION_REDIS_URL: redis://redis:6379
+      LARGE_IMAGE_CACHE_BACKEND: redis
+      LARGE_IMAGE_CACHE_REDIS_URL: redis:6379
     ports:
       - "${DSA_PORT:-8080}:8080"
     volumes:
@@ -15,6 +20,12 @@ services:
     restart: unless-stopped
     volumes:
       - db:/data/db
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+
 volumes:
   assetstore:
   db:
+  redis_data:

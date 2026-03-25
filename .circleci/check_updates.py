@@ -10,17 +10,17 @@ import requests
 
 DEPENDENT_REPOS = [
     # girder 3
-    'girder/girder/branches/master',
+    'girder/girder/branches/3.x-maintenance',
     'girder/girder_worker/branches/master',
     'girder/girder_worker_utils/branches/master',
-    'girder/large_image/branches/master',
+    'girder/large_image/branches/girder-3',
     'girder/slicer_cli_web/branches/master',
-    'DigitalSlideArchive/HistomicsUI/branches/master',
+    'DigitalSlideArchive/HistomicsUI/branches/girder-3',
     'DigitalSlideArchive/import-tracker/branches/main',
-    'DigitalSlideArchive/girder_assetstore/branches/main',
+    'DigitalSlideArchive/girder_assetstore/branches/girder-3',
 
     # girder 5
-    'girder/girder/branches/v4-integration',
+    'girder/girder/branches/master',
     'girder/large_image/branches/girder-5',
     'DigitalSlideArchive/HistomicsUI/branches/girder-5',
     'DigitalSlideArchive/girder_assetstore/branches/girder-5',
