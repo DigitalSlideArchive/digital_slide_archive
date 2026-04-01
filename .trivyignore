@@ -32,3 +32,5 @@ CVE-2026-25679
 CVE-2026-23231
 # HIGH: node-pkg - picomatch: Picomatch: Regular Expression Denial of Service v
 CVE-2026-33671
+# HIGH
+CVE-2026-23112

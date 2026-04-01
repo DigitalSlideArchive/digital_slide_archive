@@ -201,6 +201,13 @@ RUN cd /opt && \
     find . -name *js.map* -exec rm -r {} \+ && \
     true
 
+# Install additional girder plugins
+RUN pip install --no-cache-dir \
+    git+https://github.com/girder/resource_path_tools \
+    && \
+    sync && \
+    find / -xdev -type d -name __pycache__ -exec rm -r {} \+
+
 # When running the worker, adjust some settings
 RUN echo 'task_reject_on_worker_lost = True' >> /opt/girder/worker/girder_worker/celeryconfig.py && \
     echo 'task_acks_late = True' >> /opt/girder/worker/girder_worker/celeryconfig.py
