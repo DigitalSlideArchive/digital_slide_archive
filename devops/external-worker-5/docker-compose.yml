@@ -124,6 +124,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-girder}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-girder1234}
     volumes:
+      - ../ver5/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ../ver5/rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
     logging:
       options:

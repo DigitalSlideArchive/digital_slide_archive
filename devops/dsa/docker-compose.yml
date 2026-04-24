@@ -134,6 +134,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-}
     volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
     logging:
       options:
