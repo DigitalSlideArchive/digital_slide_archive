@@ -3,9 +3,6 @@
 # In bioformats_package.jar: this shouldn't be an issue because of how xml is
 # used and because we don't pass urls to bioformats
 
-# The python issue can only be reached if a developer installs an unsafe
-# tarball via setuptools; it has not direct exposure
-
 # The ubuntu issues cannot be reached
 
 # HIGH: jar - okhttp: information disclosure via improperly used cryptographic
@@ -14,23 +11,11 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
-# HIGH: jar - aircompressor Snappy and LZ4 Java-based decompressor implementati
-CVE-2025-67721
-# HIGH: jar - jackson-core: Number Length Constraint Bypass in Async Parser Lea
-GHSA-72hv-8253-57qq
-# HIGH: node-pkg - minimatch: minimatch: Denial of Service due to unbounded rec
-CVE-2026-27903
-# HIGH: node-pkg - minimatch: Minimatch: Denial of Service via catastrophic bac
-CVE-2026-27904
-# HIGH: ubuntu - kernel: Kernel: Privilege escalation or denial of service in n
-CVE-2026-23111
-# HIGH
-CVE-2025-68121
-# HIGH
-CVE-2026-25679
-# HIGH: ubuntu - kernel: kernel: Privilege escalation or denial of service via
-CVE-2026-23231
-# HIGH: node-pkg - picomatch: Picomatch: Regular Expression Denial of Service v
-CVE-2026-33671
-# HIGH
-CVE-2026-23112
+# HIGH: ubuntu - kernel: crypto: algif_aead - Revert to operating out-of-place
+CVE-2026-31431
+
+CVE-2026-33811
+CVE-2026-33814
+CVE-2026-39820
+CVE-2026-39836
+CVE-2026-42499
