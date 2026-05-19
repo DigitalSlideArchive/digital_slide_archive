@@ -11,11 +11,5 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
-# HIGH: ubuntu - kernel: crypto: algif_aead - Revert to operating out-of-place
-CVE-2026-31431
-
-CVE-2026-33811
-CVE-2026-33814
-CVE-2026-39820
-CVE-2026-39836
-CVE-2026-42499
+# HIGH: ubuntu - kernel: Read root-owned files as an unprivileged user
+CVE-2026-46333
