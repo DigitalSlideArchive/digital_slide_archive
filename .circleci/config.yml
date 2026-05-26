@@ -197,10 +197,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.13
+          name: Use Python 3.14
           command: |
             pyenv versions
-            pyenv global 3.13
+            pyenv global 3.14
             pip --version
       - run:
           name: Check provisioning defaults match
@@ -269,10 +269,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.13
+          name: Use Python 3.14
           command: |
             pyenv versions
-            pyenv global 3.13
+            pyenv global 3.14
             pip --version
       - run:
           name: Run docker compose up
@@ -289,10 +289,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.13
+          name: Use Python 3.14
           command: |
             pyenv versions
-            pyenv global 3.13
+            pyenv global 3.14
             pip --version
       - run:
           name: Run docker compose up
@@ -311,10 +311,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.13
+          name: Use Python 3.14
           command: |
             pyenv versions
-            pyenv global 3.13
+            pyenv global 3.14
             pip --version
       - run:
           name: Run docker compose up
@@ -333,10 +333,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.13
+          name: Use Python 3.14
           command: |
             pyenv versions
-            pyenv global 3.13
+            pyenv global 3.14
             pip --version
       - run:
           name: Run docker compose up
@@ -353,10 +353,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Use Python 3.13
+          name: Use Python 3.14
           command: |
             pyenv versions
-            pyenv global 3.13
+            pyenv global 3.14
             pip --version
       - run:
           name: Run docker compose up
@@ -493,7 +493,7 @@ jobs:
           command: TRIVY_DISABLE_VEX_NOTICE=true trivy image --scanners vuln image --input /tmp/workspace/dsa_common_5.tar --exit-code 0 --severity LOW,MEDIUM,UNKNOWN --no-progress
   check-for-updates:
     docker:
-      - image: python:3.13-slim
+      - image: python:3.14-slim
     steps:
       - checkout
       - run:
