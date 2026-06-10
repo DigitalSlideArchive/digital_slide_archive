@@ -11,5 +11,15 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
-# HIGH: ubuntu - kernel: Read root-owned files as an unprivileged user
-CVE-2026-46333
+# HIGH: ubuntu - kernel: mm: call ->free_folio() directly in folio_unmap_invali
+CVE-2026-31589
+# HIGH: ubuntu - kernel: usbip: validate number_of_packets in usbip_pack_ret_su
+CVE-2026-31607
+# CRITICAL: ubuntu - kernel: smb: server: avoid double-free in smb_direct_free_
+CVE-2026-31608
+# HIGH: ubuntu - kernel: ksmbd: fix out-of-bounds write in smb2_get_ea() EA ali
+CVE-2026-31705
+# HIGH: ubuntu - kernel: ksmbd: fix use-after-free in __ksmbd_close_fd() via du
+CVE-2026-31718
+# HIGH: ubuntu - Issue summary: A specially crafted PKCS#7 or S/MIME signed mes
+CVE-2026-45447
