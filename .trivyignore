@@ -11,6 +11,8 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
+# HIGH: ubuntu - Improper isolation of shared resources within the CPU operatio
+CVE-2025-54518
 # HIGH: ubuntu - kernel: mm: call ->free_folio() directly in folio_unmap_invali
 CVE-2026-31589
 # HIGH: ubuntu - kernel: usbip: validate number_of_packets in usbip_pack_ret_su
@@ -21,5 +23,37 @@ CVE-2026-31608
 CVE-2026-31705
 # HIGH: ubuntu - kernel: ksmbd: fix use-after-free in __ksmbd_close_fd() via du
 CVE-2026-31718
-# HIGH: ubuntu - Issue summary: A specially crafted PKCS#7 or S/MIME signed mes
-CVE-2026-45447
+# HIGH: ubuntu - kernel: crypto: pcrypt - Fix handling of MAY_BACKLOG requests
+CVE-2026-43493
+# CRITICAL: ubuntu - kernel: ipv6: rpl: reserve mac_len headroom when recompres
+CVE-2026-43501
+# CRITICAL: ubuntu - kernel: rxrpc: Fix re-decryption of RESPONSE packets
+CVE-2026-45988
+# HIGH: ubuntu - kernel: rxgk: Fix potential integer overflow in length check
+CVE-2026-46039
+# CRITICAL: ubuntu - kernel: RDMA/rxe: Validate pad and ICRC before payload_siz
+CVE-2026-46043
+# HIGH: ubuntu - kernel: libceph: Fix slab-out-of-bounds access in auth message
+CVE-2026-46119
+# CRITICAL: ubuntu - kernel: nvmet-tcp: fix race between ICReq handling and que
+CVE-2026-46135
+# HIGH: ubuntu - kernel: smb/client: fix out-of-bounds read in symlink_data()
+CVE-2026-46185
+# HIGH: ubuntu - kernel: smb: client: validate dacloffset before building DACL
+CVE-2026-46195
+# HIGH: ubuntu - kernel: ibmveth: Disable GSO for packets with small MSS
+CVE-2026-46273
+# HIGH: ubuntu - kernel: io-wq: check that the predecessor is hashed in io_wq_r
+CVE-2026-46274
+# HIGH: ubuntu - kernel: Bluetooth: hci_uart: fix UAFs and race conditions in c
+CVE-2026-46275
+# HIGH: ubuntu - kernel: mm/zone_device: do not touch device folio after callin
+CVE-2026-46277
+# HIGH: ubuntu - kernel: nvmet: avoid recursive nvmet-wq flush in nvmet_ctrl_fr
+CVE-2026-46304
+# HIGH: ubuntu - kernel: drm/amdgpu/userq: fix access to stale wptr mapping
+CVE-2026-46311
+# HIGH: ubuntu - kernel: net/sched: act_ct: Only release RCU read lock after ct
+CVE-2026-46319
+# HIGH: ubuntu - kernel: tap: free page on error paths in tap_get_user_xdp()
+CVE-2026-46320
