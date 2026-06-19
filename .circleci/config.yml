@@ -57,7 +57,7 @@ jobs:
   test-cli-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommondocker
@@ -68,7 +68,7 @@ jobs:
   test-cli-common-5:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommon5docker
@@ -79,7 +79,7 @@ jobs:
   test-proxy-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommondocker
@@ -117,7 +117,7 @@ jobs:
   test-proxy-common-5:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommon5docker
@@ -155,7 +155,7 @@ jobs:
   test-girder-build-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommondocker
@@ -166,7 +166,7 @@ jobs:
   test-histomicsui-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     resource_class: large
     steps:
       - checkout
@@ -179,7 +179,7 @@ jobs:
   test-histomicsui-common-5:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     resource_class: large
     steps:
       - checkout
@@ -193,7 +193,7 @@ jobs:
   docker-compose:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - run:
@@ -265,7 +265,7 @@ jobs:
   docker-compose-minimal:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - run:
@@ -285,7 +285,7 @@ jobs:
   docker-compose-external-worker:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - run:
@@ -307,7 +307,7 @@ jobs:
   docker-compose-external-worker-5:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - run:
@@ -329,7 +329,7 @@ jobs:
   docker-compose-with-dive-volview:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - run:
@@ -349,7 +349,7 @@ jobs:
   docker-compose-5:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - run:
@@ -379,7 +379,7 @@ jobs:
   publish-docker-common:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommondocker
@@ -411,7 +411,7 @@ jobs:
   publish-docker-common-5:
     working_directory: ~/project
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2404:2026.05.1
     steps:
       - checkout
       - usecommon5docker
