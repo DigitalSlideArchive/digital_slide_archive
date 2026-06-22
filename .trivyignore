@@ -11,6 +11,8 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
+# HIGH: node-pkg - undici: undici: Denial of Service due to unbounded memory gr
+CVE-2026-12151
 # HIGH: ubuntu - kernel: ext4: guard against EA inode refcount underflow in xat
 CVE-2025-40190
 # HIGH: ubuntu - Improper isolation of shared resources within the CPU operatio
