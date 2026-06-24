@@ -11,6 +11,10 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
+# HIGH: jar - jackson-databind contains the general-purpose data-binding functi
+CVE-2026-54512
+# HIGH: jar - jackson-databind contains the general-purpose data-binding functi
+CVE-2026-54513
 # HIGH: node-pkg - undici: undici: Denial of Service due to unbounded memory gr
 CVE-2026-12151
 # HIGH: ubuntu - kernel: ext4: guard against EA inode refcount underflow in xat

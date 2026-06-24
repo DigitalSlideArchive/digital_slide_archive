@@ -100,7 +100,7 @@ services:
     profiles:
       - server
     image: redis
-    command: ["redis-server", "--maxmemory", "4096MB", "--maxmemory-policy", "allkeys-lru"]
+    command: ["redis-server", "--maxmemory", "4096MB", "--maxmemory-policy", "volatile-lru"]
     restart: unless-stopped
     logging:
       options:

@@ -187,7 +187,7 @@ services:
     volumes:
       - ./start_redis.sh:/usr/start_redis.sh:ro
     entrypoint: ["/usr/start_redis.sh"]
-    # command: ["redis-server", "--maxmemory", "4096MB", "--maxmemory-policy", "allkeys-lru"]
+    # command: ["redis-server", "--maxmemory", "4096MB", "--maxmemory-policy", "volatile-lru"]
     restart: unless-stopped
     logging:
       options:
