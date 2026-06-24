@@ -5,6 +5,14 @@ if [[ -z "$DSA_USER" ]]; then
   echo "Set the DSA_USER before starting (e.g, DSA_USER=\$$(id -u):\$$(id -g) <up command>"
   exit 1
 fi
+if [[ ! "$DSA_USER" =~ ^[0-9]+:[0-9]+$ ]]; then
+  echo "DSA_USER must be in UID:GID format."
+  exit 1
+fi
+if (( ${DSA_USER%%:*} == 0 || ${DSA_USER#*:} == 0 )); then
+  echo "DSA_USER cannot specify the root user or root group (UID 0 or GID 0)."
+  exit 1
+fi
 # add a user with the DSA_USER's id; this user is named ubuntu if it doesn't
 # exist.
 adduser --uid ${DSA_USER%%:*} --disabled-password --gecos "" ubuntu 2>/dev/null
