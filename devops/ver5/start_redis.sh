@@ -49,4 +49,4 @@ USE_MB=$(($USE_BYTES/1024/1024))
 echo "Detected total memory: $((TOTAL_BYTES/1024/1024))MB"
 echo "Using maxmemory: $USE_MB MB (min of proportion=${PROP}, fixed=$(($MAX_BYTES/1024/1024))MB)"
 
-exec redis-server --maxmemory "${USE_MB}mb" --maxmemory-policy allkeys-lru
+exec redis-server --maxmemory "${USE_MB}mb" --maxmemory-policy volatile-lru
