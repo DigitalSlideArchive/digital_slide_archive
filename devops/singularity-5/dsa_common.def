@@ -1,0 +1,80 @@
+Bootstrap: docker
+From: dsarchive/dsa_common_5
+
+%environment
+    export NVM_DIR=/root_opt/nvm
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    [ -s /root_opt/venv/bin/activate ] && . /root_opt/venv/bin/activate
+
+%post -c /bin/bash
+    set -euxo pipefail
+
+    # install nvm / node properly
+    export NVM_DIR=/opt/nvm
+
+    git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+    . "$NVM_DIR/nvm.sh"
+
+    nvm install 24
+    nvm alias default 24
+    nvm use default
+
+    # install pyaml in virtual environment
+    . /opt/venv/bin/activate
+    /opt/venv/bin/pip install pyaml setuptools
+
+    # install apptainer
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        fuse3 \
+        software-properties-common \
+        squashfs-tools \
+        uidmap \
+        wget
+
+    # Prefer distro package if available; otherwise install a pinned .deb from
+    # GitHub releases (works in environments where Launchpad PPAs are blocked).
+    if ! apt-get install -y --no-install-recommends apptainer; then
+        APPTAINER_VERSION="${APPTAINER_VERSION:-1.4.3}"
+        wget -O /tmp/apptainer.deb \
+            "https://github.com/apptainer/apptainer/releases/download/v${APPTAINER_VERSION}/apptainer_${APPTAINER_VERSION}_amd64.deb"
+        apt-get install -y /tmp/apptainer.deb
+        rm -f /tmp/apptainer.deb
+    fi
+    apptainer --version
+
+    # preserve image /opt so it can be copied into bind-mounted /opt at startup
+    mv /opt /root_opt
+
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%runscript
+    set -x
+
+    if [ -d /opt/nvm ]; then
+        export NVM_DIR=/opt/nvm
+        . "$NVM_DIR/nvm.sh"
+    else
+        export NVM_DIR=/root_opt/nvm
+        . "$NVM_DIR/nvm.sh"
+    fi
+
+    if [ -f /opt/venv/bin/activate ]; then
+        . /opt/venv/bin/activate
+    else
+        . /root_opt/venv/bin/activate
+    fi
+
+    exec bash -c "$@"
+
+%startscript
+    set -x
+
+    # assuming that the user mounts a local directory to /opt/
+    # this is necessary for getting the correct singularity permissions
+    echo " - Copying docker image's opt (/root_opt) to user mounted /opt"
+    echo " - Make sure you're mounting a local directory to /opt"
+    cp -r /root_opt/* /opt/
+    /opt/venv/bin/pip install pyaml setuptools
