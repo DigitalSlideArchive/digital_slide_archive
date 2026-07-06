@@ -11,52 +11,26 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
-# HIGH: jar - jackson-databind contains the general-purpose data-binding functi
+# HIGH: jar - jackson-databind: jackson-databind: Arbitrary code execution via
 CVE-2026-54512
 # HIGH: jar - jackson-databind: Jackson-databind: Security bypass allows arbitr
 CVE-2026-54513
-# HIGH: node-pkg - undici: undici: Denial of Service due to unbounded memory gr
-CVE-2026-12151
 # HIGH: ubuntu - kernel: ext4: guard against EA inode refcount underflow in xat
 CVE-2025-40190
 # HIGH: ubuntu - kernel: xen: AMD Zen 2 Processors: Privilege escalation via im
 CVE-2025-54518
-# HIGH: ubuntu - kernel: mm: call ->free_folio() directly in folio_unmap_invali
-CVE-2026-31589
-# HIGH: ubuntu - kernel: usbip: validate number_of_packets in usbip_pack_ret_su
-CVE-2026-31607
-# CRITICAL: ubuntu - kernel: smb: server: avoid double-free in smb_direct_free_
-CVE-2026-31608
-# HIGH: ubuntu - kernel: ksmbd: fix out-of-bounds write in smb2_get_ea() EA ali
-CVE-2026-31705
-# HIGH: ubuntu - kernel: ksmbd: fix use-after-free in __ksmbd_close_fd() via du
-CVE-2026-31718
-# HIGH: ubuntu - kernel: crypto: pcrypt - Fix handling of MAY_BACKLOG requests
-CVE-2026-43493
-# CRITICAL: ubuntu - kernel: ipv6: rpl: reserve mac_len headroom when recompres
-CVE-2026-43501
-# CRITICAL: ubuntu - kernel: rxrpc: Fix re-decryption of RESPONSE packets
-CVE-2026-45988
-# HIGH: ubuntu - kernel: rxgk: Fix potential integer overflow in length check
-CVE-2026-46039
-# CRITICAL: ubuntu - kernel: RDMA/rxe: Validate pad and ICRC before payload_siz
-CVE-2026-46043
-# HIGH: ubuntu - kernel: libceph: Fix slab-out-of-bounds access in auth message
-CVE-2026-46119
-# CRITICAL: ubuntu - kernel: nvmet-tcp: fix race between ICReq handling and que
-CVE-2026-46135
-# HIGH: ubuntu - kernel: smb/client: fix out-of-bounds read in symlink_data()
-CVE-2026-46185
-# HIGH: ubuntu - kernel: smb: client: validate dacloffset before building DACL
-CVE-2026-46195
+# HIGH: ubuntu - kernel: ksmbd: validate inherited ACE SID length
+CVE-2026-43490
+# HIGH: ubuntu - kernel: net/rds: handle zerocopy send cleanup before the messa
+CVE-2026-43502
+# HIGH: ubuntu - kernel: eventpoll: fix ep_remove struct eventpoll / struct fil
+CVE-2026-46242
 # HIGH: ubuntu - kernel: ibmveth: Disable GSO for packets with small MSS
 CVE-2026-46273
 # HIGH: ubuntu - kernel: io-wq: check that the predecessor is hashed in io_wq_r
 CVE-2026-46274
 # HIGH: ubuntu - kernel: Bluetooth: hci_uart: fix UAFs and race conditions in c
 CVE-2026-46275
-# HIGH: ubuntu - kernel: mm/zone_device: do not touch device folio after callin
-CVE-2026-46277
 # HIGH: ubuntu - kernel: nvmet: avoid recursive nvmet-wq flush in nvmet_ctrl_fr
 CVE-2026-46304
 # HIGH: ubuntu - kernel: drm/amdgpu/userq: fix access to stale wptr mapping
@@ -75,6 +49,24 @@ CVE-2026-52909
 CVE-2026-52910
 # HIGH: ubuntu - kernel: ksmbd: scope conn->binding slowpath to bound sessions
 CVE-2026-52911
+# HIGH: ubuntu - kernel: batman-adv: fix fragment reassembly length accounting
+CVE-2026-52914
+# HIGH: ubuntu - kernel: sctp: purge outqueue on stale COOKIE-ECHO handling
+CVE-2026-52924
+# CRITICAL: ubuntu - kernel: libceph: Fix potential out-of-bounds access in cru
+CVE-2026-52955
+# HIGH: ubuntu - kernel: libceph: Fix potential out-of-bounds access in osdmap_
+CVE-2026-52958
+# CRITICAL: ubuntu - kernel: nvmet-tcp: propagate nvmet_tcp_build_pdu_iovec() e
+CVE-2026-52989
+# CRITICAL: ubuntu - kernel: tipc: fix double-free in tipc_buf_append()
+CVE-2026-52993
+# CRITICAL: ubuntu - kernel: netfilter: conntrack: remove sprintf usage
+CVE-2026-53002
+# HIGH: ubuntu - kernel: ipv6: fix possible UAF in icmpv6_rcv()
+CVE-2026-53006
+# HIGH: ubuntu - kernel: ksmbd: fix use-after-free in smb2_open during durable
+CVE-2026-53010
 # HIGH: ubuntu - kernel: bpf: Validate node_id in arena_alloc_pages()
 CVE-2026-53031
 # HIGH: ubuntu - kernel: bpf, sockmap: Take state lock for af_unix iter
