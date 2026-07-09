@@ -169,7 +169,7 @@ CVE-2026-53260
 CVE-2026-53262
 # HIGH: ubuntu - kernel: net/sched: act_api: use RCU with deferred freeing for
 CVE-2026-53264
-# HIGH: ubuntu - kernel: netfilter: bridge: make ebt_snat ARP rewrite writable
+# HIGH: ubuntu - kernel: Linux kernel: netfilter: ebtables SNAT target writes t
 CVE-2026-53266
 # HIGH: ubuntu - kernel: netfilter: synproxy: add mutex to guard hook reference
 CVE-2026-53269
@@ -181,3 +181,5 @@ CVE-2026-53275
 CVE-2026-53276
 # HIGH: ubuntu - kernel: KVM: arm64: Take the SRCU lock for page table walks in
 CVE-2026-53277
+# HIGH: ubuntu - kernel: KVM: x86: Fix shadow paging use-after-free due to unex
+CVE-2026-53359
