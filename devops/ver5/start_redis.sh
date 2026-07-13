@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+# Use the smaller of this proportion of memory or the max bytes
 PROP_DEFAULT="0.125"
 MAX_BYTES_DEFAULT="4096MB"
 
@@ -12,9 +13,9 @@ case "$MAX_BYTES_RAW" in
     NUM=$(echo "$MAX_BYTES_RAW" | sed -E 's/[^0-9.]//g')
     UNIT=$(echo "$MAX_BYTES_RAW" | sed -E 's/[0-9.]//g' | tr '[:upper:]' '[:lower:]')
     case "$UNIT" in
-      gib|gb|g) MAX_BYTES=$(expr "$NUM * 1024 * 1024 * 1024") ;;
-      mib|mb|m) MAX_BYTES=$(expr "$NUM * 1024 * 1024") ;;
-      kib|kb|k) MAX_BYTES=$(expr "$NUM * 1024")  ;;
+      gib|gb|g) MAX_BYTES=$(awk "BEGIN {printf \"%.0f\", $NUM * 1024 * 1024 * 1024}") ;;
+      mib|mb|m) MAX_BYTES=$(awk "BEGIN {printf \"%.0f\", $NUM * 1024 * 1024}") ;;
+      kib|kb|k) MAX_BYTES=$(awk "BEGIN {printf \"%.0f\", $NUM * 1024}")  ;;
       b|'') MAX_BYTES="$NUM" ;;
       *) echo "Unknown unit in REDIS_MAX_MEMORY_BYTES: $UNIT" >&2; exit 1 ;;
     esac
@@ -36,9 +37,9 @@ TOTAL_BYTES=$( \
   echo $(( $2 * 1024 )) \
 )
 
-PROP_BYTES=$(expr "$TOTAL_BYTES * $PROP")
+PROP_BYTES=$(awk "BEGIN {printf \"%.0f\", ($TOTAL_BYTES) * ($PROP)}")
 
-if [ "$PROP_BYTES" -lt "$MAX_BYTES" ]; then
+if [ "$(awk "BEGIN{print ($PROP_BYTES < $MAX_BYTES)}")" = "1" ]; then
   USE_BYTES="$PROP_BYTES"
 else
   USE_BYTES="$MAX_BYTES"
