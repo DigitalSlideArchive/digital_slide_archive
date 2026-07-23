@@ -6,6 +6,7 @@ ENV LANG=en_US.UTF-8
 # Install some additional packages
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    tini \
     # For ease of running tox tests inside containers \
     iptables \
     dnsutils \
@@ -42,9 +43,6 @@ RUN mkdir -p /etc/apt/keyrings && \
     sync && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -r {} \+
-
-RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /usr/bin/tini && \
-    chmod +x /usr/bin/tini
 
 # Make a virtualenv with our preferred python
 RUN python3.11 -m venv /opt/venv && \
@@ -165,6 +163,6 @@ ARG DSA_VERSIONS
 ENV DSA_VERSIONS="$DSA_VERSIONS"
 
 # Better shutdown signalling
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["tini", "--"]
 
 CMD ["bash"]
