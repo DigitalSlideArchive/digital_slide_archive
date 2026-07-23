@@ -2,6 +2,7 @@ FROM python:3.13-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    tini \
     curl \
     git \
     && \
@@ -19,9 +20,6 @@ RUN . ~/.bashrc && \
 ENV PATH="/usr/local/node:$PATH"
 
 RUN npm --version && node --version
-
-RUN curl -LJ https://github.com/krallin/tini/releases/download/v0.19.0/tini -o /usr/bin/tini && \
-    chmod +x /usr/bin/tini
 
 RUN pip install \
     girder-homepage \
@@ -61,6 +59,6 @@ RUN cd /opt && \
 
 COPY provision.py .
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["tini", "--"]
 
 CMD python provision.py --sample-data --slicer-cli-image= && (celery -A girder_worker.app worker -Q local --concurrency 4 &) && girder serve --database mongodb://mongodb:27017/girder --host=0.0.0.0
