@@ -15,6 +15,8 @@ CVE-2025-52999
 CVE-2026-54512
 # HIGH: jar - jackson-databind: Jackson-databind: Security bypass allows arbitr
 CVE-2026-54513
+# HIGH: jar - jackson-core: Async parser maxNumberLength bypass via chunked dig
+GHSA-r7wm-3cxj-wff9
 # HIGH: ubuntu - kernel: ext4: guard against EA inode refcount underflow in xat
 CVE-2025-40190
 # HIGH: ubuntu - kernel: net/sched: act_pedit: extend the writable skb range pe
