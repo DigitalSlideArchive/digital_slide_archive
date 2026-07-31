@@ -42,19 +42,20 @@ RUN mkdir -p /etc/apt/keyrings && \
     find / -xdev -name '*.py[oc]' -type f -exec rm {} \+ && \
     find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
 
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Make a virtualenv with our preferred python
 RUN python3.13 -m venv /opt/venv && \
     sync && \
-    find / -xdev -name __pycache__ -type d -exec rm -rf {} \+ || true
-
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Make sure core packages are up to date
-RUN python --version && \
+    # Make sure core packages are up to date \
+    python --version && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -U tox wheel && \
+    # Remove stale vendor files \
+    find /opt/venv -name 'vendor.txt' -delete && \
+    find /opt/venv -name 'bom.cdx.json' -delete && \
     sync && \
-    find / -xdev -name __pycache__ -type d -exec rm -rf {} \+
+    find / -xdev -name __pycache__ -type d -exec rm -r {} \+
 
 ENV SKIP_SOURCE_MAPS=true
 
