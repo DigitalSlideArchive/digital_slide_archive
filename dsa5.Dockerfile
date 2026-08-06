@@ -207,6 +207,10 @@ RUN pip install --no-cache-dir \
     sync && \
     find / -xdev -type d -name __pycache__ -exec rm -r {} \+
 
+# Remove this (it will cascade to a lot of other packages) to reduce CVE
+# complaints
+RUN apt-get remove --auto-remove -y linux-libc-dev
+
 # When running the worker, adjust some settings
 RUN echo 'task_reject_on_worker_lost = True' >> /opt/girder/worker/girder_worker/celeryconfig.py && \
     echo 'task_acks_late = True' >> /opt/girder/worker/girder_worker/celeryconfig.py

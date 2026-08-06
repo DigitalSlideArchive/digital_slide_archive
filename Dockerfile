@@ -140,6 +140,10 @@ RUN npm install -g phantomjs-prebuilt --unsafe-perm && \
     rm -rf /tmp/* ~/.npm && \
     rdfind -minsize 1024 -makehardlinks true -makeresultsfile false /root/.nvm
 
+# Remove this (it will cascade to a lot of other packages) to reduce CVE
+# complaints
+RUN apt-get remove --auto-remove -y linux-libc-dev
+
 # When running the worker, adjust some settings
 RUN echo 'task_reject_on_worker_lost = True' >> /opt/girder_worker/girder_worker/celeryconfig.py
 RUN echo 'task_acks_late = True' >> /opt/girder_worker/girder_worker/celeryconfig.py
