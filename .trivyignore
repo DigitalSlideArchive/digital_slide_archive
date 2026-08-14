@@ -5,6 +5,10 @@
 
 # The ubuntu issues cannot be reached
 
+# HIGH: gobinary - golang.org/x/net/idna: golang: net/http: golang.org/x/net/id
+CVE-2026-39821
+# HIGH: gobinary - golang.org/x/net/dns/dnsmessage: golang.org/x/net/dns/dnsmes
+CVE-2026-46600
 # HIGH: jar - okhttp: information disclosure via improperly used cryptographic
 CVE-2021-0341
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untrusted
@@ -19,7 +23,8 @@ CVE-2026-54513
 GHSA-r7wm-3cxj-wff9
 # HIGH: node-pkg - brace-expansion: Brace-expansion: Denial of Service via memo
 CVE-2026-14257
-# HIGH: node-pkg - brace-expansion: brace-expansion: Denial of Service via unbo
+CVE-2026-56876
+# HIGH: node-pkg - brace-expansion: DoS via unbounded intermediate arrays, bypa
 CVE-2026-69152
 # HIGH: node-pkg - ip-address: ip-address: Inconsistent IP address parsing lead
 CVE-2026-69192
