@@ -5,10 +5,22 @@
 
 # The ubuntu issues cannot be reached
 
+# HIGH: gobinary - encoding/asn1: golang: Go encoding/asn1: Denial of Service v
+CVE-2026-33818
 # HIGH: gobinary - golang.org/x/net/idna: golang: net/http: golang.org/x/net/id
 CVE-2026-39821
 # HIGH: gobinary - golang.org/x/net/dns/dnsmessage: golang.org/x/net/dns/dnsmes
 CVE-2026-46600
+# HIGH: gobinary - net/http: golang: Go net/http: Unencrypted HTTP/2 connection
+CVE-2026-56853
+# HIGH: gobinary - html/template: golang: Go html/template: Cross-Site Scriptin
+CVE-2026-56858
+# HIGH: gobinary - encoding/xml: golang: Go: Denial of Service via XML decoding
+CVE-2026-56859
+# HIGH: gobinary - net/url: golang: golang net/url: Denial of Service from quad
+CVE-2026-56860
+# HIGH: gobinary - crypto/tls: golang: Golang crypto/tls: Denial of Service via
+CVE-2026-56862
 # HIGH: jar - okhttp: information disclosure via improperly used cryptographic
 CVE-2021-0341
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untrusted
@@ -23,6 +35,7 @@ CVE-2026-54513
 GHSA-r7wm-3cxj-wff9
 # HIGH: node-pkg - brace-expansion: Brace-expansion: Denial of Service via memo
 CVE-2026-14257
+# HIGH: node-pkg - extract-zip: github.com/maxogden/extract-zip: extract-zip: A
 CVE-2026-56876
 # HIGH: node-pkg - brace-expansion: DoS via unbounded intermediate arrays, bypa
 CVE-2026-69152
