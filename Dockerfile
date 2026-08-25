@@ -136,6 +136,7 @@ RUN npm install -g phantomjs-prebuilt --unsafe-perm && \
     cd /root/.nvm/versions/node/v14.21.3/lib/node_modules/phantomjs-prebuilt/node_modules/request && \
     npm install 'form-data@^2.5.5' && \
     npm install 'qs@^6.14.1' && \
+    rm -rf /root/.nvm/versions/node/v14.21.3/lib/node_modules/phantomjs-prebuilt/node_modules/.bin/extract-zip /root/.nvm/versions/node/v14.21.3/lib/node_modules/phantomjs-prebuilt/node_modules/extract-zip && \
     sync && \
     rm -rf /tmp/* ~/.npm && \
     rdfind -minsize 1024 -makehardlinks true -makeresultsfile false /root/.nvm
