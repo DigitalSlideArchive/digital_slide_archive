@@ -3,7 +3,9 @@
 # In bioformats_package.jar: this shouldn't be an issue because of how xml is
 # used and because we don't pass urls to bioformats
 
-# The ubuntu issues cannot be reached
+# The gobinary issues are on the docker binary and cannot be reached
+
+# The node-pkg issues are from the latest node; since we don't actually run node except in testing these are deemed safe
 
 # HIGH: gobinary - encoding/asn1: golang: Go encoding/asn1: Denial of Service v
 CVE-2026-33818
@@ -35,9 +37,9 @@ CVE-2026-54513
 GHSA-r7wm-3cxj-wff9
 # HIGH: node-pkg - brace-expansion: Brace-expansion: Denial of Service via memo
 CVE-2026-14257
-# HIGH: node-pkg - extract-zip: github.com/maxogden/extract-zip: extract-zip: A
-CVE-2026-56876
 # HIGH: node-pkg - brace-expansion: DoS via unbounded intermediate arrays, bypa
 CVE-2026-69152
 # HIGH: node-pkg - ip-address: ip-address: Inconsistent IP address parsing lead
 CVE-2026-69192
+# HIGH: node-pkg - tar: node-tar: Denial of Service via crafted long-path tar a
+CVE-2026-73566
