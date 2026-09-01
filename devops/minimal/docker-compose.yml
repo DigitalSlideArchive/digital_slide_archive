@@ -18,6 +18,10 @@ services:
   mongodb:
     image: "mongo:latest"
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     volumes:
       - db:/data/db
   redis:

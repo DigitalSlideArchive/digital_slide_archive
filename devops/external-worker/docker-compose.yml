@@ -67,6 +67,10 @@ services:
     # so that database files are owned by yourself.
     user: ${DSA_USER:-PLEASE SET DSA_USER}
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     volumes:
       # Location to store database files
       - ../dsa/db:/data/db
