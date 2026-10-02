@@ -1,0 +1,65 @@
+# Provisioning configuration, faithful to the docker-compose reference in
+# devops/dsa.  The provision.py script and provision.yaml are mounted into the
+# Girder container at the paths the start script expects.
+#
+# `provision.py` does NOT need to be overridden: the image already contains a
+# copy at /opt/digital_slide_archive/devops/dsa/provision.py.  We only supply
+# the YAML that selects which settings to apply.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dsa3.fullname" . }}-provision
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+data:
+  provision.yaml: |
+    ---
+    force: False
+    samples: False
+    clean-delete-locks: True
+    sample-collection: Samples
+    sample-folder: Images
+    use-defaults: True
+    mongo-compat: True
+    rebuild-client: False
+    admin:
+      login: admin
+      password: {{ .Values.credentials.girderAdminPassword | quote }}
+      firstName: Admin
+      lastName: Admin
+      email: admin@nowhere.nil
+      public: True
+    assetstore:
+      method: createFilesystemAssetstore
+      name: Assetstore
+      root: /assetstore
+    resources:
+      - model: collection
+        name: Tasks
+        creator: resource:admin
+        public: True
+      - model: folder
+        parent: resource:collection/Tasks
+        parentType: collection
+        name: "Slicer CLI Web Tasks"
+        creator: resource:admin
+        public: True
+    settings:
+      worker.broker: {{ printf "amqp://%s:%s@%s" .Values.credentials.rabbitmqUser .Values.credentials.rabbitmqPassword (include "dsa3.rabbitmqHost" .) | quote }}
+      worker.backend: {{ printf "rpc://%s:%s@%s" .Values.credentials.rabbitmqUser .Values.credentials.rabbitmqPassword (include "dsa3.rabbitmqHost" .) | quote }}
+      worker.api_url: {{ printf "http://%s:8080/api/v1" (include "dsa3.fullname" .) | quote }}
+      worker.direct_path: True
+      core.brand_name: "Digital Slide Archive"
+      histomicsui.webroot_path: "histomics"
+      histomicsui.alternate_webroot_path: "histomicstk"
+      histomicsui.delete_annotations_after_ingest: True
+      slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
+    {{- if .Values.slicerCli.pullImages }}
+    slicer-cli-image-pull:
+    {{- range .Values.slicerCli.images }}
+      - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+    worker-rabbitmq-user: {{ .Values.credentials.rabbitmqUser | quote }}
+    worker-rabbitmq-pass: {{ .Values.credentials.rabbitmqPassword | quote }}
+    worker-config: /opt/girder_worker/girder_worker/worker.local.cfg

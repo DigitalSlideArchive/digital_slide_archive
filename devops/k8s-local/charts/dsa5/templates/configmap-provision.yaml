@@ -1,0 +1,70 @@
+# Provisioning configuration, faithful to the docker-compose reference in
+# devops/ver5.  The provision.py script already lives in the image at
+# /opt/digital_slide_archive/devops/ver5/provision.py; we only supply the YAML.
+#
+# NOTE: devops/ver5/provision.local.yaml adds pip packages and shell steps for
+# local development.  Those are intentionally not included here; add them via
+# `girder.extraProvisionPip` / `girder.extraProvisionShell` if needed.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dsa5.fullname" . }}-provision
+  labels:
+    {{- include "dsa5.labels" . | nindent 4 }}
+data:
+  provision.yaml: |
+    ---
+    force: False
+    samples: False
+    clean-delete-locks: True
+    sample-collection: Samples
+    sample-folder: Images
+    use-defaults: True
+    mongo-compat: True
+    admin:
+      login: admin
+      password: {{ .Values.credentials.girderAdminPassword | quote }}
+      firstName: Admin
+      lastName: Admin
+      email: admin@nowhere.nil
+      public: True
+    assetstore:
+      method: createFilesystemAssetstore
+      name: Assetstore
+      root: /assetstore
+    resources:
+      - model: collection
+        name: Tasks
+        creator: resource:admin
+        public: True
+      - model: folder
+        parent: resource:collection/Tasks
+        parentType: collection
+        name: "Slicer CLI Web Tasks"
+        creator: resource:admin
+        public: True
+    settings:
+      worker.api_url: {{ printf "http://%s:8080/api/v1" (include "dsa5.fullname" .) | quote }}
+      worker.direct_path: True
+      core.brand_name: "Digital Slide Archive"
+      histomicsui.webroot_path: "histomics"
+      histomicsui.alternate_webroot_path: "histomicstk"
+      histomicsui.delete_annotations_after_ingest: True
+      slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
+    {{- if .Values.slicerCli.pullImages }}
+    slicer-cli-image-pull:
+    {{- range .Values.slicerCli.images }}
+      - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+    worker-rabbitmq-user: {{ .Values.credentials.rabbitmqUser | quote }}
+    worker-rabbitmq-pass: {{ .Values.credentials.rabbitmqPassword | quote }}
+    worker-config: /opt/girder_worker/girder_worker/worker.local.cfg
+    {{- with .Values.girder.extraProvisionPip }}
+    pip:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.girder.extraProvisionShell }}
+    shell:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}

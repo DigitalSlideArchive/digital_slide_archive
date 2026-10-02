@@ -1,0 +1,17 @@
+# The Girder 5 image ships both provision.py variants:
+#   /opt/digital_slide_archive/devops/dsa/provision.py   (Girder 3 script)
+#   /opt/digital_slide_archive/devops/ver5/provision.py  (Girder 5 script)
+#
+# The ver5 start scripts invoke the devops/dsa path.  docker-compose makes
+# that path point at the ver5 script by bind-mounting ver5/provision.py over
+# it.  We reproduce that here by mounting the ver5 provision.py at the same
+# path, so the in-image ver5 start scripts work unchanged.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dsa5.fullname" . }}-provision-script
+  labels:
+    {{- include "dsa5.labels" . | nindent 4 }}
+data:
+  provision.py: |
+    {{- .Files.Get "files/provision.py" | nindent 4 }}

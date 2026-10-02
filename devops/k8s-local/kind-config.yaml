@@ -1,0 +1,34 @@
+# kind cluster configuration for local Digital Slide Archive testing.
+#
+# This creates a single-node Kubernetes cluster running inside a Docker
+# container.  It is intended for local development and chart validation only;
+# it is not a production configuration.
+#
+# extraPortMappings publish a NodePort from the cluster to the host.  Some
+# sandboxes do not honor Docker's host port publishing, so the local test
+# scripts in this directory talk to the cluster API from a container attached
+# to the kind network instead of relying on these mappings.  They are kept
+# here so that a normal workstation can reach the DSA web interface on
+# localhost.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: dsa-local
+nodes:
+  - role: control-plane
+    # Label the control-plane node so the sample charts can schedule the DSA
+    # server and worker onto it without needing dedicated worker nodes.
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # NodePort used by the dsa3 and dsa5 charts for the Girder web interface.
+      - containerPort: 30080
+        hostPort: 30080
+        protocol: TCP
+      # NodePort reserved for a second chart running at the same time.
+      - containerPort: 30081
+        hostPort: 30081
+        protocol: TCP

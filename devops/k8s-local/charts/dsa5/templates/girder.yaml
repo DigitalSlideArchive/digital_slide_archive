@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dsa5.fullname" . }}-girder
+  labels:
+    {{- include "dsa5.labels" . | nindent 4 }}
+    app.kubernetes.io/component: girder
+spec:
+  replicas: {{ .Values.girder.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "dsa5.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: girder
+  template:
+    metadata:
+      labels:
+        {{- include "dsa5.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: girder
+      annotations:
+        checksum/provision: {{ include (print $.Template.BasePath "/configmap-provision.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "dsa5.serviceAccountName" . }}
+      initContainers:
+        # Wait for backing services before provisioning.  Without this, the
+        # Girder process can start before MongoDB or RabbitMQ accept
+        # connections and exit on a ServerSelectionTimeoutError.
+        - name: wait-for-deps
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+          args:
+            - >-
+              wait_for() { host=$1; port=$2; echo "waiting for ${host}:${port}";
+              for i in $(seq 1 120); do nc -z "$host" "$port" && return 0; sleep 2; done;
+              echo "timed out waiting for ${host}:${port}" >&2; return 1; };
+              {{- if .Values.mongodb.enabled }}
+              wait_for {{ include "dsa5.fullname" . }}-mongodb 27017 &&
+              {{- end }}
+              {{- if .Values.redis.enabled }}
+              wait_for {{ include "dsa5.fullname" . }}-redis 6379 &&
+              {{- end }}
+              {{- if .Values.rabbitmq.enabled }}
+              wait_for {{ include "dsa5.fullname" . }}-rabbitmq 5672 &&
+              {{- end }}
+              true
+      containers:
+        - name: girder
+          image: {{ include "dsa5.girderImage" . | quote }}
+          imagePullPolicy: {{ .Values.girder.image.pullPolicy }}
+          # The Girder container mounts the host Docker socket so
+          # slicer_cli_web can launch job containers.  This requires
+          # privileged mode.
+          securityContext:
+            {{- if .Values.girder.dockerSocket.enabled }}
+            privileged: true
+            {{- end }}
+          # Use the ver5 start script from the image.  It creates DSA_USER,
+          # runs the pre/main/post provisioning phases, starts the local
+          # Celery worker, and runs girder serve, matching
+          # devops/ver5/start_girder.sh.  It reads the ver5 provision.py
+          # mounted at the devops/dsa path below.
+          command:
+            - bash
+            - -c
+          args:
+            - >-
+              {{- if and .Values.girder.dockerSocket.enabled (eq .Values.girder.dockerSocket.mode "dind") }}
+              for i in $(seq 1 150); do [ -S /var/run/docker.sock ] && break; sleep 2; done;
+              {{- end }}
+              exec /opt/digital_slide_archive/devops/ver5/start_girder.sh
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            {{- include "dsa5.girderEnv" . | nindent 12 }}
+          volumeMounts:
+            {{- include "dsa5.girderVolumeMounts" . | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /api/v1/system/version
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: /api/v1/system/version
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.girder.resources | nindent 12 }}
+        {{- if and .Values.girder.dockerSocket.enabled (eq .Values.girder.dockerSocket.mode "dind") }}
+        # Docker-in-Docker daemon.  kind nodes use containerd and have no
+        # Docker socket, so a sidecar provides one.  The DSA containers talk
+        # to it via DOCKER_HOST=unix:///var/run/docker.sock, and the shared
+        # tmp volume lets launched job containers read staged files.
+        - name: dind
+          image: "{{ .Values.girder.dockerSocket.dindImage.repository }}:{{ .Values.girder.dockerSocket.dindImage.tag }}"
+          imagePullPolicy: {{ .Values.girder.dockerSocket.dindImage.pullPolicy }}
+          securityContext:
+            privileged: true
+          args:
+            - "--storage-driver=overlay2"
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run
+            - name: tmp
+              mountPath: /tmp
+        {{- end }}
+      volumes:
+        - name: assetstore
+          persistentVolumeClaim:
+            claimName: {{ include "dsa5.fullname" . }}-assetstore
+        - name: provision
+          configMap:
+            name: {{ include "dsa5.fullname" . }}-provision
+        - name: provision-script
+          configMap:
+            name: {{ include "dsa5.fullname" . }}-provision-script
+            defaultMode: 0755
+        {{- if .Values.girder.dockerSocket.enabled }}
+        - name: docker-socket
+          {{- if eq .Values.girder.dockerSocket.mode "dind" }}
+          emptyDir: {}
+          {{- else }}
+          hostPath:
+            path: {{ .Values.girder.dockerSocket.path }}
+            type: Socket
+          {{- end }}
+        {{- end }}
+        {{- if and .Values.girder.dockerSocket.enabled (eq .Values.girder.dockerSocket.mode "dind") }}
+        - name: tmp
+          emptyDir: {}
+        {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "dsa5.fullname" . }}-assetstore
+  labels:
+    {{- include "dsa5.labels" . | nindent 4 }}
+    app.kubernetes.io/component: girder
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.assetstore.accessModes | nindent 4 }}
+  {{- if .Values.persistence.assetstore.storageClass }}
+  storageClassName: {{ .Values.persistence.assetstore.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.assetstore.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dsa5.fullname" . }}
+  labels:
+    {{- include "dsa5.labels" . | nindent 4 }}
+    app.kubernetes.io/component: girder
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "dsa5.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: girder
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}

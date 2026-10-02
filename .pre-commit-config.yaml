@@ -20,6 +20,9 @@ repos:
   # - id: check-toml
   # - id: check-xml
   - id: check-yaml
+    # Helm chart templates contain Go templating and are not valid YAML on
+    # their own; validate them with `helm lint`/`helm template` instead.
+    exclude: ^devops/k8s-local/charts/.*/templates/
   - id: debug-statements
   - id: destroyed-symlinks
   - id: detect-private-key
@@ -72,3 +75,13 @@ repos:
   rev: 7.1.1
   hooks:
     - id: flake8
+- repo: https://github.com/gruntwork-io/pre-commit
+  rev: v0.1.30
+  hooks:
+    - id: helmlint
+      # `helmlint` resolves each changed file to its chart root (the directory
+      # containing Chart.yaml) and runs `helm lint` once per chart.  Restrict
+      # it to the local k8s charts so it does not lint unrelated YAML.
+      files: ^devops/k8s-local/charts/
+      args:
+        - --strict

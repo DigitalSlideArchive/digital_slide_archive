@@ -1,0 +1,13 @@
+apiVersion: v2
+name: dsa5
+description: >-
+  Digital Slide Archive on Girder 5.  Local-development oriented chart that
+  mirrors the docker-compose reference deployment in devops/ver5.
+type: application
+version: 0.1.0
+appVersion: "5"
+keywords:
+  - digital-slide-archive
+  - girder
+  - histomicsui
+  - digital-pathology
