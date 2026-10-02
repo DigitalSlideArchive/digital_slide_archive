@@ -19,7 +19,9 @@ CVE-2026-54512
 CVE-2026-54513
 # HIGH: jar - com.fasterxml.jackson.core/jackson-databind: tools.jackson.core/j
 CVE-2026-68497
-# HIGH: jar - TypeDeserializerBase._findDeserializer() in FasterXML jackson-dat
+# HIGH: jar - com.fasterxml.jackson.core/jackson-core: Jackson-core: Denial of
+CVE-2026-89425
+# HIGH: jar - jackson-databind: com.fasterxml.jackson/jackson-core: jackson-dat
 CVE-2026-91776
 # HIGH: jar - Forward-reference completion for @JsonIdentityInfo object IDs in
 CVE-2026-91777
