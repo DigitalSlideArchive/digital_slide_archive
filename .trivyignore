@@ -17,19 +17,21 @@ CVE-2025-52999
 CVE-2026-54512
 # HIGH: jar - jackson-databind: Jackson-databind: Security bypass allows arbitr
 CVE-2026-54513
+# HIGH: jar - com.fasterxml.jackson.core/jackson-core: tools.jackson.core/jacks
+CVE-2026-68494
 # HIGH: jar - com.fasterxml.jackson.core/jackson-databind: tools.jackson.core/j
 CVE-2026-68497
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: Jackson-core: Denial of
 CVE-2026-89425
 # HIGH: jar - jackson-databind: com.fasterxml.jackson/jackson-core: jackson-dat
 CVE-2026-91776
-# HIGH: jar - Forward-reference completion for @JsonIdentityInfo object IDs in
+# HIGH: jar - com.fasterxml.jackson.core/jackson-databind: Jackson-databind: De
 CVE-2026-91777
-# HIGH: jar - jackson-core: Async parser maxNumberLength bypass via chunked dig
-GHSA-r7wm-3cxj-wff9
 # HIGH: node-pkg - brace-expansion: brace-expansion: Denial of Service via stac
 CVE-2026-102276
 # HIGH: node-pkg - brace-expansion: brace-expansion: Denial of Service via unco
 CVE-2026-102278
 # HIGH: node-pkg - undici: undici: Denial of Service via unrequested WebSocket
 CVE-2026-19534
+# HIGH: node-pkg - http-cache-semantics: http-cache-semantics: Information Disc
+CVE-2026-93748
