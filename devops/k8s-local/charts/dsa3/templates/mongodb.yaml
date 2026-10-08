@@ -1,0 +1,100 @@
+{{- if .Values.mongodb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dsa3.fullname" . }}-mongodb
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  replicas: 1
+  strategy:
+    # The database uses a ReadWriteOnce volume; a rolling update would deadlock
+    # waiting for the old pod to release it.
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "dsa3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: mongodb
+  template:
+    metadata:
+      labels:
+        {{- include "dsa3.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+          imagePullPolicy: {{ .Values.mongodb.image.pullPolicy }}
+          # Limit maxConns to reduce shared memory demand, as the compose file
+          # does.
+          args:
+            - "--maxConns"
+            - "1000"
+          ports:
+            - name: mongodb
+              containerPort: 27017
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - >-
+                  mongosh --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - >-
+                  mongosh --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 10
+          resources:
+            {{- toYaml .Values.mongodb.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "dsa3.fullname" . }}-mongodb
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "dsa3.fullname" . }}-mongodb
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.persistence.mongodb.storageClass }}
+  storageClassName: {{ .Values.persistence.mongodb.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.mongodb.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dsa3.fullname" . }}-mongodb
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "dsa3.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
+{{- end }}

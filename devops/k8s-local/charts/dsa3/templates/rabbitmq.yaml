@@ -1,0 +1,139 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dsa3.fullname" . }}-rabbitmq
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq
+data:
+  rabbitmq.conf: |
+    {{- .Files.Get "files/rabbitmq.conf" | nindent 4 }}
+  # RabbitMQ's advanced.config is Erlang terms; it must NOT contain '# '
+  # comments (Erlang uses '%').  Embed the repository file verbatim.
+  advanced.config: |
+    {{- .Files.Get "files/rabbitmq.advanced.config" | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dsa3.fullname" . }}-rabbitmq
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "dsa3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: rabbitmq
+  template:
+    metadata:
+      labels:
+        {{- include "dsa3.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: "{{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag }}"
+          imagePullPolicy: {{ .Values.rabbitmq.image.pullPolicy }}
+          # Mirror the docker-compose reference: after the broker starts,
+          # create a non-guest user and grant it permissions.
+          # Do NOT override the image entrypoint: docker-entrypoint.sh sets up
+          # the Erlang cookie and permissions.  Passing the setup script via
+          # args runs it through the entrypoint, matching docker-compose.
+          args:
+            - bash
+            - -c
+            - >-
+              (until rabbitmqctl await_startup; do sleep 1; done;
+              rabbitmqctl add_user "$RABBITMQ_USER" "$RABBITMQ_PASS" 2>/dev/null;
+              rabbitmqctl set_permissions -p / "$RABBITMQ_USER" ".*" ".*" ".*") &
+              rabbitmq-server
+          ports:
+            - name: amqp
+              containerPort: 5672
+          env:
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dsa3.secretName" . }}
+                  key: rabbitmq-user
+            - name: RABBITMQ_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dsa3.secretName" . }}
+                  key: rabbitmq-password
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/rabbitmq
+            - name: config
+              mountPath: /etc/rabbitmq/rabbitmq.conf
+              subPath: rabbitmq.conf
+            - name: config
+              mountPath: /etc/rabbitmq/advanced.config
+              subPath: advanced.config
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - "-q"
+                - ping
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 30
+          livenessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - "-q"
+                - ping
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 30
+          resources:
+            {{- toYaml .Values.rabbitmq.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "dsa3.fullname" . }}-rabbitmq
+        - name: config
+          configMap:
+            name: {{ include "dsa3.fullname" . }}-rabbitmq
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "dsa3.fullname" . }}-rabbitmq
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.persistence.rabbitmq.storageClass }}
+  storageClassName: {{ .Values.persistence.rabbitmq.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.rabbitmq.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dsa3.fullname" . }}-rabbitmq
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "dsa3.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+{{- end }}

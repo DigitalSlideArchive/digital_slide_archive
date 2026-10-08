@@ -1,0 +1,110 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dsa3.fullname" . }}-worker
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "dsa3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "dsa3.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+      annotations:
+        checksum/provision: {{ include (print $.Template.BasePath "/configmap-provision.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "dsa3.serviceAccountName" . }}
+      initContainers:
+        # Wait for RabbitMQ before the worker's provisioning phase.
+        - name: wait-for-rabbitmq
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+          args:
+            - >-
+              for i in $(seq 1 120); do nc -z {{ include "dsa3.rabbitmqHost" . }} 5672 && exit 0; sleep 2; done;
+              echo "timed out waiting for rabbitmq" >&2; exit 1
+      containers:
+        - name: worker
+          image: {{ include "dsa3.workerImage" . | quote }}
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          # The worker launches slicer_cli_web job containers via the host
+          # Docker socket, which requires privileged mode.
+          securityContext:
+            {{- if .Values.worker.dockerSocket.enabled }}
+            privileged: true
+            {{- end }}
+          # Use the start script from the image.  It creates DSA_USER, runs the
+          # worker pre/main provisioning phases, and starts girder_worker,
+          # matching devops/dsa/start_worker.sh.
+          command:
+            - bash
+            - -c
+          args:
+            - >-
+              {{- if and .Values.worker.dockerSocket.enabled (eq .Values.worker.dockerSocket.mode "dind") }}
+              for i in $(seq 1 150); do [ -S /var/run/docker.sock ] && break; sleep 2; done;
+              {{- end }}
+              exec /opt/digital_slide_archive/devops/dsa/start_worker.sh
+          env:
+            {{- include "dsa3.workerEnv" . | nindent 12 }}
+          volumeMounts:
+            {{- include "dsa3.workerVolumeMounts" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+        {{- if and .Values.worker.dockerSocket.enabled (eq .Values.worker.dockerSocket.mode "dind") }}
+        # Docker-in-Docker daemon; see the Girder deployment for details.
+        - name: dind
+          image: "{{ .Values.worker.dockerSocket.dindImage.repository }}:{{ .Values.worker.dockerSocket.dindImage.tag }}"
+          imagePullPolicy: {{ .Values.worker.dockerSocket.dindImage.pullPolicy }}
+          securityContext:
+            privileged: true
+          args:
+            - "--storage-driver=overlay2"
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run
+            - name: tmp
+              mountPath: /tmp
+        {{- end }}
+      volumes:
+        - name: assetstore
+          persistentVolumeClaim:
+            claimName: {{ include "dsa3.fullname" . }}-assetstore
+        - name: provision
+          configMap:
+            name: {{ include "dsa3.fullname" . }}-provision
+        {{- if .Values.worker.dockerSocket.enabled }}
+        - name: docker-socket
+          {{- if eq .Values.worker.dockerSocket.mode "dind" }}
+          emptyDir: {}
+          {{- else }}
+          hostPath:
+            path: {{ .Values.worker.dockerSocket.path }}
+            type: Socket
+          {{- end }}
+        {{- end }}
+        # Jobs launched by the worker exchange data through TMPDIR.  In dind
+        # mode the socket and this directory are shared with the sidecar via a
+        # pod-local emptyDir.  With a host Docker socket the host path must be
+        # shared so the launched container sees the same files.
+        - name: tmp
+          {{- if and .Values.worker.dockerSocket.enabled (eq .Values.worker.dockerSocket.mode "dind") }}
+          emptyDir: {}
+          {{- else }}
+          hostPath:
+            path: /tmp
+            type: Directory
+          {{- end }}
+{{- end }}

@@ -1,0 +1,62 @@
+{{- if .Values.memcached.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dsa3.fullname" . }}-memcached
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: memcached
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "dsa3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: memcached
+  template:
+    metadata:
+      labels:
+        {{- include "dsa3.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: memcached
+    spec:
+      containers:
+        - name: memcached
+          image: "{{ .Values.memcached.image.repository }}:{{ .Values.memcached.image.tag }}"
+          imagePullPolicy: {{ .Values.memcached.image.pullPolicy }}
+          args:
+            - "-m"
+            - {{ .Values.memcached.memoryLimit | quote }}
+            - "--max-item-size"
+            - "8M"
+          ports:
+            - name: memcached
+              containerPort: 11211
+          readinessProbe:
+            tcpSocket:
+              port: memcached
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: memcached
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.memcached.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dsa3.fullname" . }}-memcached
+  labels:
+    {{- include "dsa3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: memcached
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "dsa3.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: memcached
+  ports:
+    - name: memcached
+      port: 11211
+      targetPort: memcached
+{{- end }}

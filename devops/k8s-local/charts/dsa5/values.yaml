@@ -1,0 +1,215 @@
+# Default values for the dsa5 (Girder 5) chart.
+#
+# This chart is intended for LOCAL testing with a kind cluster.  See
+# devops/k8s-local/README.rst for how to use it and what would be needed for a
+# customer-facing EKS deployment.
+#
+# Girder 5 differences from Girder 3 (see devops/ver5/docker-compose.yml):
+#   - Redis replaces memcached for notification and large-image caching.
+#   - The Girder container starts an additional local Celery worker.
+#   - A separate `worker` deployment handles the general job queue.
+
+# -- Override the chart name.
+nameOverride: ""
+# -- Override the fully qualified release name.
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a dedicated service account.
+  create: true
+  # -- Name of the service account (generated if empty).
+  name: ""
+  # -- Automount the service account token.
+  automount: true
+
+# -- Name of an existing Secret holding credentials.  If empty, a Secret is
+# created from the values below.  The Secret must contain the keys:
+# girder-admin-password, mongodb-root-password, rabbitmq-user,
+# rabbitmq-password.
+existingSecret: ""
+
+# Credentials used when `existingSecret` is empty.  For a real deployment,
+# create a Secret out of band rather than committing passwords here.
+credentials:
+  # -- Girder admin password.
+  girderAdminPassword: password
+  # -- MongoDB root password (only used if mongodb.enabled).
+  mongodbRootPassword: mongodb
+  # -- RabbitMQ user.
+  rabbitmqUser: girder
+  # -- RabbitMQ password.
+  rabbitmqPassword: girder1234
+
+# Girder server (the web application).
+girder:
+  image:
+    repository: dsarchive/dsa_common_5
+    tag: latest
+    pullPolicy: IfNotPresent
+  # -- Number of Girder replicas.  Must be 1 with the default in-cluster
+  # provisioning mechanism, because provisioning is not idempotent across
+  # concurrent replicas.
+  replicaCount: 1
+  # -- DSA_USER passed to the start script, in UID:GID format.  Must not be
+  # root.  The start script creates this user at container start.
+  dsaUser: "1000:1000"
+  # -- Extra environment variables for the Girder container.
+  extraEnv: []
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      memory: 4Gi
+  # -- Mount the Docker socket so slicer_cli_web can launch job containers.
+  # This requires a privileged pod.
+  #   mode: hostPath  mount the node's Docker socket (real hosts, EKS with a
+  #                   Docker daemon on the node)
+  #         dind      run a docker:dind sidecar and talk to its socket (works
+  #                   in kind, where nodes use containerd and have no Docker)
+  dockerSocket:
+    enabled: true
+    mode: dind
+    path: /var/run/docker.sock
+    # -- Image for the DinD sidecar (mode: dind).
+    dindImage:
+      repository: docker
+      tag: dind
+      pullPolicy: IfNotPresent
+  # -- Extra pip packages to install during provisioning (maps to the `pip:`
+  # key in provision.yaml).
+  extraProvisionPip: []
+  # -- Extra shell commands to run during provisioning (maps to the `shell:`
+  # key in provision.yaml).
+  extraProvisionShell: []
+  # -- Run the local Celery worker inside the Girder container, matching
+  # devops/ver5/start_girder.sh.
+  localWorker:
+    enabled: true
+    concurrency: 4
+
+# Celery worker (runs slicer_cli_web jobs via Docker-in-Docker).
+worker:
+  enabled: true
+  image:
+    repository: dsarchive/dsa_common_5
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  dsaUser: "1000:1000"
+  # -- Worker job concurrency.
+  concurrency: 2
+  extraEnv: []
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      memory: 4Gi
+  # -- The worker requires the Docker socket to launch job containers.
+  dockerSocket:
+    enabled: true
+    mode: dind
+    path: /var/run/docker.sock
+    dindImage:
+      repository: docker
+      tag: dind
+      pullPolicy: IfNotPresent
+
+# Web exposure.
+service:
+  type: NodePort
+  port: 8080
+  # -- NodePort to use (kind-config.yaml maps 30081 to the host for dsa5).
+  nodePort: 30081
+
+# Ingress (disabled by default for local testing).
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: dsa5.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Persistent storage.
+persistence:
+  assetstore:
+    # -- Size of the assetstore volume.
+    size: 10Gi
+    # -- StorageClass (empty uses the cluster default).
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+  mongodb:
+    size: 10Gi
+    storageClass: ""
+  rabbitmq:
+    size: 1Gi
+    storageClass: ""
+  redis:
+    size: 1Gi
+    storageClass: ""
+
+# In-cluster backing services.  Set enabled: false and provide an external
+# endpoint to use managed services.  Note: Amazon DocumentDB is NOT compatible
+# with MongoDB and must not be used.
+mongodb:
+  enabled: true
+  image:
+    repository: mongo
+    tag: latest
+    pullPolicy: IfNotPresent
+  # -- Use an external MongoDB instead of the in-cluster one.
+  externalUri: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 4Gi
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: latest
+    pullPolicy: IfNotPresent
+  externalHost: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 5Gi
+
+rabbitmq:
+  enabled: true
+  image:
+    repository: rabbitmq
+    tag: latest
+    pullPolicy: IfNotPresent
+  externalHost: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 2Gi
+
+# Slicer CLI images to make available.  These are pulled by the provisioner.
+slicerCli:
+  # -- Pull the listed images during post-provisioning.  On a slow or
+  # constrained local setup this can take a long time and block the
+  # provisioning phase; set to false to skip it.
+  pullImages: true
+  images:
+    - dsarchive/histomicstk:latest
+
+# -- Disable provisioning after the first successful run.  Provisioning is run
+# as an init container on the Girder pod by default.
+provision:
+  enabled: true
