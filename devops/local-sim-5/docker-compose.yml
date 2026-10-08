@@ -1,0 +1,207 @@
+# Local simulation of an apptainer/slurm-based DSA deployment (Girder 5).
+#
+# This mirrors devops/local-sim (Girder 3), but is built from dsa_common_5:
+#   - girder and the worker are built from apptainer.Dockerfile
+#     (dsa_common_5 with apptainer and the opt-in apptainer/slurm port from
+#     the girder `apptainer-port` branch overlaid on the stock tree),
+#     privileged so that apptainer works inside the containers.
+#   - SIF images are pulled into a directory shared by girder, the worker,
+#     and the slurm node (SIF_IMAGE_PATH, analogous to shared HPC storage).
+#   - CLI jobs are submitted to a single-node slurm "cluster" with sbatch and
+#     executed there with `apptainer exec` on the shared SIF files.
+#
+# Girder 5 differences from the Girder 3 simulation (../local-sim):
+#   - redis replaces memcached (notifications and the large_image cache).
+#   - girder is configured through environment variables rather than
+#     /etc/girder.cfg, and the celery broker/backend are set through
+#     CELERY_BROKER_URL / CELERY_RESULT_BACKEND (and the girder-worker
+#     GIRDER_WORKER_BROKER / GIRDER_WORKER_BACKEND equivalents) instead of
+#     worker.cfg.
+#   - the singularity flow is enabled with the
+#     slicer_cli_web.singularity_enabled girder setting (server side) and the
+#     GIRDER_WORKER_SINGULARITY_ENABLED environment variable (worker side).
+#
+# Requires docker with support for privileged containers and /dev/fuse.
+---
+services:
+  girder:
+    image: dsa_common_apptainer:g5
+    build:
+      # NOTE: the build context must be self-contained inside this directory:
+      # this environment deploys the project to a host-visible directory
+      # (see deploy.sh), and the repository itself is not visible to the
+      # docker daemon.  Unlike ../local-sim, the Dockerfiles here do not use
+      # the repository as a build context.
+      context: .
+      dockerfile: apptainer.Dockerfile
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      DSA_PROVISION_YAML: /opt/digital_slide_archive/devops/local-sim-5/provision.yaml
+      CELERY_BROKER_URL: amqp://guest:guest@rabbitmq/
+      CELERY_RESULT_BACKEND: rpc://guest:guest@rabbitmq/
+      GIRDER_MONGO_URI: mongodb://mongodb:27017/girder?socketTimeoutMS=3600000
+      GIRDER_NOTIFICATION_REDIS_URL: redis://redis:6379
+      GIRDER_SERVER_MODE: production
+      GIRDER_SETTING_CORE_CACHE_ENABLED: "true"
+      GIRDER_SETTING_CORE_HTTP_ONLY_COOKIES: "true"
+      HISTOMICSUI_RESTRICT_DOWNLOADS: 100000
+      LARGE_IMAGE_CACHE_BACKEND: redis
+      LARGE_IMAGE_CACHE_REDIS_URL: redis:6379
+      LARGE_IMAGE_CACHE_TILESOURCE_MAXIMUM: 64
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
+      # Opt-in singularity execution on the server side; this is a database
+      # setting, so it is also set in provision.yaml (either is sufficient).
+      GIRDER_SETTING_SLICER_CLI_WEB_SINGULARITY_ENABLED: "true"
+    restart: unless-stopped
+    ports:
+      - "${DSA_PORT:-8082}:8080"
+    volumes:
+      - ./assetstore:/assetstore
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      - ./provision.yaml:/opt/digital_slide_archive/devops/local-sim-5/provision.yaml
+      - ./start_girder.sh:/opt/digital_slide_archive/devops/local-sim-5/start_girder.sh
+      - ./logs:/logs
+      - ./SIF:/SIF
+      - ./tmp:/tmp
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    command: /opt/digital_slide_archive/devops/local-sim-5/start_girder.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5m
+  worker:
+    image: dsa_sim_worker:g5
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      DSA_PROVISION_YAML: /opt/digital_slide_archive/devops/local-sim-5/provision.yaml
+      DSA_WORKER_CONCURRENCY: ${DSA_WORKER_CONCURRENCY:-2}
+      # girder-worker reads the broker and backend from the celeryconfig
+      # module (GIRDER_WORKER_*); celery itself also honors the CELERY_*
+      # variables, so both are set.
+      CELERY_BROKER_URL: amqp://guest:guest@rabbitmq/
+      CELERY_RESULT_BACKEND: rpc://guest:guest@rabbitmq/
+      GIRDER_WORKER_BROKER: amqp://guest:guest@rabbitmq/
+      GIRDER_WORKER_BACKEND: rpc://guest:guest@rabbitmq/
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
+      TMP: /tmp
+      TMPDIR: /tmp
+      GW_DIRECT_PATHS: "true"
+      # The worker container runs as root (needed for apptainer inside the
+      # container); celery requires this variable to allow that.
+      C_FORCE_ROOT: "1"
+      # Opt-in singularity task execution on the worker side.  Without this,
+      # the worker behaves exactly like stock girder-worker (docker only).
+      GIRDER_WORKER_SINGULARITY_ENABLED: "1"
+      # Writable directory for apptainer task logs; it must be visible to the
+      # slurm compute node as well, since the job writes its output there.
+      GIRDER_WORKER_SINGULARITY_LOGS_DIR: /logs
+      # Slurm submission (the submit script requires a partition named
+      # "girdercompute", which slurm.conf defines).
+      GIRDER_WORKER_SLURM_SUBMIT_SCRIPT: /opt/girder/worker/girder_worker/slurm/girder_worker_slurm/singularity.slurm
+      # On HPC, the assetstore path on the compute node is prefixed by this
+      # value; in this simulation the paths are identical, so it is empty.
+      # It may be unset (the port treats unset as an empty prefix), but it is
+      # set here anyway to make the HPC mapping explicit.
+      GIRDER_WORKER_SLURM_MOUNT_PREFIX: ""
+    restart: unless-stopped
+    volumes:
+      # The assetstore is mounted like a shared HPC filesystem so that
+      # GW_DIRECT_PATHS job inputs are visible to the worker.
+      - ./assetstore:/assetstore
+      - ./logs:/logs
+      - ./SIF:/SIF
+      - ./tmp:/tmp
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      - ./provision.yaml:/opt/digital_slide_archive/devops/local-sim-5/provision.yaml
+      - ./slurm/slurm.conf:/etc/slurm/slurm.conf
+      - ./munge/munge.key:/opt/munge.key:ro
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    command: /opt/start_worker.sh
+  mongodb:
+    image: "mongo:latest"
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    command: --maxConns 1000
+    volumes:
+      - ./db:/data/db
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  redis:
+    image: redis
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  rabbitmq:
+    image: "rabbitmq:latest"
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-}
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  slurm:
+    image: dsa_sim_slurm:latest
+    build:
+      context: ./slurm
+    # The "compute node" runs apptainer on the shared SIF/assetstore/tmp
+    # directories, so this container needs the same privileges and mounts as
+    # the worker.
+    hostname: slurm
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    restart: unless-stopped
+    volumes:
+      - ./slurm/slurm.conf:/etc/slurm/slurm.conf
+      - ./slurm/cgroup.conf:/etc/slurm/cgroup.conf
+      - ./munge/munge.key:/opt/munge.key:ro
+      - ./assetstore:/assetstore
+      - ./logs:/logs
+      - ./SIF:/SIF
+      - ./tmp:/tmp

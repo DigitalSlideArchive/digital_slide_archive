@@ -29,13 +29,19 @@ For Podman deployment:
 
 For Apptainer job execution:
 - [Apptainer](https://apptainer.org/docs/admin/main/installation.html)
-- [Girder Worker Singularity](https://github.com/girder/girder_worker/tree/slurm/girder_worker/singularity) plugin
-- [Slicer CLI Web Singularity](https://github.com/girder/slicer_cli_web/tree/slicer-cli-web-singularity/slicer_cli_web/singularity) plugin
+- Girder 3: the [Girder Worker Singularity](https://github.com/girder/girder_worker/tree/slurm/girder_worker/singularity) and [Slicer CLI Web Singularity](https://github.com/girder/slicer_cli_web/tree/slicer-cli-web-singularity/slicer_cli_web/singularity) plugins.
+- Girder 5: the support is included in the girder tree behind opt-in flags
+  (the `slicer_cli_web.singularity_enabled` setting on the server and the
+  `GIRDER_WORKER_SINGULARITY_ENABLED` environment variable on the worker); no
+  extra plugin installation is needed.  See `../local-sim-5` for a working
+  configuration.
 
 
 For Apptainer job execution using Slurm:
 - All above Apptainer requirements
-- [Girder Worker Slurm](https://github.com/girder/girder_worker/tree/slurm/girder_worker/slurm) plugin
+- Girder 3: the [Girder Worker Slurm](https://github.com/girder/girder_worker/tree/slurm/girder_worker/slurm) plugin.
+  Girder 5: included in the girder tree (same port as above); it is selected
+  by setting `GIRDER_WORKER_SLURM_SUBMIT_SCRIPT` on the worker.
 - Apptainer installed on all slurm nodes (login & compute)
 - Shared filesystem visible to worker and compute nodes
 - Slurm login node access (`squeue`, `sinfo`, `scontrol`, etc.) for `girder_worker`

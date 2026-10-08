@@ -1,0 +1,59 @@
+# Optional compose override for devops/ver5 that enables apptainer
+# (singularity) job execution for slicer_cli_web tasks, instead of docker:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.singularity.yml up -d
+#
+# This requires an apptainer-enabled dsa_common_5 image.  TODO: once the
+# opt-in apptainer/slurm job execution support is merged into the girder
+# repository, dsa5.Dockerfile will build from a ref that contains it and this
+# override can build the image directly (uncomment the build section below).
+# Until then, build a suitable image as shown in ../local-sim-5 (see
+# apptainer.Dockerfile there).
+#
+# The girder server needs apptainer available (it pulls docker images as SIF
+# files into SIF_IMAGE_PATH and inspects them), the worker needs the
+# singularity flags, and both need access to the shared SIF and log
+# directories.  To also run the CLI jobs on a slurm cluster instead of on the
+# worker host, set GIRDER_WORKER_SLURM_SUBMIT_SCRIPT and
+# GIRDER_WORKER_SLURM_MOUNT_PREFIX on the worker (see ../slurm/HPC.md).
+---
+services:
+  girder:
+    image: dsa_common_apptainer:g5
+    # build:
+    #   context: ../..
+    #   dockerfile: apptainer.Dockerfile
+    #   args:
+    #     DSA_VERSIONS: ${DSA_VERSIONS:-}
+    privileged: true
+    environment:
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
+      # Opt-in singularity execution on the server side.
+      GIRDER_SETTING_SLICER_CLI_WEB_SINGULARITY_ENABLED: "true"
+    volumes:
+      # Shared SIF storage, analogous to shared HPC storage: SIF files are
+      # pulled here by the server and used by the worker (or compute nodes).
+      - ./SIF:/SIF
+      - ./logs:/logs
+  worker:
+    image: dsa_common_apptainer:g5
+    privileged: true
+    environment:
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
+      # Opt-in singularity task execution on the worker side.  Without this,
+      # the worker behaves exactly like stock girder-worker (docker only).
+      GIRDER_WORKER_SINGULARITY_ENABLED: "1"
+      # Writable directory for apptainer task logs; when using slurm it must
+      # be visible to the compute nodes as well.
+      GIRDER_WORKER_SINGULARITY_LOGS_DIR: /logs
+      # When the CLI jobs should be submitted to a slurm cluster rather than
+      # run directly on the worker host, also set (and add the slurm client
+      # tools and munge to the worker image):
+      # GIRDER_WORKER_SLURM_SUBMIT_SCRIPT: /opt/girder/worker/girder_worker/slurm/girder_worker_slurm/singularity.slurm
+      # GIRDER_WORKER_SLURM_MOUNT_PREFIX: ""   # prefix of the compute-node paths; may be empty
+      # GIRDER_WORKER_SLURM_PARTITION: girdercompute
+    volumes:
+      - ./SIF:/SIF
+      - ./logs:/logs

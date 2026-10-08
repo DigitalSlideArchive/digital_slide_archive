@@ -1,0 +1,67 @@
+---
+# Provision options for the local apptainer + slurm simulation (Girder 5).
+#
+# The singularity flow is enabled with slicer_cli_web.singularity_enabled, so
+# the slicer-cli-image pull in the post-provisioning phase downloads the
+# docker image and converts it to a SIF in SIF_IMAGE_PATH (/SIF), and the
+# registered CLI tasks are run with apptainer (via slurm on the worker).
+force: False
+samples: False
+clean-delete-locks: True
+sample-collection: Samples
+sample-folder: Images
+use-defaults: True
+mongo-compat: True
+admin:
+  login: admin
+  password: password
+  firstName: Admin
+  lastName: Admin
+  email: admin@nowhere.nil
+  public: True
+assetstore:
+  method: createFilesystemAssetstore
+  name: Assetstore
+  root: /assetstore
+resources:
+  - model: collection
+    name: Tasks
+    creator: resource:admin
+    public: True
+  - model: folder
+    parent: resource:collection/Tasks
+    parentType: collection
+    name: "Slicer CLI Web Tasks"
+    creator: resource:admin
+    public: True
+settings:
+  worker.api_url: "http://girder:8080/api/v1"
+  worker.direct_path: True
+  core.brand_name: "Digital Slide Archive (local sim 5)"
+  histomicsui.webroot_path: "histomics"
+  histomicsui.alternate_webroot_path: "histomicstk"
+  histomicsui.delete_annotations_after_ingest: True
+  homepage.markdown: |-
+    # Digital Slide Archive (local sim 5)
+    ---
+    ## Bioinformatics Platform
+
+    Welcome to the **Digital Slide Archive** local apptainer simulation
+    (Girder 5).
+
+    The [HistomicsUI](histomics) application is enabled.
+  slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
+  # Opt-in apptainer (singularity) execution, server side.  This is also set
+  # via the GIRDER_SETTING_SLICER_CLI_WEB_SINGULARITY_ENABLED environment
+  # variable in docker-compose.yml; either is sufficient.
+  slicer_cli_web.singularity_enabled: True
+# The post-provisioning phase pulls this image and registers its CLI tasks.
+# With the singularity flow enabled, the image is pulled as a SIF file into
+# SIF_IMAGE_PATH (/SIF).
+slicer-cli-image-pull:
+  - dsarchive/histomicstk:latest
+# The worker celery broker/backend come from the CELERY_* / GIRDER_WORKER_*
+# environment variables set in docker-compose.yml, so the worker config and
+# rabbitmq provisioning options are intentionally omitted (the girder 5
+# provisioner would otherwise rewrite the config from the rabbitmq-host
+# option).

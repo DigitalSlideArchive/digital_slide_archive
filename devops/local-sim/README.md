@@ -90,5 +90,14 @@ plugin branches, and pull the histomicstk SIF):
 - Verified end to end: provisioning, SIF pull, task registration, job
   submission via sbatch, apptainer execution on the "compute node", and output
   annotation upload back to girder.
-- A Girder 5 variant (based on `dsa_common_5`, mirroring `../ver5`) is the
-  next step; the same harness applies with `../ver5/provision.py`.
+
+## Girder 5 (dsa_common_5) status
+
+A Girder 5 variant of this simulation exists in `../local-sim-5`.  It uses
+the opt-in apptainer/slurm job execution support ported into the girder 5
+tree (the girder `apptainer-port` branch), enabled with the
+`slicer_cli_web.singularity_enabled` setting and
+`GIRDER_WORKER_SINGULARITY_ENABLED`, and is verified end to end the same way
+as this simulation.  Until the port is merged, its images overlay the ported
+subtrees onto the stock `dsa_common_5` tree; see the TODO comments in its
+Dockerfiles and `deploy.sh`.
