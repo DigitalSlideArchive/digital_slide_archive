@@ -9,7 +9,7 @@ Let's go over the typical use cases of Docker in the DSA.
 
 ### Deployment
 
-Docker is used in several contexts in the DSA. Firstly, the DSA is typically deployed using a `docker compose` [here](https://github.com/DigitalSlideArchive/digital_slide_archive/tree/master/devops/dsa), which launches the Girder app, worker, etc. The other main use of Docker is with the execution of `slicer_cli_web` jobs (i.e. jobs submitted through HistomicsUI, etc.), where a each job executes Docker container ran by the `girder_worker`. In this context, Docker is easily replacable since its only used to orchestrate processes.
+Docker is used in several contexts in the DSA. Firstly, the DSA is typically deployed using a `docker compose` [here](https://github.com/DigitalSlideArchive/digital_slide_archive/tree/master/devops/dsa), which launches the Girder app, worker, etc. The other main use of Docker is with the execution of `slicer_cli_web` jobs (i.e. jobs submitted through HistomicsUI, etc.), where a each job executes Docker container ran by the `girder_worker`. In this context, Docker is easily replaceable since its only used to orchestrate processes.
 
 To address the first case, to replace Docker in the DSA deployment the recommended option is to use Podman. Several research partners (namely Tulane and Pitt) have deployments executed using Podman as a drop in replacement for Docker. Podman configuration is required (TODO: add known details).
 

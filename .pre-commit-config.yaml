@@ -4,7 +4,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-added-large-files
     exclude: docs/assets/pdfs
@@ -49,7 +49,7 @@ repos:
     files: README.rst
     name: rst-linter of README.rst
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.3
   hooks:
   - id: codespell
     exclude: (?x)^(.*_config.yml|.*\.(lock|scss))$
@@ -61,18 +61,18 @@ repos:
   hooks:
   - id: circleci-config-validate
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.19.0
+  rev: v3.21.2
   hooks:
     - id: pyupgrade
       args:
         - --py39-plus
         - --keep-percent-format
-- repo: https://github.com/pre-commit/mirrors-autopep8
-  rev: v2.0.4
+- repo: https://github.com/hhatto/autopep8
+  rev: v2.3.2
   hooks:
     - id: autopep8
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.1.1
+  rev: 7.4.1
   hooks:
     - id: flake8
 - repo: https://github.com/gruntwork-io/pre-commit
