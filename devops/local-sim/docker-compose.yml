@@ -1,0 +1,168 @@
+# Local simulation of an apptainer-based DSA deployment.
+#
+# This mirrors devops/slurm (Girder 3), but with the girder_worker running in
+# a privileged, apptainer-enabled container instead of on the host.  This
+# simulates the parts of an HPC deployment that matter for job execution:
+#   - SIF images are pulled/built into a directory shared by girder and the
+#     worker (SIF_IMAGE_PATH, analogous to shared HPC storage).
+#   - Job execution uses apptainer rather than docker.
+# Slurm is not part of this simulation; the worker runs the singularity plugin
+# directly (see ../slurm and phase 2 plans in README.md).
+#
+# Requires docker with support for privileged containers and /dev/fuse.
+# Build the image first:
+#   docker build -f apptainer.Dockerfile -t dsa_common_apptainer:g3 ..
+---
+services:
+  girder:
+    image: dsa_common_apptainer:g3
+    build:
+      context: ../..
+      dockerfile: apptainer.Dockerfile
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      DSA_PROVISION_YAML: /opt/digital_slide_archive/devops/dsa/provision.yaml
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
+    restart: unless-stopped
+    ports:
+      - "${DSA_PORT:-8081}:8080"
+    volumes:
+      - ./assetstore:/assetstore
+      - ./girder.cfg:/etc/girder.cfg
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ./start_girder.sh:/opt/digital_slide_archive/devops/dsa/start_girder.sh
+      - ./logs:/logs
+      - ./SIF:/SIF
+      - ./tmp:/tmp
+      - ./worker.dist.cfg:/opt/worker.dist.cfg
+    depends_on:
+      - mongodb
+      - memcached
+      - rabbitmq
+    command: /opt/digital_slide_archive/devops/dsa/start_girder.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/system/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5m
+  worker:
+    image: dsa_sim_worker:g3
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      DSA_PROVISION_YAML: /opt/digital_slide_archive/devops/dsa/provision.yaml
+      SIF_IMAGE_PATH: /SIF
+      LOGS: /logs
+      TMP: /tmp
+      TMPDIR: /tmp
+      GW_DIRECT_PATHS: "true"
+      # The worker container runs as root (needed for apptainer inside the
+      # container); celery requires this variable to allow that.
+      C_FORCE_ROOT: "1"
+      # Slurm submission (see girder_worker_slurm; the script template
+      # requires a partition named "girdercompute", which slurm.conf defines).
+      GIRDER_WORKER_SLURM_SUBMIT_SCRIPT: /opt/girder_worker/girder_worker/slurm/girder_worker_slurm/singularity.slurm
+      # On HPC, the assetstore path on the compute node is prefixed by this
+      # value; in this simulation the paths are identical, so it is empty.
+      # It must be set (even empty) or path mapping in girder_worker_slurm
+      # fails with a TypeError.
+      GIRDER_WORKER_SLURM_MOUNT_PREFIX: ""
+    restart: unless-stopped
+    volumes:
+      # The assetstore is mounted like a shared HPC filesystem so that
+      # GW_DIRECT_PATHS job inputs are visible to the worker.
+      - ./assetstore:/assetstore
+      - ./logs:/logs
+      - ./SIF:/SIF
+      - ./tmp:/tmp
+      - ./worker.cfg:/opt/worker.cfg
+      - ./provision.py:/opt/digital_slide_archive/devops/dsa/provision.py
+      - ./provision.yaml:/opt/digital_slide_archive/devops/dsa/provision.yaml
+      - ./slurm/slurm.conf:/etc/slurm/slurm.conf
+      - ./munge/munge.key:/opt/munge.key:ro
+    depends_on:
+      - mongodb
+      - memcached
+      - rabbitmq
+    command: /opt/start_worker.sh
+  mongodb:
+    image: "mongo:latest"
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    command: --maxConns 1000
+    volumes:
+      - ./db:/data/db
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  memcached:
+    image: memcached
+    command: -m 4096 --max-item-size 8M
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "bash", "-c", 'exec 3<>/dev/tcp/localhost/11211; printf "stats\nquit\n" >&3; cat <&3']
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  rabbitmq:
+    image: "rabbitmq:latest"
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-}
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq.advanced.config:/etc/rabbitmq/advanced.config:ro
+    logging:
+      options:
+        max-size: "10M"
+        max-file: "5"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  slurm:
+    image: dsa_sim_slurm:latest
+    build:
+      context: ./slurm
+    # The "compute node" runs apptainer on the shared SIF/assetstore/tmp
+    # directories, so this container needs the same privileges and mounts as
+    # the worker.
+    hostname: slurm
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    restart: unless-stopped
+    volumes:
+      - ./slurm/slurm.conf:/etc/slurm/slurm.conf
+      - ./slurm/cgroup.conf:/etc/slurm/cgroup.conf
+      - ./munge/munge.key:/opt/munge.key:ro
+      - ./assetstore:/assetstore
+      - ./logs:/logs
+      - ./SIF:/SIF
+      - ./tmp:/tmp

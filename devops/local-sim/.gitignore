@@ -1,0 +1,8 @@
+assetstore/
+db/
+logs/
+tmp/
+SIF/
+!SIF/.gitkeep
+lib/
+munge/

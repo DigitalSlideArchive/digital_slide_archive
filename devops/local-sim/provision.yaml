@@ -1,0 +1,88 @@
+---
+# Provision options for the local apptainer simulation (Girder 3).
+#
+# This is based on ../slurm/provision.yaml.  The slurm plugin is not
+# installed here (this simulation runs the singularity plugin directly from
+# the worker; add the slurm plugin and submit-script environment variables in
+# phase 2).
+force: False
+samples: False
+clean-delete-locks: True
+sample-collection: Samples
+sample-folder: Images
+use-defaults: True
+mongo-compat: True
+rebuild-client: False
+admin:
+  login: admin
+  password: password
+  firstName: Admin
+  lastName: Admin
+  email: admin@nowhere.nil
+  public: True
+assetstore:
+  method: createFilesystemAssetstore
+  name: Assetstore
+  root: /assetstore
+resources:
+  - model: collection
+    name: Tasks
+    creator: resource:admin
+    public: True
+  - model: folder
+    parent: resource:collection/Tasks
+    parentType: collection
+    name: "Slicer CLI Web Tasks"
+    creator: resource:admin
+    public: True
+settings:
+  worker.broker: "amqp://guest:guest@rabbitmq"
+  worker.backend: "rpc://guest:guest@rabbitmq"
+  worker.api_url: "http://girder:8080/api/v1"
+  worker.direct_path: True
+  core.brand_name: "Digital Slide Archive (local sim)"
+  histomicsui.webroot_path: "histomics"
+  histomicsui.alternate_webroot_path: "histomicstk"
+  histomicsui.delete_annotations_after_ingest: True
+  homepage.markdown: |-
+    # Digital Slide Archive (local sim)
+    ---
+    ## Bioinformatics Platform
+
+    Welcome to the **Digital Slide Archive** local apptainer simulation.
+
+    The [HistomicsUI](histomics) application is enabled.
+  slicer_cli_web.task_folder: "resourceid:collection/Tasks/Slicer CLI Web Tasks"
+# The default provisioning pulls dsarchive/histomicstk:latest; with the
+# slicer_cli_web singularity plugin installed, this is converted to a SIF in
+# SIF_IMAGE_PATH (/SIF).
+# slicer-cli-image-pull:
+#   - dsarchive/histomicstk:latest
+worker-config: /opt/girder_worker/girder_worker/worker.local.cfg
+worker-rabbitmq-user: guest
+worker-rabbitmq-pass: guest
+worker:
+  # The worker config is copied from /opt/worker.cfg (see docker-compose.yml);
+  # it already contains the correct broker and backend, so rabbitmq-host is
+  # intentionally unset (provision_worker would otherwise rewrite the config).
+  config: /opt/girder_worker/girder_worker/worker.local.cfg
+  shell:
+    - rm -rf /opt/girder_worker /opt/slicer_cli_web
+    - git clone --depth 1 --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
+    - git clone --depth 1 --branch slicer-cli-web-singularity https://github.com/willdunklin/slicer_cli_web.git /opt/slicer_cli_web
+    - cp /opt/worker.cfg /opt/girder_worker/girder_worker/worker.local.cfg
+    - pip install -e /opt/girder_worker
+    - pip install -e /opt/girder_worker/girder_worker/singularity
+    - pip install -e /opt/girder_worker/girder_worker/slurm
+    - pip install -e /opt/slicer_cli_web
+    - pip install -e /opt/slicer_cli_web/slicer_cli_web/singularity
+# These have precedence over the top level values
+shell:
+  - rm -rf /opt/girder_worker /opt/slicer_cli_web
+  - git clone --depth 1 --branch slurm https://github.com/girder/girder_worker.git /opt/girder_worker
+  - git clone --depth 1 --branch slicer-cli-web-singularity https://github.com/willdunklin/slicer_cli_web.git /opt/slicer_cli_web
+  - cp /opt/worker.dist.cfg /opt/girder_worker/girder_worker/worker.dist.cfg
+  - pip install -e /opt/girder_worker
+  - pip install -e /opt/girder_worker/girder_worker/singularity
+  - pip install -e /opt/slicer_cli_web
+  - pip install -e /opt/slicer_cli_web/slicer_cli_web/singularity
