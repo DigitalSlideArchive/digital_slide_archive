@@ -3,7 +3,7 @@
   "girder/girder_worker/branches/master": "123c7d38c35f8a9eb88cd447b81b7983e671fc09",
   "girder/girder_worker_utils/branches/master": "f55c1e6a22e6f19045ac9d976c78801a6e3ddead",
   "girder/large_image/branches/girder-3": "a7920bd914ad27ffde52aac125cd1efa87aefe69",
-  "girder/slicer_cli_web/branches/master": "d426208e0cb7a11696571c0c9471232f338223d0",
+  "girder/slicer_cli_web/branches/master": "9da9ba6b2d9936a01e7f529ca0d51e4ce6e53566",
   "DigitalSlideArchive/HistomicsUI/branches/girder-3": "8514af8e9d051ada0bc4b62697a4c5cdde6e15d3",
   "DigitalSlideArchive/import-tracker/branches/main": "055e395e9d9c2de965624391e8f6a1010f42141e",
   "DigitalSlideArchive/girder_assetstore/branches/girder-3": "dbf539d8212de175a7eb65fa78d17d380fe6e46d",
