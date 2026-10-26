@@ -31,9 +31,17 @@ CVE-2026-91777
 CVE-2026-102276
 # HIGH: node-pkg - brace-expansion: brace-expansion: Denial of Service via unco
 CVE-2026-102278
+# HIGH: node-pkg - undici: undici: Denial of Service via unhandled stream error
+CVE-2026-109869
 # HIGH: node-pkg - undici: undici: Denial of Service via unrequested WebSocket
 CVE-2026-19534
 # HIGH: node-pkg - http-cache-semantics: http-cache-semantics: Information Disc
 CVE-2026-93748
+# HIGH: python-pkg - filelock: filelock: Arbitrary file overwrite via insecure
+CVE-2026-112940
+# HIGH: python-pkg - virtualenv: virtualenv: arbitrary code execution via impro
+CVE-2026-113718
 # HIGH: python-pkg - virtualenv: virtualenv: arbitrary code execution via impro
 CVE-2026-113722
+# HIGH: python-pkg - virtualenv: virtualenv: Arbitrary code execution via malic
+CVE-2026-113723
