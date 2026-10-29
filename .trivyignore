@@ -13,6 +13,8 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
 CVE-2025-52999
+# HIGH: jar - com.google.guava/guava: Google Guava: Denial of Service via unthr
+CVE-2026-102554
 # HIGH: jar - jackson-databind: jackson-databind: Arbitrary code execution via
 CVE-2026-54512
 # HIGH: jar - jackson-databind: Jackson-databind: Security bypass allows arbitr
@@ -27,21 +29,11 @@ CVE-2026-89425
 CVE-2026-91776
 # HIGH: jar - com.fasterxml.jackson.core/jackson-databind: tools.jackson.core:j
 CVE-2026-91777
-# HIGH: node-pkg - brace-expansion: brace-expansion: Denial of Service via stac
-CVE-2026-102276
-# HIGH: node-pkg - brace-expansion: brace-expansion: Denial of Service via unco
-CVE-2026-102278
+# HIGH: node-pkg - undici: undici: Certificate validation bypass via dropped TL
+CVE-2026-109383
 # HIGH: node-pkg - undici: undici: Denial of Service via unhandled stream error
 CVE-2026-109869
-# HIGH: node-pkg - undici: undici: Denial of Service via unrequested WebSocket
-CVE-2026-19534
-# HIGH: node-pkg - http-cache-semantics: http-cache-semantics: Information Disc
-CVE-2026-93748
+# HIGH: node-pkg - undici: undici: Denial of Service via TLS renegotiation with
+CVE-2026-87018
 # HIGH: python-pkg - filelock: filelock: Arbitrary file overwrite via insecure
 CVE-2026-112940
-# HIGH: python-pkg - virtualenv: virtualenv: arbitrary code execution via impro
-CVE-2026-113718
-# HIGH: python-pkg - virtualenv: virtualenv: arbitrary code execution via impro
-CVE-2026-113722
-# HIGH: python-pkg - virtualenv: virtualenv: Arbitrary code execution via malic
-CVE-2026-113723
