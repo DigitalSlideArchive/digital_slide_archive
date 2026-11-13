@@ -24,6 +24,10 @@ mongo-compat: True
 # Run additional shell commands before start
 # shell:
 #   - ls
+# If the shell commands build client-side code, we can remove node_modules
+# and any package-lock.json files that are not tracked by git after the build;
+# this is recommended for production mode.  Mounted volumes are not modified.
+prune-node-modules: True
 # Default admin user if there are no admin users
 admin:
   login: admin
