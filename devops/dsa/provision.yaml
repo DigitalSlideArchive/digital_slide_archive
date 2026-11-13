@@ -23,6 +23,9 @@ mongo-compat: True
 #   - girder-ldap
 # rebuild-client may be False, True (for production mode), or "development"
 rebuild-client: False
+# If rebuild-client is true, we can remove node-modules after the build; this
+# is recommended for production mode
+prune-node-modules: True
 # Run additional shell commands before start
 # shell:
 #   - ls

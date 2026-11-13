@@ -296,6 +296,26 @@ def preprovision(opts):
             except Exception:
                 logger.error(f'Failed to run {cmd}')
                 raise
+    if getattr(opts, 'prune-node-modules', None):
+        # -xdev avoids removing anything from mounted volumes; -prune avoids
+        # find failing when it tries to descend into a removed directory
+        cmd = 'find /opt -xdev -name node_modules -type d -prune -exec rm -rf {} +'
+        # Remove package-lock.json files unless they are tracked by git (or
+        # are in a git repository where we can't tell).
+        cmd += (
+            ' && find /opt -xdev -name package-lock.json -type f -exec sh -c \''
+            'for f; do d=$(dirname "$f"); r="$d"; '
+            'while [ "$r" != / ] && [ ! -e "$r/.git" ]; do r=$(dirname "$r"); done; '
+            'if [ -e "$r/.git" ]; then '
+            'git -C "$d" ls-files --error-unmatch package-lock.json >/dev/null 2>&1; '
+            '[ $? = 1 ] || continue; fi; '
+            'rm -f "$f"; done\' sh {} +')
+        logger.info('Pruning node_modules: %s', cmd)
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except Exception:
+            logger.error(f'Failed to run {cmd}')
+            raise
 
 
 def clean_delete_locks():
@@ -667,6 +687,11 @@ if __name__ == '__main__':  # noqa
         'to pip install directly, so additional options are needed, these can '
         'be added (such as --find-links).  The actual values need to be '
         'escaped appropriately for a bash shell.')
+    parser.add_argument(
+        '--prune-node-modules', dest='prune-node-modules', action='store_true',
+        default=False, help='Remove node_modules directories and '
+        'package-lock.json files that are not tracked by git from /opt after '
+        'the pip and shell steps.')
     parser.add_argument(
         '--slicer-cli-image', dest='slicer-cli-image', action='append',
         help='Install slicer_cli images, only pulling if not present.')

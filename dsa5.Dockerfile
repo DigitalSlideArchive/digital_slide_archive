@@ -3,6 +3,9 @@ LABEL maintainer="Kitware, Inc. <kitware@kitware.com>"
 
 ENV LANG=en_US.UTF-8
 
+# Prune undesired python version
+RUN bash -c "rm -rf /.pyenv/versions/3.{9,10}* || true"
+
 # Install some additional packages
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
