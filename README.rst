@@ -34,9 +34,11 @@ Community
 Installation
 ------------
 
-For installation instructions, see the complete `docker compose example <./devops/dsa>`_.
+For installation instructions, see the complete `docker compose example <./devops/ver5>`_.
 
-There is a `migration guide <./docs/migration.rst>`_  from the Girder 2 version or from the ``deploy_docker.py`` script.
+For the older Girder 3 based version, the docker compose example is in `devops/dsa <./devops/dsa>`_.  To upgrade an existing Girder 3 deployment to the modern Girder 5 stack (from the ``dsarchive/dsa_common`` image using ``devops/dsa`` to the ``dsarchive/dsa_common_5`` image using ``devops/ver5``), see the `upgrade instructions <./devops/ver5/README.rst>`_.
+
+There is also a `migration guide <./docs/migration.rst>`_  from the Girder 2 version or from the ``deploy_docker.py`` script.
 
 Adding Docker Tasks
 -------------------
@@ -47,4 +49,4 @@ To use a docker image from a docker repository that requires authentication, see
 
 Funding
 -------
-This work was funded in part by the `NIH grant U24-CA194362-01 <http://grantome.com/grant/NIH/U24-CA194362-01>`_.
+rThis work was funded in part by the `NIH grant U24-CA194362-01 <http://grantome.com/grant/NIH/U24-CA194362-01>`_.
