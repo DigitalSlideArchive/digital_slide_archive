@@ -1,39 +1,11 @@
 # Accept these; revisit as needed
 
-# In bioformats_package.jar: this shouldn't be an issue because of how xml is
-# used and because we don't pass urls to bioformats
-
-# The gobinary issues are on the docker binary and cannot be reached
-
-# The node-pkg issues are from the latest node; since we don't actually run node except in testing these are deemed safe
+# In bioformats_package.jar: this shouldn't be an issue because we don't pass
+# urls to bioformats
 
 # HIGH: jar - okhttp: information disclosure via improperly used cryptographic
 CVE-2021-0341
 # HIGH: jar - apache-commons-io: Possible denial of service attack on untrusted
 CVE-2024-47554
-# HIGH: jar - com.fasterxml.jackson.core/jackson-core: jackson-core Potential S
-CVE-2025-52999
 # HIGH: jar - com.google.guava/guava: Google Guava: Denial of Service via unthr
 CVE-2026-102554
-# HIGH: jar - jackson-databind: jackson-databind: Arbitrary code execution via
-CVE-2026-54512
-# HIGH: jar - jackson-databind: Jackson-databind: Security bypass allows arbitr
-CVE-2026-54513
-# HIGH: jar - com.fasterxml.jackson.core/jackson-core: tools.jackson.core/jacks
-CVE-2026-68494
-# HIGH: jar - com.fasterxml.jackson.core/jackson-databind: tools.jackson.core/j
-CVE-2026-68497
-# HIGH: jar - com.fasterxml.jackson.core/jackson-core: Jackson-core: Denial of
-CVE-2026-89425
-# HIGH: jar - jackson-databind: com.fasterxml.jackson/jackson-core: jackson-dat
-CVE-2026-91776
-# HIGH: jar - com.fasterxml.jackson.core/jackson-databind: tools.jackson.core:j
-CVE-2026-91777
-# HIGH: node-pkg - undici: undici: Certificate validation bypass via dropped TL
-CVE-2026-109383
-# HIGH: node-pkg - undici: undici: Denial of Service via unhandled stream error
-CVE-2026-109869
-# HIGH: node-pkg - undici: undici: Denial of Service via TLS renegotiation with
-CVE-2026-87018
-# HIGH: python-pkg - filelock: filelock: Arbitrary file overwrite via insecure
-CVE-2026-112940

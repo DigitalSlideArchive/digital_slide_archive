@@ -288,6 +288,21 @@ def preprovision(opts):
         cmd = ('NPM_CONFIG_FUND=false NPM_CONFIG_AUDIT=false '
                'NPM_CONFIG_AUDIT_LEVEL=high NPM_CONFIG_LOGLEVEL=error '
                'NPM_CONFIG_PROGRESS=false NPM_CONFIG_PREFER_OFFLINE=true ' + cmd)
+        if getattr(opts, 'prune-node-modules', None):
+            # -xdev avoids removing anything from mounted volumes; -prune
+            # avoids find failing when it tries to descend into a removed
+            # directory
+            cmd += ' && find /opt -xdev -name node_modules -type d -prune -exec rm -rf {} +'
+            # Remove package-lock.json files unless they are tracked by git
+            # (or are in a git repository where we can't tell).
+            cmd += (
+                ' && find /opt -xdev -name package-lock.json -type f -exec sh -c \''
+                'for f; do d=$(dirname "$f"); r="$d"; '
+                'while [ "$r" != / ] && [ ! -e "$r/.git" ]; do r=$(dirname "$r"); done; '
+                'if [ -e "$r/.git" ]; then '
+                'git -C "$d" ls-files --error-unmatch package-lock.json >/dev/null 2>&1; '
+                '[ $? = 1 ] || continue; fi; '
+                'rm -f "$f"; done\' sh {} +')
         try:
             if not getattr(opts, 'no_wait', False):
                 subprocess.check_call(cmd, shell=True)
@@ -665,6 +680,9 @@ if __name__ == '__main__':  # noqa
     parser.add_argument(
         '--rebuild-client', dest='rebuild-client', action='store_true',
         default=False, help='Rebuild the girder client.')
+    parser.add_argument(
+        '--prune-node-modules', dest='prune-node-modules', action='store_true',
+        default=False, help='Prune node_modules after rebuild client.')
     parser.add_argument(
         '--slicer-cli-image', dest='slicer-cli-image', action='append',
         help='Install slicer_cli images, only pulling if not present.')
