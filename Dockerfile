@@ -170,6 +170,7 @@ RUN cp /opt/digital_slide_archive/devops/dsa/utils/.vimrc ~/.vimrc && \
 
 ARG DSA_VERSIONS
 ENV DSA_VERSIONS="$DSA_VERSIONS"
+ENV LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6
 
 # Better shutdown signalling
 ENTRYPOINT ["tini", "--"]
