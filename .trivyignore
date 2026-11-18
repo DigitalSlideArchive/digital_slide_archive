@@ -9,3 +9,5 @@ CVE-2021-0341
 CVE-2024-47554
 # HIGH: jar - com.google.guava/guava: Google Guava: Denial of Service via unthr
 CVE-2026-102554
+# HIGH: node-pkg - picomatch: picomatch: Denial of Service via single-branch re
+CVE-2026-112366
